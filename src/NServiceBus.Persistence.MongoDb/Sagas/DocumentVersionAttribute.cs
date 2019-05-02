@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-
-namespace NServiceBus.Persistence.MongoDB
+﻿namespace NServiceBus.Persistence.MongoDB
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+
     /// <summary>
-    /// Used to specify that a saga property should be unique across all saga instances. 
+    /// Used to specify that a saga property should be unique across all saga instances.
     /// This will ensure that 2 saga instances don't get persisted when using the property to correlate between multiple message types
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = true)]

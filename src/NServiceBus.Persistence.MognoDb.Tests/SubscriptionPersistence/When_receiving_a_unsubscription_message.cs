@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Persistence.MongoDB.Subscriptions;
-using NUnit.Framework;
+﻿using MongoDB.Driver;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 {
+    using System.Threading.Tasks;
+    using NServiceBus.Persistence.MongoDB.Subscriptions;
+    using NUnit.Framework;
+
     [TestFixture]
     public class When_receiving_a_unsubscription_message : MongoFixture
     {

@@ -1,12 +1,13 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using NServiceBus.Persistence.MongoDB.Database;
 
 namespace NServiceBus.Persistence.MongoDB.Sagas
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Persistence.MongoDB.Database;
+
     public class MongoDbSagaRepository : BaseNsbMongoDbRepository
     {
         public MongoDbSagaRepository(IMongoDatabase database)
@@ -32,7 +33,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
 
             var fbuilder = Builders<BsonDocument>.Filter;
             var filter = fbuilder.Eq("_id", saga.Id) & fbuilder.Eq(versionFieldName, version);
-            
+
             var bsonDoc = saga.ToBsonDocument();
             var ubuilder = Builders<BsonDocument>.Update;
             var update = ubuilder.Inc(versionFieldName, 1);
@@ -43,7 +44,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             }
 
             var modifyResult = await collection.FindOneAndUpdateAsync(
-                filter, 
+                filter,
                 update,
                 new FindOneAndUpdateOptions<BsonDocument> {IsUpsert = false, ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
 

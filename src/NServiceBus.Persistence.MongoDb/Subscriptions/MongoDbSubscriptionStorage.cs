@@ -1,8 +1,8 @@
-﻿using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Database;
-
-namespace NServiceBus.Persistence.MongoDB.Subscriptions
+﻿namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
+    using NServiceBus.Features;
+    using NServiceBus.Persistence.MongoDB.Database;
+
     public class MongoDbSubscriptionStorage : Feature
     {
         internal MongoDbSubscriptionStorage()

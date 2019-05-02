@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
+﻿namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 {
+    using System.Linq;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+
     [TestFixture]
     public class When_using_semantic_versioning_of_messages : MongoFixture
     {

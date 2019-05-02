@@ -1,13 +1,14 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
-using NServiceBus.DataBus;
 
 namespace NServiceBus.Persistence.MongoDB.DataBus
 {
+    using System;
+    using System.IO;
+    using System.Threading.Tasks;
+    using NServiceBus.DataBus;
+
     public class GridFsDataBus : IDataBus
     {
         private readonly IGridFSBucket _fs;
@@ -30,7 +31,7 @@ namespace NServiceBus.Persistence.MongoDB.DataBus
             var key = await _fs.UploadFromStreamAsync(Guid.NewGuid().ToString(), stream).ConfigureAwait(false);
             return key.ToString();
         }
-        
+
         Task IDataBus.Start()
         {
             return Task.FromResult(0);

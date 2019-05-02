@@ -1,20 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb", "NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj", "{B34DDE97-B5F7-4FDE-8144-CE0A5C886947}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MognoDb.Tests", "NServiceBus.Persistence.MognoDb.Tests\NServiceBus.Persistence.MognoDb.Tests.csproj", "{3B39C103-9D66-490C-AF20-CDC976F80F90}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DDEF47D3-86A0-4C2E-A69D-A08A49E0217A}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb.Example", "NServiceBus.Persistence.MongoDb.Example\NServiceBus.Persistence.MongoDb.Example.csproj", "{76A67356-4D42-4C58-A27F-74063C53CC7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,12 +21,11 @@ Global
 		{3B39C103-9D66-490C-AF20-CDC976F80F90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B39C103-9D66-490C-AF20-CDC976F80F90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B39C103-9D66-490C-AF20-CDC976F80F90}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6041C7B6-0A8D-4C0B-9297-97E33FF1ED60}
 	EndGlobalSection
 EndGlobal

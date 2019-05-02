@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace NServiceBus.Persistence.MongoDB.Sagas
+﻿namespace NServiceBus.Persistence.MongoDB.Sagas
 {
+    using System;
+
     public class SagaMongoDbConcurrentUpdateException : Exception
     {
         public int ExpectedVersion { get; set; }

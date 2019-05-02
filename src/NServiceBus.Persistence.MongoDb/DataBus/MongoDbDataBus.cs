@@ -1,8 +1,8 @@
-﻿using System;
-using NServiceBus.DataBus;
-
-namespace NServiceBus.Persistence.MongoDB.DataBus
+﻿namespace NServiceBus.Persistence.MongoDB.DataBus
 {
+    using System;
+    using NServiceBus.DataBus;
+
     public class MongoDbDataBus : DataBusDefinition
     {
         protected override Type ProvidedByFeature()

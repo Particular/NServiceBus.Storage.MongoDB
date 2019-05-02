@@ -38,7 +38,6 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         [DocumentVersion]
         public int Version { get; set; }
     }
-    
     public class PolymorpicProperty : PolymorpicPropertyBase
     {
         public virtual int SomeInt { get; set; }

@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
+﻿namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
 {
+    using System;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
 
     [TestFixture]
     public class AcceptanceTests : MongoFixture

@@ -1,12 +1,12 @@
-﻿using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Database;
-using NServiceBus.Persistence.MongoDB.Gateway;
-using NServiceBus.Persistence.MongoDB.Sagas;
-using NServiceBus.Persistence.MongoDB.Subscriptions;
-using NServiceBus.Persistence.MongoDB.Timeout;
-
-namespace NServiceBus.Persistence.MongoDB
+﻿namespace NServiceBus.Persistence.MongoDB
 {
+    using NServiceBus.Features;
+    using NServiceBus.Persistence.MongoDB.Database;
+    using NServiceBus.Persistence.MongoDB.Gateway;
+    using NServiceBus.Persistence.MongoDB.Sagas;
+    using NServiceBus.Persistence.MongoDB.Subscriptions;
+    using NServiceBus.Persistence.MongoDB.Timeout;
+
     public class MongoDbPersistence : PersistenceDefinition
     {
         public MongoDbPersistence()
@@ -15,7 +15,6 @@ namespace NServiceBus.Persistence.MongoDB
             {
                 s.EnableFeatureByDefault<MongoDbStorage>();
             });
-            
 
             Supports<StorageType.GatewayDeduplication>(s => s.EnableFeatureByDefault<MongoDbGatewayDeduplication>());
             Supports<StorageType.Timeouts>(s => s.EnableFeatureByDefault<MongoDbTimeoutStorage>());

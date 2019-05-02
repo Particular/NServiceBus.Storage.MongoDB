@@ -1,18 +1,18 @@
-﻿using System;
-using System.Configuration;
-using System.Globalization;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Persistence.MongoDB.DataBus;
-using NUnit.Framework;
+﻿using MongoDB.Driver;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
 {
+    using System;
+    using System.Configuration;
+    using System.Globalization;
+    using System.IO;
+    using System.Text;
+    using System.Threading.Tasks;
+    using NServiceBus.Persistence.MongoDB.DataBus;
+    using NUnit.Framework;
+
     public class MongoFixture
     {
-        
         private IMongoDatabase _database;
         private MongoClient _client;
         private GridFsDataBus _gridFsDataBus;

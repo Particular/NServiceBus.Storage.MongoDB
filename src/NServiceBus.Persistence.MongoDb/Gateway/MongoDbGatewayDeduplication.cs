@@ -1,8 +1,8 @@
-﻿using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Database;
-
-namespace NServiceBus.Persistence.MongoDB.Gateway
+﻿namespace NServiceBus.Persistence.MongoDB.Gateway
 {
+    using NServiceBus.Features;
+    using NServiceBus.Persistence.MongoDB.Database;
+
     public class MongoDbGatewayDeduplication : Feature
     {
         public MongoDbGatewayDeduplication()

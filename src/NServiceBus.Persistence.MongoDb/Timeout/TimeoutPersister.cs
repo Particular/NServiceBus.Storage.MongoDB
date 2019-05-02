@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Options;
 using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Timeout.Core;
 
 namespace NServiceBus.Persistence.MongoDB.Timeout
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
+    using NServiceBus.Timeout.Core;
+
     public class TimeoutPersister : IPersistTimeouts, IQueryTimeouts
     {
         private readonly string _endpointName;
@@ -25,6 +26,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 .WithWriteConcern(WriteConcern.WMajority);
         }
 
+        //TODO: fix obselete warning
         private async Task EnsureIndex()
         {
             if (!_indexCreated)
@@ -36,7 +38,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                     new CreateIndexOptions { Background = true }).ConfigureAwait(false);
 
                 await _collection.Indexes.CreateOneAsync(
-                    Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.Endpoint).Ascending(t => t.Time), 
+                    Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.Endpoint).Ascending(t => t.Time),
                     new CreateIndexOptions { Background = true }).ConfigureAwait(false);
             }
         }
@@ -57,7 +59,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 .Project(t => new { t.Id, t.Time })
                 .ToListAsync()
                 .ConfigureAwait(false);
-                
+
 
             var ncBuilder = Builders<TimeoutEntity>.Filter;
             var ncQuery = ncBuilder.Eq(t => t.Endpoint, _endpointName) &
@@ -75,14 +77,14 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             var nextTimeToRunQuery = startOfNextChunk?.Time ?? DateTime.UtcNow.AddMinutes(10);
 
             return new TimeoutsChunk(
-                results.Select(x => new TimeoutsChunk.Timeout(x.Id, x.Time)).ToArray(), 
+                results.Select(x => new TimeoutsChunk.Timeout(x.Id, x.Time)).ToArray(),
                 nextTimeToRunQuery);
         }
 
         public async Task Add(TimeoutData timeout, ContextBag context)
         {
             await EnsureIndex().ConfigureAwait(false);
-            
+
             await _collection.InsertOneAsync(new TimeoutEntity
             {
                 Id = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow).ToString(),
@@ -113,20 +115,20 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         {
             return _collection.DeleteManyAsync(t => t.SagaId == sagaId);
         }
-        
+
         public async Task<TimeoutData> Peek(string timeoutId, ContextBag context)
         {
             var now = DateTime.UtcNow;
 
             var timeoutEntity = await _collection.FindOneAndUpdateAsync<TimeoutEntity, TimeoutEntity>(
-                e => e.Id == timeoutId && (!e.LockDateTime.HasValue || e.LockDateTime.Value < now.AddSeconds(-10)), 
+                e => e.Id == timeoutId && (!e.LockDateTime.HasValue || e.LockDateTime.Value < now.AddSeconds(-10)),
                 new UpdateDefinitionBuilder<TimeoutEntity>().Set(te => te.LockDateTime, now))
                     .ConfigureAwait(false);
-            
+
             return timeoutEntity?.ToTimeoutData();
         }
     }
-    
+
     /// <summary>
     /// NHibernate wrapper class for <see cref="TimeoutData"/>
     /// </summary>

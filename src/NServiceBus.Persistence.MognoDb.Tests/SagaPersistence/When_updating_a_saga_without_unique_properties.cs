@@ -18,7 +18,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             };
 
             await SaveSaga(saga1).ConfigureAwait(false);
-            
+
             await UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
             {
                 s.NonUniqueString = "notUnique2";
@@ -28,7 +28,6 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             saga1 = await LoadSaga<SagaWithoutUniqueProperties>(saga1.Id).ConfigureAwait(false);
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
-
 
         [Test]
         public async Task It_should_throw_when_version_changed()
@@ -42,7 +41,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             await SaveSaga(saga1).ConfigureAwait(false);
 
-            Assert.ThrowsAsync<SagaMongoDbConcurrentUpdateException>(() => 
+            Assert.ThrowsAsync<SagaMongoDbConcurrentUpdateException>(() =>
                 UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
                 {
                     Assert.AreEqual(s.Version, 0);

@@ -1,8 +1,8 @@
-﻿using NServiceBus.Configuration.AdvanceExtensibility;
-using NServiceBus.Persistence.MongoDB.Database;
-
-namespace NServiceBus.Persistence.MongoDB
+﻿namespace NServiceBus.Persistence.MongoDB
 {
+    using NServiceBus.Configuration.AdvanceExtensibility;
+    using NServiceBus.Persistence.MongoDB.Database;
+
     public static class MongoDbSettingsExtensions
     {
         public static PersistenceExtensions<MongoDbPersistence> SetConnectionStringName(

@@ -11,7 +11,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
-    public class SubscriptionPersister : ISubscriptionStorage, IInitializableSubscriptionStorage
+    public class SubscriptionPersister : IInitializableSubscriptionStorage
     {
         private readonly IMongoCollection<Subscription> _subscriptions;
 

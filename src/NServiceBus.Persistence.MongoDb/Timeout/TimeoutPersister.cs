@@ -65,12 +65,13 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             var ncQuery = ncBuilder.Eq(t => t.Endpoint, _endpointName) &
                           ncBuilder.Gte(t => t.Time, now);
 
-            var startOfNextChunkQry = _collection
+            var startOfNextChunkQry = await _collection
                 .Find(ncQuery)
                 .Sort(Builders<TimeoutEntity>.Sort.Ascending(t => t.Time))
                 .Limit(1)
-                .Project(t => new { t.Time })
-                .ToList();
+                .Project(t => new {t.Time})
+                .ToListAsync()
+                .ConfigureAwait(false);
 
             var startOfNextChunk = startOfNextChunkQry.SingleOrDefault();
 
@@ -101,7 +102,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         public async Task<bool> TryRemove(string timeoutId, ContextBag context)
         {
             var query =  Builders<TimeoutEntity>.Filter.Eq(t => t.Id, timeoutId);
-            var entity = _collection.Find(query).FirstOrDefault();
+            var entity = await _collection.Find(query).FirstOrDefaultAsync().ConfigureAwait(false);
 
             if (entity == null)
             {

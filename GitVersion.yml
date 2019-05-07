@@ -1,0 +1,7 @@
+assembly-versioning-scheme: Major
+next-version: 10.0
+branches:
+  develop:
+    tag: beta
+  release:
+    tag: rc

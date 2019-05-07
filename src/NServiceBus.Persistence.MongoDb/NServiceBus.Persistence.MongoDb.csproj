@@ -9,11 +9,7 @@
     <PackageReference Include="MongoDB.Driver" Version="2.8.0" />
     <PackageReference Include="MongoDB.Driver.Core" Version="2.8.0" />
     <PackageReference Include="MongoDB.Driver.GridFS" Version="2.8.0" />
-    <PackageReference Include="NServiceBus" Version="6.5.5" />
-    <PackageReference Include="NServiceBus.Interfaces" Version="5.0.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
+    <PackageReference Include="NServiceBus" Version="[6.0.0, 7.0.0)" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />

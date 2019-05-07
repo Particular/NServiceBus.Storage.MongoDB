@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using NServiceBus.Unicast.Subscriptions;
-using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SubscriptionPersistence
 {
+    using System;
+    using System.Collections.Generic;
+    using NServiceBus.Unicast.Subscriptions;
+    using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+
     public interface ISomeInterface
     {
     }

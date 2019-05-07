@@ -7,7 +7,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
     {
         internal MongoDbSagaStorage()
         {
-            DependsOn<Features.Sagas>();
+            DependsOn<Sagas>();
             DependsOn<MongoDbStorage>();
         }
 

@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb", "NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj", "{B34DDE97-B5F7-4FDE-8144-CE0A5C886947}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MognoDb.Tests", "NServiceBus.Persistence.MognoDb.Tests\NServiceBus.Persistence.MognoDb.Tests.csproj", "{3B39C103-9D66-490C-AF20-CDC976F80F90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb.Tests", "NServiceBus.Persistence.MongoDb.Tests\NServiceBus.Persistence.MongoDb.Tests.csproj", "{3B39C103-9D66-490C-AF20-CDC976F80F90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

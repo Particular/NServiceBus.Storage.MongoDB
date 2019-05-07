@@ -1,8 +1,7 @@
-﻿using MongoDB.Driver;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SubscriptionPersistence
 {
     using System.Threading.Tasks;
+    using global::MongoDB.Driver;
     using NServiceBus.Persistence.MongoDB.Subscriptions;
     using NUnit.Framework;
 

@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SubscriptionPersistence
 {
     using System.Linq;
     using System.Threading.Tasks;

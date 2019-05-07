@@ -8,7 +8,7 @@
         public MongoDbDataBusPersistence()
         {
             DependsOn<MongoDbStorage>();
-            DependsOn<Features.DataBus>();
+            DependsOn<DataBus>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

@@ -1,10 +1,10 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using NServiceBus.Unicast.Subscriptions;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SubscriptionPersistence
 {
+    using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Unicast.Subscriptions;
+    using NUnit.Framework;
+
     [TestFixture]
     public class When_listing_subscribers_for_message_types : MongoFixture
     {

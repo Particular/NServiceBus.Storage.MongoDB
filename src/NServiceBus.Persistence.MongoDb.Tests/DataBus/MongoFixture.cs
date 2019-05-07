@@ -1,6 +1,4 @@
-﻿using MongoDB.Driver;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.DataBus
 {
     using System;
     using System.Configuration;
@@ -8,6 +6,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
+    using global::MongoDB.Driver;
     using NServiceBus.Persistence.MongoDB.DataBus;
     using NUnit.Framework;
 

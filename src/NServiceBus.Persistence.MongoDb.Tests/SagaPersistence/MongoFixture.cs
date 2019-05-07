@@ -1,16 +1,16 @@
-﻿using System;
-using System.Configuration;
-using System.Globalization;
-using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Driver;
-using NServiceBus.Persistence.MongoDB.Sagas;
-using NServiceBus.Sagas;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SagaPersistence
 {
+    using System;
+    using System.Configuration;
+    using System.Globalization;
+    using System.Threading.Tasks;
+    using global::MongoDB.Bson;
+    using global::MongoDB.Bson.Serialization.Conventions;
+    using global::MongoDB.Driver;
+    using NServiceBus.Persistence.MongoDB.Sagas;
+    using NServiceBus.Sagas;
+    using NUnit.Framework;
+
     [TestFixture]
     public class MongoFixture
     {

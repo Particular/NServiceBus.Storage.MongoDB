@@ -1,15 +1,15 @@
-﻿using System;
-using System.Configuration;
-using System.Globalization;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using NServiceBus.Persistence.MongoDB.Database;
-using NServiceBus.Persistence.MongoDB.Subscriptions;
-using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SubscriptionPersistence
 {
+    using System;
+    using System.Configuration;
+    using System.Globalization;
+    using global::MongoDB.Bson;
+    using global::MongoDB.Driver;
+    using NServiceBus.Persistence.MongoDB.Database;
+    using NServiceBus.Persistence.MongoDB.Subscriptions;
+    using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+    using NUnit.Framework;
+
     public class MongoFixture
     {
         private SubscriptionPersister _storage;

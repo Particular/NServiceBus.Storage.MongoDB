@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.Gateway
 {
+    using System;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+
     [TestFixture]
     public class Should_Dedupe : MongorFixture
     {

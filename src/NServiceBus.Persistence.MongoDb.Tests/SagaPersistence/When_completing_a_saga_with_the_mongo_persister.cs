@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SagaPersistence
 {
+    using System;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+
     public class When_completing_a_saga_with_the_mongo_persister : MongoFixture
     {
 

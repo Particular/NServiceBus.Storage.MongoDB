@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.SagaPersistence
 {
+    using System;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+
     public class When_persisting_a_saga_entity_with_inherited_property : MongoFixture
     {
         TestSaga _entity;

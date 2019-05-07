@@ -1,5 +1,4 @@
-﻿using MongoBason = MongoDB.Bson;
-using MongoDriver = MongoDB.Driver;
+﻿using MongoBson = MongoDB.Bson;
 using MongoDB.Bson;
 using MongoDB.Driver;
 namespace NServiceBus.Persistence.MongoDB.Database
@@ -44,7 +43,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
                 return default(T);
             }
 
-            return MongoBason.Serialization.BsonSerializer.Deserialize<T>(doc);
+            return MongoBson.Serialization.BsonSerializer.Deserialize<T>(doc);
         }
     }
 }

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Configuration;
-using System.Globalization;
-using MongoDB.Driver;
-using NServiceBus.Gateway.Deduplication;
-using NServiceBus.Persistence.MongoDB.Gateway;
-using NUnit.Framework;
-
-namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.TimeoutPersistence
 {
-    public class MongorFixture
+    using System;
+    using System.Configuration;
+    using System.Globalization;
+    using global::MongoDB.Driver;
+    using NServiceBus.Persistence.MongoDB.Timeout;
+    using NUnit.Framework;
+
+    public class MongoFixture
     {
-        private IDeduplicateMessages _deduplication;
+        private TimeoutPersister _storage;
         private IMongoDatabase _database;
         private MongoClient _client;
         private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
@@ -22,10 +21,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _deduplication = new Deduplication(_database);
+
+            _storage = new TimeoutPersister("MyTestEndpoint", _database);
         }
 
-        protected IDeduplicateMessages Deduplication => _deduplication;
+        protected TimeoutPersister Storage => _storage;
 
         [TearDown]
         public void TeardownContext() => _client.DropDatabase(_databaseName);

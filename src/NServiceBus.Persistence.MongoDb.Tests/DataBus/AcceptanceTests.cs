@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
+﻿namespace NServiceBus.Persistence.MongoDb.Tests.DataBus
 {
     using System;
     using System.IO;

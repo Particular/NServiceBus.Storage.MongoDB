@@ -5,16 +5,19 @@
     public static class EqualityExtensions
     {
         public static bool EqualTo<T>(this T item, object obj, Func<T, T, bool> equals)
+            where T : class
         {
-            if (!(obj is T)) return false;
+            var x = obj as T;
 
-            var x = (T)obj;
+            if (ReferenceEquals(item, obj))
+            {
+                return true;
+            }
 
-            if (item != null && x == null) return false;
-
-            if (item == null && x != null) return false;
-
-            if (item == null && x == null) return true;
+            if (item == null || x == null)
+            {
+                return false;
+            }
 
             return equals(item, x);
         }

@@ -6,19 +6,9 @@
     {
         protected override void Setup(FeatureConfigurationContext context)
         {
-            if (context.Settings.HasSetting(SettingsKeys.ConnectionStringName))
-            {
-                context.Container.MongoDBPersistence(context.Settings.Get<string>(SettingsKeys.ConnectionStringName));
-            }
+            context.Settings.TryGet(SettingsKeys.ConnectionString, out string connectionString);
 
-            else if (context.Settings.HasSetting(SettingsKeys.ConnectionString))
-            {
-                context.Container.MongoDBPersistence(() => context.Settings.Get<string>(SettingsKeys.ConnectionString));
-            }
-            else
-            {
-                context.Container.MongoDBPersistence();
-            }
+            context.Container.MongoDBPersistence(() => connectionString);
         }
     }
 }

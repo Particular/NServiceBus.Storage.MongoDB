@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
     using System;
-    using System.Configuration;
 
     class ConnectionStringProvider
     {
@@ -14,7 +13,7 @@
                 return containerConnectionString;
             }
 
-            return ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            return string.Empty; //TODO fix this up for real
         }
     }
 }

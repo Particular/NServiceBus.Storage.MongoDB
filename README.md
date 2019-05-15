@@ -125,6 +125,14 @@ namespace Example
 ## NServiceBus Documentation Sample
 http://docs.particular.net/samples/mongodb/
 
+## Running Tests NServiceBus.Storage.MongoDB.Tests
+
+For Docker: `docker run -d -p 27017:27017 mongo:latest`
+
+The database will be created automatically if it does not exist.
+
+Set an environment variable: `ContainerUrl` to the URL: `mongodb://localhost/NServiceBus.Storage.MongoDB.Tests`
+
 ## Thanks to our contributors ##
 [@ruslanrusu](https://twitter.com/ruslanrusu)  
 [CRuppert](https://github.com/CRuppert)

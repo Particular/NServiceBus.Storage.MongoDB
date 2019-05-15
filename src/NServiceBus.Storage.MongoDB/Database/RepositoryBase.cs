@@ -7,11 +7,11 @@ namespace NServiceBus.Storage.MongoDB
     using System;
     using System.Threading.Tasks;
 
-    abstract class BaseNsbMongoDbRepository
+    abstract class RepositoryBase
     {
         protected IMongoDatabase Database { get; private set; }
 
-        protected BaseNsbMongoDbRepository(IMongoDatabase database)
+        protected RepositoryBase(IMongoDatabase database)
         {
             Database = database;
         }

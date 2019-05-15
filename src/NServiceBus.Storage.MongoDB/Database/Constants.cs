@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
-    static class MongoPersistenceConstants
+    static class Constants
     {
         public const string SubscriptionCollectionName = "subscriptions";
         public const string DeduplicationCollectionName = "deduplication";

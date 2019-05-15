@@ -2,12 +2,12 @@ namespace NServiceBus.Storage.MongoDB
 {
     using NServiceBus.Features;
 
-    class MongoDbSagaStorage : Feature
+    class SagaStorage : Feature
     {
-        MongoDbSagaStorage()
+        SagaStorage()
         {
             DependsOn<Sagas>();
-            DependsOn<MongoDbStorage>();
+            DependsOn<MongoDBStorage>();
         }
 
         /// <summary>
@@ -16,7 +16,7 @@ namespace NServiceBus.Storage.MongoDB
         protected override void Setup(FeatureConfigurationContext context)
         {
             context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.InstancePerCall);
-            context.Container.ConfigureComponent<MongoDbSagaRepository>(DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent<SagaRepository>(DependencyLifecycle.SingleInstance);
         }
     }
 }

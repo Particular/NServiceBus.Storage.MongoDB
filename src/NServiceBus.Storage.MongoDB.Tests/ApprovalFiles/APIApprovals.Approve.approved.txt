@@ -11,19 +11,19 @@ namespace NServiceBus
         public static int GetPropertyValue(object objectWithADocumentVersionDecoratedProperty) { }
         public static void SetPropertyValue(object objectWithADocumentVersionDecoratedProperty, int value) { }
     }
-    public class MongoDbPersistence : NServiceBus.Persistence.PersistenceDefinition
+    public class MongoDBPersistence : NServiceBus.Persistence.PersistenceDefinition
     {
-        public MongoDbPersistence() { }
+        public MongoDBPersistence() { }
     }
-    public class static MongoDbSettingsExtensions
+    public class MongoDBSagaConcurrentUpdateException : System.Exception
     {
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> SetConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> cfg, string connectionString) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> SetConnectionStringName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> cfg, string connectionStringName) { }
-    }
-    public class SagaMongoDbConcurrentUpdateException : System.Exception
-    {
-        public SagaMongoDbConcurrentUpdateException() { }
-        public SagaMongoDbConcurrentUpdateException(int expectedVersion) { }
+        public MongoDBSagaConcurrentUpdateException() { }
+        public MongoDBSagaConcurrentUpdateException(int expectedVersion) { }
         public int ExpectedVersion { get; set; }
+    }
+    public class static MongoDBSettingsExtensions
+    {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> SetConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> cfg, string connectionString) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> SetConnectionStringName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> cfg, string connectionStringName) { }
     }
 }

@@ -11,9 +11,9 @@ namespace NServiceBus.Storage.MongoDB
 
     class SagaPersister : ISagaPersister
     {
-        private readonly MongoDbSagaRepository _repo;
+        private readonly SagaRepository _repo;
 
-        public SagaPersister(MongoDbSagaRepository repo)
+        public SagaPersister(SagaRepository repo)
         {
             _repo = repo;
         }

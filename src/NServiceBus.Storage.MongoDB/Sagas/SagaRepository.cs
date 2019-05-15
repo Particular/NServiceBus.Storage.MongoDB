@@ -7,9 +7,9 @@ namespace NServiceBus.Storage.MongoDB
     using System.Linq;
     using System.Threading.Tasks;
 
-    class MongoDbSagaRepository : BaseNsbMongoDbRepository
+    class SagaRepository : RepositoryBase
     {
-        public MongoDbSagaRepository(IMongoDatabase database)
+        public SagaRepository(IMongoDatabase database)
             : base(database)
         {
         }
@@ -49,7 +49,7 @@ namespace NServiceBus.Storage.MongoDB
 
             if (modifyResult == null)
             {
-                throw new SagaMongoDbConcurrentUpdateException(version);
+                throw new MongoDBSagaConcurrentUpdateException(version);
             }
         }
 

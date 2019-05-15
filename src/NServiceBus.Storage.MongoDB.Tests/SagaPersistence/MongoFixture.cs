@@ -13,7 +13,7 @@
     public class MongoFixture
     {
         private IMongoDatabase _database;
-        private MongoDbSagaRepository _repo;
+        private SagaRepository _repo;
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
         private bool _camelCaseConventionSet;
@@ -31,7 +31,7 @@
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _repo = new MongoDbSagaRepository(_database);
+            _repo = new SagaRepository(_database);
 
             _sagaPersister = new SagaPersister(_repo);
         }

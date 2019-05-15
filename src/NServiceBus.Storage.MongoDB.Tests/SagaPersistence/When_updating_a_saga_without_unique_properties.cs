@@ -40,7 +40,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
             await SaveSaga(saga1).ConfigureAwait(false);
 
-            Assert.ThrowsAsync<SagaMongoDbConcurrentUpdateException>(() =>
+            Assert.ThrowsAsync<MongoDBSagaConcurrentUpdateException>(() =>
                 UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
                 {
                     Assert.AreEqual(s.Version, 0);

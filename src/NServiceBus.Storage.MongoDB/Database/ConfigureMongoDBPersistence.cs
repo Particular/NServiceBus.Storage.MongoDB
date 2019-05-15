@@ -6,9 +6,9 @@ namespace NServiceBus.Storage.MongoDB
     using System.Configuration;
     using NServiceBus.ObjectBuilder;
 
-    static class ConfigureMongoDbPersistence
+    static class ConfigureMongoDBPersistence
     {
-        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, IMongoDatabase database)
+        public static IConfigureComponents MongoDBPersistence(this IConfigureComponents config, IMongoDatabase database)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (database == null) throw new ArgumentNullException(nameof(database));
@@ -18,7 +18,7 @@ namespace NServiceBus.Storage.MongoDB
             return config;
         }
 
-        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, string connectionStringName)
+        public static IConfigureComponents MongoDBPersistence(this IConfigureComponents config, string connectionStringName)
         {
             var connectionStringEntry = ConfigurationManager.ConnectionStrings[connectionStringName];
 
@@ -31,9 +31,9 @@ namespace NServiceBus.Storage.MongoDB
             return MongoPersistenceWithConectionString(config, connectionString);
         }
 
-        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config)
+        public static IConfigureComponents MongoDBPersistence(this IConfigureComponents config)
         {
-            return MongoDbPersistence(config, MongoPersistenceConnectionStringNames.DefaultConnectionStringName);
+            return MongoDBPersistence(config, ConnectionStringNames.DefaultConnectionStringName);
         }
 
         public static IConfigureComponents MongoPersistenceWithConectionString(IConfigureComponents config, string connectionString)
@@ -50,10 +50,10 @@ namespace NServiceBus.Storage.MongoDB
             var database = client.GetDatabase(databaseName);
 
 
-            return MongoDbPersistence(config, database);
+            return MongoDBPersistence(config, database);
         }
 
-        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, Func<string> getConnectionString)
+        public static IConfigureComponents MongoDBPersistence(this IConfigureComponents config, Func<string> getConnectionString)
         {
             var connectionString = getConnectionString();
 

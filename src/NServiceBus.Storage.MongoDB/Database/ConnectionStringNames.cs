@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
-    static class MongoPersistenceConnectionStringNames
+    static class ConnectionStringNames
     {
         public const string DefaultConnectionStringName = "NServiceBus/Persistence/MongoDB";
     }

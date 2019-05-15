@@ -30,25 +30,6 @@ namespace NServiceBus.Persistence.MongoDB.Database
         public const string ConnectionStringName = "MongoDbConnectionStringName";
     }
 }
-namespace NServiceBus.Persistence.MongoDB.DataBus
-{
-    public class GridFsDataBus : NServiceBus.DataBus.IDataBus
-    {
-        public GridFsDataBus(MongoDB.Driver.IMongoDatabase database) { }
-        public System.Threading.Tasks.Task<System.IO.Stream> Get(string key) { }
-        public System.Threading.Tasks.Task<string> Put(System.IO.Stream stream, System.TimeSpan timeToBeReceived) { }
-    }
-    public class MongoDbDataBus : NServiceBus.DataBus.DataBusDefinition
-    {
-        public MongoDbDataBus() { }
-        protected override System.Type ProvidedByFeature() { }
-    }
-    public class MongoDbDataBusPersistence : NServiceBus.Features.Feature
-    {
-        public MongoDbDataBusPersistence() { }
-        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
-    }
-}
 namespace NServiceBus.Persistence.MongoDB
 {
     [System.AttributeUsageAttribute(System.AttributeTargets.Property | System.AttributeTargets.All, Inherited=true)]

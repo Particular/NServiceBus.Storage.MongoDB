@@ -1,0 +1,21 @@
+﻿namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+{
+    using System;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+
+    public class When_completing_a_saga_with_the_mongo_persister : MongoFixture
+    {
+
+        [Test]
+        public async Task Should_delete_the_saga()
+        {
+            var sagaId = Guid.NewGuid();
+
+            await SaveSaga(new TestSaga { Id = sagaId }).ConfigureAwait(false);
+            await CompleteSaga<TestSaga>(sagaId).ConfigureAwait(false);
+
+            Assert.Null(await LoadSaga<TestSaga>(sagaId).ConfigureAwait(false));
+        }
+    }
+}

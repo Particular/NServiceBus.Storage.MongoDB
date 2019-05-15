@@ -1,0 +1,29 @@
+[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("NServiceBus.Storage.MongoDB.Tests")]
+namespace NServiceBus
+{
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property | System.AttributeTargets.All, Inherited=true)]
+    public class DocumentVersionAttribute : System.Attribute
+    {
+        public DocumentVersionAttribute() { }
+        public static System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo> GetDocumentVersionProperties(System.Type type) { }
+        public static System.Reflection.PropertyInfo GetDocumentVersionProperty(System.Type type) { }
+        public static System.Collections.Generic.KeyValuePair<string, int> GetProperty(object objectWithADocumentVersionDecoratedProperty) { }
+        public static int GetPropertyValue(object objectWithADocumentVersionDecoratedProperty) { }
+        public static void SetPropertyValue(object objectWithADocumentVersionDecoratedProperty, int value) { }
+    }
+    public class MongoDbPersistence : NServiceBus.Persistence.PersistenceDefinition
+    {
+        public MongoDbPersistence() { }
+    }
+    public class static MongoDbSettingsExtensions
+    {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> SetConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> cfg, string connectionString) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> SetConnectionStringName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDbPersistence> cfg, string connectionStringName) { }
+    }
+    public class SagaMongoDbConcurrentUpdateException : System.Exception
+    {
+        public SagaMongoDbConcurrentUpdateException() { }
+        public SagaMongoDbConcurrentUpdateException(int expectedVersion) { }
+        public int ExpectedVersion { get; set; }
+    }
+}

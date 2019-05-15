@@ -151,34 +151,3 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         public System.Threading.Tasks.Task Unsubscribe(NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions.Subscriber subscriber, NServiceBus.Unicast.Subscriptions.MessageType messageType, NServiceBus.Extensibility.ContextBag context) { }
     }
 }
-namespace NServiceBus.Persistence.MongoDB.Timeout
-{
-    public class MongoDbTimeoutStorage : NServiceBus.Features.Feature
-    {
-        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
-    }
-    public class TimeoutEntity
-    {
-        public TimeoutEntity() { }
-        public virtual string Destination { get; set; }
-        public virtual string Endpoint { get; set; }
-        [MongoDB.Bson.Serialization.Attributes.BsonDictionaryOptionsAttribute(MongoDB.Bson.Serialization.Options.DictionaryRepresentation.ArrayOfArrays)]
-        public virtual System.Collections.Generic.Dictionary<string, string> Headers { get; set; }
-        public virtual string Id { get; set; }
-        public System.Nullable<System.DateTime> LockDateTime { get; set; }
-        public string OwningTimeoutManager { get; set; }
-        public virtual System.Guid SagaId { get; set; }
-        public virtual byte[] State { get; set; }
-        public virtual System.DateTime Time { get; set; }
-        public NServiceBus.Timeout.Core.TimeoutData ToTimeoutData() { }
-    }
-    public class TimeoutPersister : NServiceBus.Timeout.Core.IPersistTimeouts, NServiceBus.Timeout.Core.IQueryTimeouts
-    {
-        public TimeoutPersister(string endpointName, MongoDB.Driver.IMongoDatabase database) { }
-        public System.Threading.Tasks.Task Add(NServiceBus.Timeout.Core.TimeoutData timeout, NServiceBus.Extensibility.ContextBag context) { }
-        public System.Threading.Tasks.Task<NServiceBus.Timeout.Core.TimeoutsChunk> GetNextChunk(System.DateTime startSlice) { }
-        public System.Threading.Tasks.Task<NServiceBus.Timeout.Core.TimeoutData> Peek(string timeoutId, NServiceBus.Extensibility.ContextBag context) { }
-        public System.Threading.Tasks.Task RemoveTimeoutBy(System.Guid sagaId, NServiceBus.Extensibility.ContextBag context) { }
-        public System.Threading.Tasks.Task<bool> TryRemove(string timeoutId, NServiceBus.Extensibility.ContextBag context) { }
-    }
-}

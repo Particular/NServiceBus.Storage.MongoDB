@@ -20,7 +20,7 @@
             var builder = Builders<Subscription>.Filter;
             var query = builder.Ne(s => s.Subscribers, null) & !builder.Size(s => s.Subscribers, 0);
 
-            var count = Subscriptions.Count(query);
+            var count = await Subscriptions.CountDocumentsAsync(query);
             Assert.AreEqual(0, count);
         }
     }

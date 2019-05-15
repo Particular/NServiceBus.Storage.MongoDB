@@ -40,7 +40,7 @@
     {
         public static long Count<TDocument>(this IMongoCollection<TDocument> collection)
         {
-            return collection.Count(new BsonDocument());
+            return collection.CountDocuments(new BsonDocument());
         }
     }
 }

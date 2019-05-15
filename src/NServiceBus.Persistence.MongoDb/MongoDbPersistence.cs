@@ -2,7 +2,6 @@
 {
     using NServiceBus.Features;
     using NServiceBus.Persistence.MongoDB.Database;
-    using NServiceBus.Persistence.MongoDB.Gateway;
     using NServiceBus.Persistence.MongoDB.Sagas;
 
     public class MongoDbPersistence : PersistenceDefinition
@@ -14,7 +13,6 @@
                 s.EnableFeatureByDefault<MongoDbStorage>();
             });
 
-            Supports<StorageType.GatewayDeduplication>(s => s.EnableFeatureByDefault<MongoDbGatewayDeduplication>());
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<MongoDbSagaStorage>());
         }
     }

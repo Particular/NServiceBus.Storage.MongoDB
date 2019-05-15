@@ -71,25 +71,6 @@ namespace NServiceBus.Persistence.MongoDB
         public static NServiceBus.PersistenceExtensions<NServiceBus.Persistence.MongoDB.MongoDbPersistence> SetConnectionStringName(this NServiceBus.PersistenceExtensions<NServiceBus.Persistence.MongoDB.MongoDbPersistence> cfg, string connectionStringName) { }
     }
 }
-namespace NServiceBus.Persistence.MongoDB.Gateway
-{
-    public class Deduplication : NServiceBus.Gateway.Deduplication.IDeduplicateMessages
-    {
-        public Deduplication(MongoDB.Driver.IMongoDatabase database) { }
-        public System.Threading.Tasks.Task<bool> DeduplicateMessage(string clientId, System.DateTime timeReceived, NServiceBus.Extensibility.ContextBag context) { }
-    }
-    public class GatewayMessage
-    {
-        public GatewayMessage() { }
-        public string Id { get; set; }
-        public System.DateTime TimeReceived { get; set; }
-    }
-    public class MongoDbGatewayDeduplication : NServiceBus.Features.Feature
-    {
-        public MongoDbGatewayDeduplication() { }
-        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
-    }
-}
 namespace NServiceBus.Persistence.MongoDB.Sagas
 {
     public class MongoDbSagaRepository : NServiceBus.Persistence.MongoDB.Database.BaseNsbMongoDbRepository

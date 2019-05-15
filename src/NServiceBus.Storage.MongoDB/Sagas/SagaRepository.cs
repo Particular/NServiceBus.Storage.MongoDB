@@ -45,7 +45,7 @@ namespace NServiceBus.Storage.MongoDB
             var modifyResult = await collection.FindOneAndUpdateAsync(
                 filter,
                 update,
-                new FindOneAndUpdateOptions<BsonDocument> {IsUpsert = false, ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
+                new FindOneAndUpdateOptions<BsonDocument> { IsUpsert = false, ReturnDocument = ReturnDocument.After }).ConfigureAwait(false);
 
             if (modifyResult == null)
             {

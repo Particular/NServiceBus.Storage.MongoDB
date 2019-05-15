@@ -28,6 +28,7 @@ namespace NServiceBus.Storage.MongoDB
             }
 
             var connectionString = connectionStringEntry.ConnectionString;
+
             return MongoPersistenceWithConectionString(config, connectionString);
         }
 
@@ -44,11 +45,8 @@ namespace NServiceBus.Storage.MongoDB
                 throw new ConfigurationErrorsException("Cannot configure Mongo Persister. Database name not present in the connection string.");
             }
 
-
-
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
-
 
             return MongoDBPersistence(config, database);
         }

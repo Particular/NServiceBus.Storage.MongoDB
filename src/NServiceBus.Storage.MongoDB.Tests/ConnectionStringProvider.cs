@@ -8,8 +8,11 @@
         public static string GetConnectionString()
         {
             var containerConnectionString = Environment.GetEnvironmentVariable("ContainerUrl");
+
             if (string.IsNullOrWhiteSpace(containerConnectionString) == false)
+            {
                 return containerConnectionString;
+            }
 
             return ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
         }

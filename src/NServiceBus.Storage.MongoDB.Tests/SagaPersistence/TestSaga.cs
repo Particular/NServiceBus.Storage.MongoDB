@@ -65,6 +65,7 @@
     public class TestComponent
     {
         public string Property { get; set; }
+
         public string AnotherProperty { get; set; }
 
         public override bool Equals(object obj)
@@ -85,7 +86,6 @@
         public virtual Guid Id { get; set; }
 
         public virtual Guid ProductId { get; set; }
-
     }
 
     public class RelatedClass
@@ -122,6 +122,7 @@
         public virtual string UniqueString { get; set; }
 
         public string NonUniqueString { get; set; }
+
         [DocumentVersion]
         public int Version { get; set; }
     }

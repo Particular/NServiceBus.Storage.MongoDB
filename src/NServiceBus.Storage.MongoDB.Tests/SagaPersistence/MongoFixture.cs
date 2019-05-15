@@ -43,12 +43,12 @@
         {
             SagaCorrelationProperty correlationProperty = null;
 
-            if(saga.GetType() == typeof(SagaWithUniqueProperty))
+            if (saga.GetType() == typeof(SagaWithUniqueProperty))
             {
                 correlationProperty = new SagaCorrelationProperty("UniqueString", String.Empty);
             }
 
-            return _sagaPersister.Save(saga, correlationProperty, null, null );
+            return _sagaPersister.Save(saga, correlationProperty, null, null);
         }
 
         protected Task<T> LoadSaga<T>(Guid id) where T : IContainSagaData
@@ -71,7 +71,7 @@
             await _sagaPersister.Update(saga, null, null).ConfigureAwait(false);
         }
 
-        protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData
+        protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : IContainSagaData
         {
             var versionName = _camelCaseConventionSet ? "version" : "Version";
             var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());

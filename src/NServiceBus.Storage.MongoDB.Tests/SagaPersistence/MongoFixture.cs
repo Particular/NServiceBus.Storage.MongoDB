@@ -39,7 +39,7 @@
         [TearDown]
         public void TeardownContext() => _client.DropDatabase(_databaseName);
 
-        protected Task SaveSaga<T>(T saga) where T : IContainSagaData
+        protected Task SaveSaga<T>(T saga) where T : class, IContainSagaData
         {
             SagaCorrelationProperty correlationProperty = null;
 
@@ -51,19 +51,19 @@
             return _sagaPersister.Save(saga, correlationProperty, null, null);
         }
 
-        protected Task<T> LoadSaga<T>(Guid id) where T : IContainSagaData
+        protected Task<T> LoadSaga<T>(Guid id) where T : class, IContainSagaData
         {
             return _sagaPersister.Get<T>(id, null, null);
         }
 
-        protected async Task CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
+        protected async Task CompleteSaga<T>(Guid sagaId) where T : class, IContainSagaData
         {
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga);
             await _sagaPersister.Complete(saga, null, null).ConfigureAwait(false);
         }
 
-        protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
+        protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : class, IContainSagaData
         {
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga, "Could not update saga. Saga not found");
@@ -71,7 +71,7 @@
             await _sagaPersister.Update(saga, null, null).ConfigureAwait(false);
         }
 
-        protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : IContainSagaData
+        protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData
         {
             var versionName = _camelCaseConventionSet ? "version" : "Version";
             var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());

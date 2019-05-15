@@ -49,12 +49,12 @@ namespace NServiceBus.Storage.MongoDB
             return _repo.Update(sagaData, versionFieldName, versionProperty.Value);
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : IContainSagaData
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
             return _repo.FindById<TSagaData>(sagaId);
         }
 
-        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : IContainSagaData
+        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
             var classmap = BsonClassMap.LookupClassMap(typeof(TSagaData));
             var propertyFieldName = GetFieldName(classmap, propertyName);

@@ -1,0 +1,184 @@
+namespace NServiceBus.Persistence.MongoDB.Database
+{
+    public abstract class BaseNsbMongoDbRepository
+    {
+        protected BaseNsbMongoDbRepository(MongoDB.Driver.IMongoDatabase database) { }
+        protected MongoDB.Driver.IMongoDatabase Database { get; }
+        protected static T Deserialize<T>(MongoDB.Bson.BsonDocument doc) { }
+        public System.Threading.Tasks.Task EnsureUniqueIndex(System.Type entityType, string fieldName) { }
+        protected MongoDB.Driver.IMongoCollection<MongoDB.Bson.BsonDocument> GetCollection<T>() { }
+        protected MongoDB.Driver.IMongoCollection<MongoDB.Bson.BsonDocument> GetCollection(System.Type type) { }
+        protected string GetCollectionName(System.Type entityType) { }
+    }
+    public class MongoDbStorage : NServiceBus.Features.Feature
+    {
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+    public class static MongoPersistenceConnectionStringNames
+    {
+        public const string DefaultConnectionStringName = "NServiceBus/Persistence/MongoDB";
+    }
+    public class static MongoPersistenceConstants
+    {
+        public const string DeduplicationCollectionName = "deduplication";
+        public const string SagaUniqueIdentityCollectionName = "saga_unique_ids";
+        public const string SubscriptionCollectionName = "subscriptions";
+    }
+    public class static MongoPersistenceSettings
+    {
+        public const string ConnectionString = "MongoDbConnectionString";
+        public const string ConnectionStringName = "MongoDbConnectionStringName";
+    }
+}
+namespace NServiceBus.Persistence.MongoDB.DataBus
+{
+    public class GridFsDataBus : NServiceBus.DataBus.IDataBus
+    {
+        public GridFsDataBus(MongoDB.Driver.IMongoDatabase database) { }
+        public System.Threading.Tasks.Task<System.IO.Stream> Get(string key) { }
+        public System.Threading.Tasks.Task<string> Put(System.IO.Stream stream, System.TimeSpan timeToBeReceived) { }
+    }
+    public class MongoDbDataBus : NServiceBus.DataBus.DataBusDefinition
+    {
+        public MongoDbDataBus() { }
+        protected override System.Type ProvidedByFeature() { }
+    }
+    public class MongoDbDataBusPersistence : NServiceBus.Features.Feature
+    {
+        public MongoDbDataBusPersistence() { }
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+}
+namespace NServiceBus.Persistence.MongoDB
+{
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property | System.AttributeTargets.All, Inherited=true)]
+    public class DocumentVersionAttribute : System.Attribute
+    {
+        public DocumentVersionAttribute() { }
+        public static System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo> GetDocumentVersionProperties(System.Type type) { }
+        public static System.Reflection.PropertyInfo GetDocumentVersionProperty(System.Type type) { }
+        public static System.Collections.Generic.KeyValuePair<string, int> GetProperty(object objectWithADocumentVersionDecoratedProperty) { }
+        public static int GetPropertyValue(object objectWithADocumentVersionDecoratedProperty) { }
+        public static void SetPropertyValue(object objectWithADocumentVersionDecoratedProperty, int value) { }
+    }
+    public class MongoDbPersistence : NServiceBus.Persistence.PersistenceDefinition
+    {
+        public MongoDbPersistence() { }
+    }
+    public class static MongoDbSettingsExtensions
+    {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.Persistence.MongoDB.MongoDbPersistence> SetConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.Persistence.MongoDB.MongoDbPersistence> cfg, string connectionString) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.Persistence.MongoDB.MongoDbPersistence> SetConnectionStringName(this NServiceBus.PersistenceExtensions<NServiceBus.Persistence.MongoDB.MongoDbPersistence> cfg, string connectionStringName) { }
+    }
+}
+namespace NServiceBus.Persistence.MongoDB.Gateway
+{
+    public class Deduplication : NServiceBus.Gateway.Deduplication.IDeduplicateMessages
+    {
+        public Deduplication(MongoDB.Driver.IMongoDatabase database) { }
+        public System.Threading.Tasks.Task<bool> DeduplicateMessage(string clientId, System.DateTime timeReceived, NServiceBus.Extensibility.ContextBag context) { }
+    }
+    public class GatewayMessage
+    {
+        public GatewayMessage() { }
+        public string Id { get; set; }
+        public System.DateTime TimeReceived { get; set; }
+    }
+    public class MongoDbGatewayDeduplication : NServiceBus.Features.Feature
+    {
+        public MongoDbGatewayDeduplication() { }
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+}
+namespace NServiceBus.Persistence.MongoDB.Sagas
+{
+    public class MongoDbSagaRepository : NServiceBus.Persistence.MongoDB.Database.BaseNsbMongoDbRepository
+    {
+        public MongoDbSagaRepository(MongoDB.Driver.IMongoDatabase database) { }
+        public System.Threading.Tasks.Task<T> FindByFieldName<T>(string fieldName, object value) { }
+        public System.Threading.Tasks.Task<T> FindById<T>(System.Guid id) { }
+        public System.Threading.Tasks.Task Insert(object entity) { }
+        public System.Threading.Tasks.Task Remove(NServiceBus.IContainSagaData saga) { }
+        public System.Threading.Tasks.Task Update(NServiceBus.IContainSagaData saga, string versionFieldName, int version) { }
+    }
+    public class MongoDbSagaStorage : NServiceBus.Features.Feature
+    {
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+    public class SagaMongoDbConcurrentUpdateException : System.Exception
+    {
+        public SagaMongoDbConcurrentUpdateException() { }
+        public SagaMongoDbConcurrentUpdateException(int expectedVersion) { }
+        public int ExpectedVersion { get; set; }
+    }
+    public class SagaPersister : NServiceBus.Sagas.ISagaPersister
+    {
+        public SagaPersister(NServiceBus.Persistence.MongoDB.Sagas.MongoDbSagaRepository repo) { }
+        public System.Threading.Tasks.Task Complete(NServiceBus.IContainSagaData sagaData, NServiceBus.Persistence.SynchronizedStorageSession session, NServiceBus.Extensibility.ContextBag context) { }
+        public System.Threading.Tasks.Task<TSagaData> Get<TSagaData>(System.Guid sagaId, NServiceBus.Persistence.SynchronizedStorageSession session, NServiceBus.Extensibility.ContextBag context)
+            where TSagaData : NServiceBus.IContainSagaData { }
+        public System.Threading.Tasks.Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, NServiceBus.Persistence.SynchronizedStorageSession session, NServiceBus.Extensibility.ContextBag context)
+            where TSagaData : NServiceBus.IContainSagaData { }
+        public System.Threading.Tasks.Task Save(NServiceBus.IContainSagaData sagaData, NServiceBus.Sagas.SagaCorrelationProperty correlationProperty, NServiceBus.Persistence.SynchronizedStorageSession session, NServiceBus.Extensibility.ContextBag context) { }
+        public System.Threading.Tasks.Task Update(NServiceBus.IContainSagaData sagaData, NServiceBus.Persistence.SynchronizedStorageSession session, NServiceBus.Extensibility.ContextBag context) { }
+    }
+}
+namespace NServiceBus.Persistence.MongoDB.Subscriptions
+{
+    public class MongoDbSubscriptionStorage : NServiceBus.Features.Feature
+    {
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+    public class Subscription
+    {
+        public Subscription() { }
+        [MongoDB.Bson.Serialization.Attributes.BsonIdAttribute()]
+        public NServiceBus.Persistence.MongoDB.Subscriptions.SubscriptionKey Id { get; set; }
+        public System.Collections.Generic.List<string> Subscribers { get; set; }
+    }
+    public class SubscriptionKey
+    {
+        public SubscriptionKey() { }
+        public string TypeName { get; set; }
+        public string Version { get; set; }
+    }
+    public class SubscriptionPersister : NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions.IInitializableSubscriptionStorage, NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions.ISubscriptionStorage
+    {
+        public SubscriptionPersister(MongoDB.Driver.IMongoDatabase database) { }
+        public System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions.Subscriber>> GetSubscriberAddressesForMessage(System.Collections.Generic.IEnumerable<NServiceBus.Unicast.Subscriptions.MessageType> messageTypes, NServiceBus.Extensibility.ContextBag context) { }
+        public void Init() { }
+        public System.Threading.Tasks.Task Subscribe(NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions.Subscriber subscriber, NServiceBus.Unicast.Subscriptions.MessageType messageType, NServiceBus.Extensibility.ContextBag context) { }
+        public System.Threading.Tasks.Task Unsubscribe(NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions.Subscriber subscriber, NServiceBus.Unicast.Subscriptions.MessageType messageType, NServiceBus.Extensibility.ContextBag context) { }
+    }
+}
+namespace NServiceBus.Persistence.MongoDB.Timeout
+{
+    public class MongoDbTimeoutStorage : NServiceBus.Features.Feature
+    {
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+    public class TimeoutEntity
+    {
+        public TimeoutEntity() { }
+        public virtual string Destination { get; set; }
+        public virtual string Endpoint { get; set; }
+        [MongoDB.Bson.Serialization.Attributes.BsonDictionaryOptionsAttribute(MongoDB.Bson.Serialization.Options.DictionaryRepresentation.ArrayOfArrays)]
+        public virtual System.Collections.Generic.Dictionary<string, string> Headers { get; set; }
+        public virtual string Id { get; set; }
+        public System.Nullable<System.DateTime> LockDateTime { get; set; }
+        public string OwningTimeoutManager { get; set; }
+        public virtual System.Guid SagaId { get; set; }
+        public virtual byte[] State { get; set; }
+        public virtual System.DateTime Time { get; set; }
+        public NServiceBus.Timeout.Core.TimeoutData ToTimeoutData() { }
+    }
+    public class TimeoutPersister : NServiceBus.Timeout.Core.IPersistTimeouts, NServiceBus.Timeout.Core.IQueryTimeouts
+    {
+        public TimeoutPersister(string endpointName, MongoDB.Driver.IMongoDatabase database) { }
+        public System.Threading.Tasks.Task Add(NServiceBus.Timeout.Core.TimeoutData timeout, NServiceBus.Extensibility.ContextBag context) { }
+        public System.Threading.Tasks.Task<NServiceBus.Timeout.Core.TimeoutsChunk> GetNextChunk(System.DateTime startSlice) { }
+        public System.Threading.Tasks.Task<NServiceBus.Timeout.Core.TimeoutData> Peek(string timeoutId, NServiceBus.Extensibility.ContextBag context) { }
+        public System.Threading.Tasks.Task RemoveTimeoutBy(System.Guid sagaId, NServiceBus.Extensibility.ContextBag context) { }
+        public System.Threading.Tasks.Task<bool> TryRemove(string timeoutId, NServiceBus.Extensibility.ContextBag context) { }
+    }
+}

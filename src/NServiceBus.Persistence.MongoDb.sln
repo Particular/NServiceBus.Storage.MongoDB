@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb", "NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj", "{B34DDE97-B5F7-4FDE-8144-CE0A5C886947}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Persistence.MongoDb", "NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj", "{B34DDE97-B5F7-4FDE-8144-CE0A5C886947}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb.Tests", "NServiceBus.Persistence.MongoDb.Tests\NServiceBus.Persistence.MongoDb.Tests.csproj", "{3B39C103-9D66-490C-AF20-CDC976F80F90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Persistence.MongoDb.Tests", "NServiceBus.Persistence.MongoDb.Tests\NServiceBus.Persistence.MongoDb.Tests.csproj", "{3B39C103-9D66-490C-AF20-CDC976F80F90}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{204B96DD-7CDD-498E-B527-2CA09B17AD6D}"
+	ProjectSection(SolutionItems) = preProject
+		..\GitVersion.yml = ..\GitVersion.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

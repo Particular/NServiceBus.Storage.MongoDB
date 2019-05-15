@@ -34,7 +34,7 @@ namespace NServiceBus.Persistence.MongoDB.DataBus
 
         Task IDataBus.Start()
         {
-            return Task.CompletedTask;
+            return TaskEx.CompletedTask;
         }
     }
 }

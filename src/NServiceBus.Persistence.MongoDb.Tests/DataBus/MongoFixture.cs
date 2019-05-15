@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Persistence.MongoDb.Tests.DataBus
 {
     using System;
-    using System.Configuration;
     using System.Globalization;
     using System.IO;
     using System.Text;
@@ -21,7 +20,7 @@
         [SetUp]
         public void SetupContext()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = ConnectionStringProvider.GetConnectionString();
 
             _client = new MongoClient(connectionString);
             _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);

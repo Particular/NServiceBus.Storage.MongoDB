@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Persistence.MongoDb.Tests.SagaPersistence
 {
     using System;
-    using System.Configuration;
     using System.Globalization;
     using System.Threading.Tasks;
     using global::MongoDB.Bson;
@@ -29,7 +28,7 @@
             ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
             _camelCaseConventionSet = true;
 
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = ConnectionStringProvider.GetConnectionString();
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);

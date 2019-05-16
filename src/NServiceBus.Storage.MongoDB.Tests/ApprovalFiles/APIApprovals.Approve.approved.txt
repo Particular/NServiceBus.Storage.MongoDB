@@ -23,7 +23,6 @@ namespace NServiceBus
     }
     public class static MongoDBSettingsExtensions
     {
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> SetConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> cfg, string connectionString) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> SetConnectionStringName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> cfg, string connectionStringName) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> ConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string connectionString) { }
     }
 }

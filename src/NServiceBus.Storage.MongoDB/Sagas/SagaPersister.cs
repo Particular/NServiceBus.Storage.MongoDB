@@ -1,4 +1,6 @@
 ﻿using MongoDB.Bson.Serialization;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace NServiceBus.Storage.MongoDB
 {
@@ -13,13 +15,17 @@ namespace NServiceBus.Storage.MongoDB
     {        
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
-            DocumentVersionAttribute.SetPropertyValue(sagaData, 0);
-            await EnsureUniqueIndex(sagaData.GetType(), correlationProperty?.Name).ConfigureAwait(false);
+            var storageSession = (StorageSession)session;
 
-            await _repo.Insert(sagaData).ConfigureAwait(false);
+            var collection = storageSession.GetCollection(sagaData.GetType());
+
+            DocumentVersionAttribute.SetPropertyValue(sagaData, 0);
+            await EnsureUniqueIndex(sagaData.GetType(), correlationProperty?.Name, collection).ConfigureAwait(false);
+
+            await collection.InsertOneAsync(sagaData.ToBsonDocument()).ConfigureAwait(false);
         }
 
-        private Task EnsureUniqueIndex(Type sagaDataType, string propertyName)
+        private Task EnsureUniqueIndex(Type sagaDataType, string propertyName, IMongoCollection<BsonDocument> collection)
         {
             if (propertyName == null)
             {
@@ -29,7 +35,8 @@ namespace NServiceBus.Storage.MongoDB
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
             var uniqueFieldName = GetFieldName(classmap, propertyName);
 
-            return _repo.EnsureUniqueIndex(sagaDataType, uniqueFieldName);
+            return collection.Indexes.CreateOneAsync(
+                new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyName, 1)), new CreateIndexOptions() { Unique = true });
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)

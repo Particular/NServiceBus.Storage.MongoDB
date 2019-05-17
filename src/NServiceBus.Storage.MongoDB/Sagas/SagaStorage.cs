@@ -11,8 +11,7 @@ namespace NServiceBus.Storage.MongoDB
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.InstancePerCall);
-            context.Container.ConfigureComponent<SagaRepository>(DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent<SagaPersister>(DependencyLifecycle.SingleInstance);
         }
     }
 }

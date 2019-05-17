@@ -10,14 +10,7 @@ namespace NServiceBus.Storage.MongoDB
     using NServiceBus.Sagas;
 
     class SagaPersister : ISagaPersister
-    {
-        private readonly SagaRepository _repo;
-
-        public SagaPersister(SagaRepository repo)
-        {
-            _repo = repo;
-        }
-
+    {        
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             DocumentVersionAttribute.SetPropertyValue(sagaData, 0);

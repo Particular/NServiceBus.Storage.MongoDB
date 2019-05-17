@@ -1,10 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using MongoBson = MongoDB.Bson;
 using MongoDB.Bson;
 using MongoDB.Driver;
-
 namespace NServiceBus.Persistence.MongoDB.Database
 {
+    using System;
+    using System.Threading.Tasks;
+
     public abstract class BaseNsbMongoDbRepository
     {
         protected IMongoDatabase Database { get; private set; }
@@ -42,7 +43,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
                 return default(T);
             }
 
-            return global::MongoDB.Bson.Serialization.BsonSerializer.Deserialize<T>(doc);
+            return MongoBson.Serialization.BsonSerializer.Deserialize<T>(doc);
         }
     }
 }

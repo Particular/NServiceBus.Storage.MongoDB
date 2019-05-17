@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace NServiceBus.Persistence.MongoDB.Gateway
+﻿namespace NServiceBus.Persistence.MongoDB.Gateway
 {
+    using System;
+
     public class GatewayMessage
     {
         /// <summary>

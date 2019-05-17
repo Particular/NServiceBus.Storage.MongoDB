@@ -1,11 +1,12 @@
-﻿using System;
-using System.Configuration;
-using MongoDB.Driver;
-using NServiceBus.Features;
-using NServiceBus.ObjectBuilder;
+﻿using MongoDB.Driver;
 
 namespace NServiceBus.Persistence.MongoDB.Database
 {
+    using System;
+    using System.Configuration;
+    using NServiceBus.Features;
+    using NServiceBus.ObjectBuilder;
+
     public static class MongoPersistenceConstants
     {
         public const string SubscriptionCollectionName = "subscriptions";
@@ -17,7 +18,6 @@ namespace NServiceBus.Persistence.MongoDB.Database
     {
         public const string ConnectionStringName = "MongoDbConnectionStringName";
         public const string ConnectionString = "MongoDbConnectionString";
-        
     }
 
     public static class MongoPersistenceConnectionStringNames
@@ -25,7 +25,6 @@ namespace NServiceBus.Persistence.MongoDB.Database
         public const string DefaultConnectionStringName = "NServiceBus/Persistence/MongoDB";
     }
 
-    
     public class MongoDbStorage : Feature
     {
         internal MongoDbStorage()
@@ -59,10 +58,9 @@ namespace NServiceBus.Persistence.MongoDB.Database
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (database == null) throw new ArgumentNullException(nameof(database));
-            
+
             config.RegisterSingleton(database);
-            
-            
+
             return config;
         }
 
@@ -109,7 +107,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
             {
                 throw new ConfigurationErrorsException("Cannot configure Mongo Persister. No connection string was found");
             }
-            
+
             return MongoPersistenceWithConectionString(config, connectionString);
         }
     }

@@ -1,9 +1,10 @@
 ﻿using MongoDB.Driver;
-using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Database;
 
 namespace NServiceBus.Persistence.MongoDB.Timeout
 {
+    using NServiceBus.Features;
+    using NServiceBus.Persistence.MongoDB.Database;
+
     public class MongoDbTimeoutStorage : Feature
     {
         internal MongoDbTimeoutStorage()
@@ -20,7 +21,6 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             context.Container.ConfigureComponent(b =>
             {
                 return new TimeoutPersister(context.Settings.EndpointName().ToString(), b.Build<IMongoDatabase>());
-                
             }, DependencyLifecycle.InstancePerCall);
         }
     }

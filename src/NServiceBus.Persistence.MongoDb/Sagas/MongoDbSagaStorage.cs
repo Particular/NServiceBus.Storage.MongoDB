@@ -1,13 +1,13 @@
-using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Database;
-
 namespace NServiceBus.Persistence.MongoDB.Sagas
 {
+    using NServiceBus.Features;
+    using NServiceBus.Persistence.MongoDB.Database;
+
     public class MongoDbSagaStorage : Feature
     {
         internal MongoDbSagaStorage()
         {
-            DependsOn<Features.Sagas>();
+            DependsOn<Sagas>();
             DependsOn<MongoDbStorage>();
         }
 

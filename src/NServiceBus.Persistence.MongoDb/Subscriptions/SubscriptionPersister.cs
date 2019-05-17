@@ -1,19 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Persistence.MongoDB.Database;
-using NServiceBus.Unicast.Subscriptions;
-using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+﻿using MongoDB.Driver;
 
 namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
-    public class SubscriptionPersister : ISubscriptionStorage, IInitializableSubscriptionStorage
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
+    using NServiceBus.Persistence.MongoDB.Database;
+    using NServiceBus.Unicast.Subscriptions;
+    using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
+
+    public class SubscriptionPersister : IInitializableSubscriptionStorage
     {
         private readonly IMongoCollection<Subscription> _subscriptions;
-        
+
         public SubscriptionPersister(IMongoDatabase database)
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
@@ -28,7 +29,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var key = GetMessageTypeKey(messageType);
-            
+
             var update = new UpdateDefinitionBuilder<Subscription>().AddToSet(s => s.Subscribers, SubscriberToString(subscriber));
 
             return _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() { IsUpsert = true });
@@ -47,7 +48,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         public Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var key = GetMessageTypeKey(messageType);
-            
+
             var subscriberName = SubscriberToString(subscriber);
 
             var update = new UpdateDefinitionBuilder<Subscription>().Pull(s => s.Subscribers, subscriberName);
@@ -60,7 +61,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
             var keys = GetMessageTypeKeys(messageTypes);
 
             var subscriptions = await _subscriptions.Find(s => keys.Contains(s.Id)).ToListAsync().ConfigureAwait(false);
-            
+
             return subscriptions
                 .SelectMany(s => s.Subscribers)
                 .Distinct()

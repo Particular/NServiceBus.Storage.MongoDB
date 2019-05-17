@@ -1,12 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
-using NServiceBus.Extensibility;
-using NServiceBus.Sagas;
+﻿using MongoDB.Bson.Serialization;
 
 namespace NServiceBus.Persistence.MongoDB.Sagas
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using NServiceBus.Extensibility;
+    using NServiceBus.Sagas;
+
     public class SagaPersister : ISagaPersister
     {
         private readonly MongoDbSagaRepository _repo;
@@ -30,7 +31,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             {
                 return Task.FromResult(0);
             }
-            
+
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
             var uniqueFieldName = GetFieldName(classmap, propertyName);
 

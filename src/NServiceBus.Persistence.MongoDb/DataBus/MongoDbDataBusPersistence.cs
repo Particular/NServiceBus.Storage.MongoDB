@@ -1,14 +1,14 @@
-﻿using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Database;
-
-namespace NServiceBus.Persistence.MongoDB.DataBus
+﻿namespace NServiceBus.Persistence.MongoDB.DataBus
 {
+    using NServiceBus.Features;
+    using NServiceBus.Persistence.MongoDB.Database;
+
     public class MongoDbDataBusPersistence : Feature
     {
         public MongoDbDataBusPersistence()
         {
             DependsOn<MongoDbStorage>();
-            DependsOn<Features.DataBus>();
+            DependsOn<DataBus>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

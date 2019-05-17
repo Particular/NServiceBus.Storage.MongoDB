@@ -74,17 +74,29 @@ namespace NServiceBus.Storage.MongoDB
             }
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
+        public async Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
-            return _repo.FindById<TSagaData>(sagaId);
+            var storageSession = (StorageSession)session;
+
+            var collection = storageSession.GetCollection(typeof(TSagaData));
+
+            var doc = await collection.Find(new BsonDocument("_id", sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
+
+            return storageSession.Deserialize<TSagaData>(doc);
         }
 
-        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
+        public async Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
+            var storageSession = (StorageSession)session;
+
+            var collection = storageSession.GetCollection(typeof(TSagaData));
+
             var classmap = BsonClassMap.LookupClassMap(typeof(TSagaData));
             var propertyFieldName = GetFieldName(classmap, propertyName);
 
-            return _repo.FindByFieldName<TSagaData>(propertyFieldName, propertyValue);
+            var doc = await collection.Find(new BsonDocument(propertyFieldName, BsonValue.Create(propertyValue))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
+
+            return storageSession.Deserialize<TSagaData>(doc);
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)

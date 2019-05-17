@@ -101,7 +101,11 @@ namespace NServiceBus.Storage.MongoDB
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            return _repo.Remove(sagaData);
+            var storageSession = (StorageSession)session;
+
+            var collection = storageSession.GetCollection(sagaData.GetType());
+
+            return collection.DeleteOneAsync(new BsonDocument("_id", sagaData.Id));
         }
 
         private string GetFieldName(BsonClassMap classMap, string property)

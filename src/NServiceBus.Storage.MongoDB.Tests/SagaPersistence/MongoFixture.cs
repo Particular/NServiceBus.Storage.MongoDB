@@ -6,6 +6,7 @@
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization.Conventions;
     using global::MongoDB.Driver;
+    using NServiceBus.Persistence;
     using NServiceBus.Sagas;
     using NUnit.Framework;
 
@@ -13,7 +14,7 @@
     public class MongoFixture
     {
         private IMongoDatabase _database;
-        private SagaRepository _repo;
+        private CompletableSynchronizedStorageSession _session;
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
         private bool _camelCaseConventionSet;
@@ -31,15 +32,15 @@
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _repo = new SagaRepository(_database);
+            _session = new StorageSession(_database);
 
-            _sagaPersister = new SagaPersister(_repo);
+            _sagaPersister = new SagaPersister();
         }
 
         [TearDown]
         public void TeardownContext() => _client.DropDatabase(_databaseName);
 
-        protected Task SaveSaga<T>(T saga) where T : class, IContainSagaData
+        protected async Task SaveSaga<T>(T saga) where T : class, IContainSagaData
         {
             SagaCorrelationProperty correlationProperty = null;
 
@@ -48,19 +49,19 @@
                 correlationProperty = new SagaCorrelationProperty("UniqueString", String.Empty);
             }
 
-            return _sagaPersister.Save(saga, correlationProperty, null, null);
+            await _sagaPersister.Save(saga, correlationProperty, _session, null);
         }
 
-        protected Task<T> LoadSaga<T>(Guid id) where T : class, IContainSagaData
+        protected async Task<T> LoadSaga<T>(Guid id) where T : class, IContainSagaData
         {
-            return _sagaPersister.Get<T>(id, null, null);
+            return await _sagaPersister.Get<T>(id, _session, null);
         }
 
         protected async Task CompleteSaga<T>(Guid sagaId) where T : class, IContainSagaData
         {
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga);
-            await _sagaPersister.Complete(saga, null, null).ConfigureAwait(false);
+            await _sagaPersister.Complete(saga, _session, null).ConfigureAwait(false);
         }
 
         protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : class, IContainSagaData
@@ -68,7 +69,7 @@
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga, "Could not update saga. Saga not found");
             update(saga);
-            await _sagaPersister.Update(saga, null, null).ConfigureAwait(false);
+            await _sagaPersister.Update(saga, _session, null).ConfigureAwait(false);
         }
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData

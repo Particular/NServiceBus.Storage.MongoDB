@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NServiceBus.Persistence;
 using System;
@@ -14,6 +15,16 @@ namespace NServiceBus.Storage.MongoDB
         }
 
         public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(GetCollectionName(type)).WithReadPreference(ReadPreference.Primary).WithWriteConcern(WriteConcern.WMajority);
+
+        public T Deserialize<T>(BsonDocument doc)
+        {
+            if (doc == null)
+            {
+                return default(T);
+            }
+
+            return BsonSerializer.Deserialize<T>(doc);
+        }
 
         public Task CompleteAsync()
         {

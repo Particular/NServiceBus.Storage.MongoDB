@@ -39,14 +39,39 @@ namespace NServiceBus.Storage.MongoDB
                 new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyName, 1)), new CreateIndexOptions() { Unique = true });
         }
 
-        public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
+            var storageSession = (StorageSession)session;
+
             var versionProperty = DocumentVersionAttribute.GetProperty(sagaData);
 
             var classmap = BsonClassMap.LookupClassMap(sagaData.GetType());
             var versionFieldName = GetFieldName(classmap, versionProperty.Key);
+            var version = versionProperty.Value;
+            
+            var collection = storageSession.GetCollection(sagaData.GetType());
 
-            return _repo.Update(sagaData, versionFieldName, versionProperty.Value);
+            var fbuilder = Builders<BsonDocument>.Filter;
+            var filter = fbuilder.Eq("_id", sagaData.Id) & fbuilder.Eq(versionFieldName, version);
+
+            var bsonDoc = sagaData.ToBsonDocument();
+            var ubuilder = Builders<BsonDocument>.Update;
+            var update = ubuilder.Inc(versionFieldName, 1);
+
+            foreach (var field in bsonDoc.Where(field => field.Name != versionFieldName && field.Name != "_id"))
+            {
+                update = update.Set(field.Name, field.Value);
+            }
+
+            var modifyResult = await collection.FindOneAndUpdateAsync(
+                filter,
+                update,
+                new FindOneAndUpdateOptions<BsonDocument> { IsUpsert = false, ReturnDocument = ReturnDocument.After }).ConfigureAwait(false);
+
+            if (modifyResult == null)
+            {
+                throw new MongoDBSagaConcurrentUpdateException(version);
+            }
         }
 
         public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData

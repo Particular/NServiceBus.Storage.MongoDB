@@ -7,7 +7,6 @@ namespace NServiceBus.Storage.MongoDB
         SagaStorage()
         {
             DependsOn<Sagas>();
-            DependsOn<MongoDBStorage>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

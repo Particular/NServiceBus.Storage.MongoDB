@@ -3,26 +3,22 @@
 namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using NServiceBus.Features;
     using NServiceBus.ObjectBuilder;
 
-    static class ConfigureMongoDBPersistence
+    class ConfigureMongoDBPersistence : Feature
     {
-        public static IConfigureComponents MongoDBPersistence(this IConfigureComponents config, Func<string> getConnectionString)
+        protected override void Setup(FeatureConfigurationContext context)
         {
-            var connectionString = getConnectionString();
+            context.Settings.TryGet(SettingsKeys.ConnectionString, out string connectionString);
 
-            if (String.IsNullOrWhiteSpace(connectionString))
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new Exception("Cannot configure Mongo Persister. No connection string was found");
             }
 
-            return MongoPersistenceWithConectionString(config, connectionString);
-        }
-
-        static IConfigureComponents MongoPersistenceWithConectionString(IConfigureComponents config, string connectionString)
-        {
             var databaseName = MongoUrl.Create(connectionString).DatabaseName;
-            if (String.IsNullOrWhiteSpace(databaseName))
+            if (string.IsNullOrWhiteSpace(databaseName))
             {
                 throw new Exception("Cannot configure Mongo Persister. Database name not present in the connection string.");
             }
@@ -30,17 +26,12 @@ namespace NServiceBus.Storage.MongoDB
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
 
-            return MongoDBPersistence(config, database);
-        }
+            if (database == null)
+            {
+                throw new Exception(nameof(database));
+            }
 
-        static IConfigureComponents MongoDBPersistence(this IConfigureComponents config, IMongoDatabase database)
-        {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            if (database == null) throw new ArgumentNullException(nameof(database));
-
-            config.RegisterSingleton(database);
-
-            return config;
+            context.Container.RegisterSingleton(database);
         }
     }
 }

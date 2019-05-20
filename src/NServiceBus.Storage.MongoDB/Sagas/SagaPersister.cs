@@ -87,9 +87,11 @@ namespace NServiceBus.Storage.MongoDB
                 var version = doc.GetValue(versionFieldName);
                 doc.Remove(versionFieldName);
                 storageSession.StoreVersion(typeof(TSagaData), version);
+
+                return BsonSerializer.Deserialize<TSagaData>(doc);
             }
 
-            return storageSession.Deserialize<TSagaData>(doc);
+            return default;
         }
 
         public async Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
@@ -107,9 +109,11 @@ namespace NServiceBus.Storage.MongoDB
                 var version = doc.GetValue(versionFieldName);
                 doc.Remove(versionFieldName);
                 storageSession.StoreVersion(typeof(TSagaData), version);
+
+                return BsonSerializer.Deserialize<TSagaData>(doc);
             }
 
-            return storageSession.Deserialize<TSagaData>(doc);
+            return default;
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)

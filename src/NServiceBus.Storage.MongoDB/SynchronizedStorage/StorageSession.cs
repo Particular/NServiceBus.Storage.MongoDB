@@ -1,10 +1,9 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using NServiceBus.Extensibility;
 using NServiceBus.Persistence;
-using System;
-using System.Threading.Tasks;
 
 namespace NServiceBus.Storage.MongoDB
 {
@@ -21,16 +20,6 @@ namespace NServiceBus.Storage.MongoDB
         public void StoreVersion(Type type, BsonValue version) => contextBag.Set(type.FullName, version);
 
         public BsonValue RetrieveVersion(Type type) => contextBag.Get<BsonValue>(type.FullName);
-
-        public T Deserialize<T>(BsonDocument doc)
-        {
-            if (doc == null)
-            {
-                return default(T);
-            }
-
-            return BsonSerializer.Deserialize<T>(doc);
-        }
 
         public Task CompleteAsync()
         {

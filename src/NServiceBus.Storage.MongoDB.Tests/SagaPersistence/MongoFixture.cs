@@ -32,7 +32,7 @@
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _session = new StorageSession(_database, new ContextBag());
+            _session = new StorageSession(_database, new ContextBag(), type => type.Name.ToLower());
 
             _sagaPersister = new SagaPersister(versionFieldName);
         }

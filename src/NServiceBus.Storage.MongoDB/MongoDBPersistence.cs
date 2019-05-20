@@ -11,7 +11,7 @@
             Defaults(s =>
             {
                 s.EnableFeatureByDefault<ConfigureMongoDBPersistence>();
-                s.EnableFeatureByDefault<SynchronizedStorageFeature>();                
+                s.EnableFeatureByDefault<SynchronizedStorageFeature>();
             });
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());

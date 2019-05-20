@@ -1,4 +1,6 @@
-﻿using NServiceBus.Features;
+﻿using System;
+using MongoDB.Driver;
+using NServiceBus.Features;
 
 namespace NServiceBus.Storage.MongoDB
 {
@@ -11,7 +13,12 @@ namespace NServiceBus.Storage.MongoDB
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<SynchronizedStorage>(DependencyLifecycle.SingleInstance);
+            if (!context.Settings.TryGet(SettingsKeys.CollectionNamingScheme, out Func<Type, string> collectionNamingScheme))
+            {
+                collectionNamingScheme = type => type.Name.ToLower();
+            }
+
+            context.Container.ConfigureComponent(builder => new SynchronizedStorage(builder.Build<IMongoDatabase>(), collectionNamingScheme), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<SynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
         }
     }

@@ -9,13 +9,14 @@ namespace NServiceBus.Storage.MongoDB
 {
     class StorageSession : CompletableSynchronizedStorageSession
     {
-        public StorageSession(IMongoDatabase database, ContextBag contextBag)
+        public StorageSession(IMongoDatabase database, ContextBag contextBag, Func<Type, string> collectionNamingScheme)
         {
             this.database = database;
             this.contextBag = contextBag;
+            this.collectionNamingScheme = collectionNamingScheme;
         }
 
-        public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(GetCollectionName(type)).WithReadPreference(ReadPreference.Primary).WithWriteConcern(WriteConcern.WMajority);
+        public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingScheme(type)).WithReadPreference(ReadPreference.Primary).WithWriteConcern(WriteConcern.WMajority);
 
         public void StoreVersion(Type type, BsonValue version) => contextBag.Set(type.FullName, version);
 
@@ -31,12 +32,8 @@ namespace NServiceBus.Storage.MongoDB
 
         }
 
-        protected string GetCollectionName(Type entityType)
-        {
-            return entityType.Name.ToLower();
-        }
-
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
+        readonly Func<Type, string> collectionNamingScheme;
     }
 }

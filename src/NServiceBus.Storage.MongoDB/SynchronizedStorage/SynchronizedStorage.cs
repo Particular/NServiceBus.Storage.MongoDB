@@ -14,7 +14,7 @@ namespace NServiceBus.Storage.MongoDB
 
         public Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
         {
-            return Task.FromResult((CompletableSynchronizedStorageSession)new StorageSession(database));
+            return Task.FromResult((CompletableSynchronizedStorageSession)new StorageSession(database, contextBag));
         }
 
         readonly IMongoDatabase database;

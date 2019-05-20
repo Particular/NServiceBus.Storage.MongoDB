@@ -33,9 +33,6 @@
         {
             return base.GetHashCode();
         }
-
-        [DocumentVersion]
-        public int Version { get; set; }
     }
     public class PolymorpicProperty : PolymorpicPropertyBase
     {
@@ -105,9 +102,6 @@
         public virtual string UniqueString { get; set; }
 
         public string NonUniqueString { get; set; }
-
-        [DocumentVersion]
-        public int Version { get; set; }
     }
 
     [BsonIgnoreExtraElements]
@@ -122,8 +116,5 @@
         public virtual string UniqueString { get; set; }
 
         public string NonUniqueString { get; set; }
-
-        [DocumentVersion]
-        public int Version { get; set; }
     }
 }

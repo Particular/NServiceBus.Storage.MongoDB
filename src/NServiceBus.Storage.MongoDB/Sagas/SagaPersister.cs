@@ -16,13 +16,14 @@ namespace NServiceBus.Storage.MongoDB
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
-
             var collection = storageSession.GetCollection(sagaData.GetType());
 
-            DocumentVersionAttribute.SetPropertyValue(sagaData, 0);
             await EnsureUniqueIndex(sagaData.GetType(), correlationProperty?.Name, collection).ConfigureAwait(false);
 
-            await collection.InsertOneAsync(sagaData.ToBsonDocument()).ConfigureAwait(false);
+            var document = sagaData.ToBsonDocument();
+            document.Add("_version", 0);
+
+            await collection.InsertOneAsync(document).ConfigureAwait(false);
         }
 
         private Task EnsureUniqueIndex(Type sagaDataType, string propertyName, IMongoCollection<BsonDocument> collection)
@@ -42,14 +43,10 @@ namespace NServiceBus.Storage.MongoDB
         public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
-
-            var versionProperty = DocumentVersionAttribute.GetProperty(sagaData);
-
-            var classmap = BsonClassMap.LookupClassMap(sagaData.GetType());
-            var versionFieldName = GetFieldName(classmap, versionProperty.Key);
-            var version = versionProperty.Value;
-
             var collection = storageSession.GetCollection(sagaData.GetType());
+
+            var version = storageSession.RetrieveVersion(sagaData.GetType());
+            var versionFieldName = "_version";
 
             var fbuilder = Builders<BsonDocument>.Filter;
             var filter = fbuilder.Eq("_id", sagaData.Id) & fbuilder.Eq(versionFieldName, version);
@@ -77,10 +74,16 @@ namespace NServiceBus.Storage.MongoDB
         public async Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
             var storageSession = (StorageSession)session;
-
             var collection = storageSession.GetCollection(typeof(TSagaData));
 
             var doc = await collection.Find(new BsonDocument("_id", sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
+
+            if (doc != null)
+            {
+                var version = doc.GetValue("_version");
+                doc.Remove("_version");
+                storageSession.StoreVersion(typeof(TSagaData), version);
+            }
 
             return storageSession.Deserialize<TSagaData>(doc);
         }
@@ -88,7 +91,6 @@ namespace NServiceBus.Storage.MongoDB
         public async Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
             var storageSession = (StorageSession)session;
-
             var collection = storageSession.GetCollection(typeof(TSagaData));
 
             var classmap = BsonClassMap.LookupClassMap(typeof(TSagaData));
@@ -96,13 +98,19 @@ namespace NServiceBus.Storage.MongoDB
 
             var doc = await collection.Find(new BsonDocument(propertyFieldName, BsonValue.Create(propertyValue))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
 
+            if (doc != null)
+            {
+                var version = doc.GetValue("_version");
+                doc.Remove("_version");
+                storageSession.StoreVersion(typeof(TSagaData), version);
+            }
+
             return storageSession.Deserialize<TSagaData>(doc);
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
-
             var collection = storageSession.GetCollection(sagaData.GetType());
 
             return collection.DeleteOneAsync(new BsonDocument("_id", sagaData.Id));

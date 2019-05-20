@@ -6,6 +6,7 @@
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization.Conventions;
     using global::MongoDB.Driver;
+    using NServiceBus.Extensibility;
     using NServiceBus.Persistence;
     using NServiceBus.Sagas;
     using NUnit.Framework;
@@ -17,7 +18,6 @@
         private CompletableSynchronizedStorageSession _session;
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
-        private bool _camelCaseConventionSet;
         private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
 
         [SetUp]
@@ -26,13 +26,12 @@
 
             var camelCasePack = new ConventionPack { new CamelCaseElementNameConvention() };
             ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
-            _camelCaseConventionSet = true;
 
             var connectionString = ConnectionStringProvider.GetConnectionString();
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _session = new StorageSession(_database);
+            _session = new StorageSession(_database, new ContextBag());
 
             _sagaPersister = new SagaPersister();
         }
@@ -74,7 +73,7 @@
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData
         {
-            var versionName = _camelCaseConventionSet ? "version" : "Version";
+            var versionName = "_version";
             var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());
 
             collection.UpdateOne(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(

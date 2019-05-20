@@ -42,8 +42,9 @@ namespace NServiceBus.Storage.MongoDB
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
             var uniqueFieldName = GetFieldName(classmap, propertyName);
 
-            return collection.Indexes.CreateOneAsync(
-                new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() { Unique = true });
+            var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() { Unique = true });
+
+            return collection.Indexes.CreateOneAsync(indexModel);
         }
 
         public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)

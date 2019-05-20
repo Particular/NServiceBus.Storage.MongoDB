@@ -12,6 +12,7 @@ namespace NServiceBus.Storage.MongoDB
         protected override void Setup(FeatureConfigurationContext context)
         {
             context.Container.ConfigureComponent<SynchronizedStorage>(DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent<SynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
         }
     }
 }

@@ -19,6 +19,7 @@
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
         private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+        private readonly string versionFieldName = "_version";
 
         [SetUp]
         public virtual void SetupContext()
@@ -33,7 +34,7 @@
             _database = _client.GetDatabase(_databaseName);
             _session = new StorageSession(_database, new ContextBag());
 
-            _sagaPersister = new SagaPersister();
+            _sagaPersister = new SagaPersister(versionFieldName);
         }
 
         [TearDown]
@@ -73,11 +74,10 @@
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData
         {
-            var versionName = "_version";
             var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());
 
             collection.UpdateOne(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
-                new BsonDocument("$set", new BsonDocument(versionName, version))));
+                new BsonDocument("$set", new BsonDocument(versionFieldName, version))));
         }
     }
 }

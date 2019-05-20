@@ -10,5 +10,11 @@
             persistenceExtensions.GetSettings().Set(SettingsKeys.ConnectionString, connectionString);
             return persistenceExtensions;
         }
+
+        public static PersistenceExtensions<MongoDBPersistence> VersionFieldName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string versionFieldnName)
+        {
+            persistenceExtensions.GetSettings().Set(SettingsKeys.ConnectionString, versionFieldnName);
+            return persistenceExtensions;
+        }
     }
 }

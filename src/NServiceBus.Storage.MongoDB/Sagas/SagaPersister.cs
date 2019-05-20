@@ -13,6 +13,11 @@ namespace NServiceBus.Storage.MongoDB
 
     class SagaPersister : ISagaPersister
     {
+        public SagaPersister(string versionFieldName)
+        {
+            this.versionFieldName = versionFieldName;
+        }
+
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
@@ -21,7 +26,7 @@ namespace NServiceBus.Storage.MongoDB
             await EnsureUniqueIndex(sagaData.GetType(), correlationProperty?.Name, collection).ConfigureAwait(false);
 
             var document = sagaData.ToBsonDocument();
-            document.Add("_version", 0);
+            document.Add(versionFieldName, 0);
 
             await collection.InsertOneAsync(document).ConfigureAwait(false);
         }
@@ -46,7 +51,6 @@ namespace NServiceBus.Storage.MongoDB
             var collection = storageSession.GetCollection(sagaData.GetType());
 
             var version = storageSession.RetrieveVersion(sagaData.GetType());
-            var versionFieldName = "_version";
 
             var fbuilder = Builders<BsonDocument>.Filter;
             var filter = fbuilder.Eq("_id", sagaData.Id) & fbuilder.Eq(versionFieldName, version);
@@ -80,8 +84,8 @@ namespace NServiceBus.Storage.MongoDB
 
             if (doc != null)
             {
-                var version = doc.GetValue("_version");
-                doc.Remove("_version");
+                var version = doc.GetValue(versionFieldName);
+                doc.Remove(versionFieldName);
                 storageSession.StoreVersion(typeof(TSagaData), version);
             }
 
@@ -100,8 +104,8 @@ namespace NServiceBus.Storage.MongoDB
 
             if (doc != null)
             {
-                var version = doc.GetValue("_version");
-                doc.Remove("_version");
+                var version = doc.GetValue(versionFieldName);
+                doc.Remove(versionFieldName);
                 storageSession.StoreVersion(typeof(TSagaData), version);
             }
 
@@ -121,5 +125,7 @@ namespace NServiceBus.Storage.MongoDB
             var element = classMap.AllMemberMaps.First(m => m.MemberName == property);
             return element.ElementName;
         }
+
+        readonly string versionFieldName;
     }
 }

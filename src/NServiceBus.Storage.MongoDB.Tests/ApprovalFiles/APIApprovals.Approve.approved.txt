@@ -8,5 +8,6 @@ namespace NServiceBus
     public class static MongoDBSettingsExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> ConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string connectionString) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> VersionFieldName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string versionFieldnName) { }
     }
 }

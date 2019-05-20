@@ -12,7 +12,7 @@ namespace NServiceBus.Storage.MongoDB
     using NServiceBus.Sagas;
 
     class SagaPersister : ISagaPersister
-    {        
+    {
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
@@ -48,7 +48,7 @@ namespace NServiceBus.Storage.MongoDB
             var classmap = BsonClassMap.LookupClassMap(sagaData.GetType());
             var versionFieldName = GetFieldName(classmap, versionProperty.Key);
             var version = versionProperty.Value;
-            
+
             var collection = storageSession.GetCollection(sagaData.GetType());
 
             var fbuilder = Builders<BsonDocument>.Filter;
@@ -70,7 +70,7 @@ namespace NServiceBus.Storage.MongoDB
 
             if (modifyResult == null)
             {
-                throw new MongoDBSagaConcurrentUpdateException(version);
+                throw new Exception("Concurrency"); //TODO real exception message
             }
         }
 

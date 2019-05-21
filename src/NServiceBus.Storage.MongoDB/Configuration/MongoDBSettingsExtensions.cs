@@ -14,13 +14,13 @@
 
         public static PersistenceExtensions<MongoDBPersistence> VersionFieldName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string versionFieldnName)
         {
-            persistenceExtensions.GetSettings().Set(SettingsKeys.ConnectionString, versionFieldnName);
+            persistenceExtensions.GetSettings().Set(SettingsKeys.VersionFieldName, versionFieldnName);
             return persistenceExtensions;
         }
 
         public static PersistenceExtensions<MongoDBPersistence> CollectionNamingScheme(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, Func<Type, string> collectionNamingScheme)
         {
-            persistenceExtensions.GetSettings().Set(SettingsKeys.ConnectionString, collectionNamingScheme);
+            persistenceExtensions.GetSettings().Set(SettingsKeys.CollectionNamingScheme, collectionNamingScheme);
             return persistenceExtensions;
         }
     }

@@ -88,7 +88,10 @@ namespace NServiceBus.Storage.MongoDB
 
             if (doc != null)
             {
-                var version = doc.GetValue(versionFieldName);
+                var versionElement = doc.Single(e => e.Name.Equals(versionFieldName, StringComparison.InvariantCultureIgnoreCase));
+
+                var version = versionElement.Value;
+
                 doc.Remove(versionFieldName);
                 storageSession.StoreVersion(sagaDataType, version);
 

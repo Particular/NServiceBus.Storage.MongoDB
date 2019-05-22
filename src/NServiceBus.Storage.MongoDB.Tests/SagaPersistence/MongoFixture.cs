@@ -20,6 +20,7 @@
         private MongoClient _client;
         private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
         private string versionFieldName = "_version";
+        Func<Type, string> collectionNameConvention = t => t.Name.ToLower();
 
         [SetUp]
         public virtual void SetupContext()
@@ -32,8 +33,7 @@
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _session = new StorageSession(_database, new ContextBag(), type => type.Name.ToLower());
-
+            _session = new StorageSession(_database, new ContextBag(), collectionNameConvention);
             _sagaPersister = new SagaPersister(versionFieldName);
         }
 
@@ -44,6 +44,12 @@
         {
             this.versionFieldName = versionFieldName;
             _sagaPersister = new SagaPersister(versionFieldName);
+        }
+
+        protected void SetCollectionNamingConvention(Func<Type, string> convention)
+        {
+            collectionNameConvention = convention;
+            _session = new StorageSession(_database, new ContextBag(), convention);
         }
 
         protected Task EnsureUniqueIndex(IMongoCollection<BsonDocument> collection, IContainSagaData saga, string correlationPropertyName)
@@ -85,7 +91,7 @@
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData
         {
-            var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());
+            var collection = _database.GetCollection<BsonDocument>(collectionNameConvention(typeof(T)));
 
             collection.UpdateOne(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
                 new BsonDocument("$set", new BsonDocument(versionFieldName, version))));

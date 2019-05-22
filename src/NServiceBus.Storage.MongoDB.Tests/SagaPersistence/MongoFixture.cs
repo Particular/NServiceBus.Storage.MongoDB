@@ -52,6 +52,22 @@
             _session = new StorageSession(_database, new ContextBag(), convention);
         }
 
+        protected Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName) where TSagaData : IContainSagaData
+        {
+            return PrepareSagaCollection(data, correlationPropertyName, d => d.ToBsonDocument());     
+        }
+
+        protected async Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName, Func<TSagaData, BsonDocument> convertSagaData) where TSagaData: IContainSagaData
+        {
+            var document = convertSagaData(data);
+
+            var collection = _database.GetCollection<BsonDocument>(collectionNameConvention(typeof(TSagaData)));
+
+            await EnsureUniqueIndex(collection, data, correlationPropertyName);
+
+            await collection.InsertOneAsync(document);
+        }
+
         protected Task EnsureUniqueIndex(IMongoCollection<BsonDocument> collection, IContainSagaData saga, string correlationPropertyName)
         {
             return _sagaPersister.EnsureUniqueIndex(saga.GetType(), correlationPropertyName, collection);

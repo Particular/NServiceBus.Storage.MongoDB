@@ -16,10 +16,10 @@
     {
         private IMongoDatabase _database;
         private CompletableSynchronizedStorageSession _session;
-        private ISagaPersister _sagaPersister;
+        private SagaPersister _sagaPersister;
         private MongoClient _client;
         private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
-        private readonly string versionFieldName = "_version";
+        private string versionFieldName = "_version";
 
         [SetUp]
         public virtual void SetupContext()
@@ -39,6 +39,12 @@
 
         [TearDown]
         public void TeardownContext() => _client.DropDatabase(_databaseName);
+
+        protected void SetVersionFieldName(string versionFieldName)
+        {
+            this.versionFieldName = versionFieldName;
+            _sagaPersister = new SagaPersister(versionFieldName);
+        }
 
         protected Task EnsureUniqueIndex(IMongoCollection<BsonDocument> collection, IContainSagaData saga, string correlationPropertyName)
         {

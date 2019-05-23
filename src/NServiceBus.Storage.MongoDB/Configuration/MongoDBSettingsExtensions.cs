@@ -33,6 +33,9 @@
         /// <returns></returns>
         public static PersistenceExtensions<MongoDBPersistence> VersionFieldName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string versionFieldName)
         {
+            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+            Guard.AgainstNullAndEmpty(nameof(versionFieldName), versionFieldName);
+
             persistenceExtensions.GetSettings().Set(SettingsKeys.VersionFieldName, versionFieldName);
             return persistenceExtensions;
         }

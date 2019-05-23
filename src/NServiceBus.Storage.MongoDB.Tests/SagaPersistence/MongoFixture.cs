@@ -19,7 +19,7 @@
         private IMongoDatabase _database;
         private CompletableSynchronizedStorageSession _session;
         private SagaPersister _sagaPersister;
-        private MongoClient _client;
+
         private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
         private string versionFieldName = "_version";
         Func<Type, string> collectionNameConvention = t => t.Name.ToLower();
@@ -31,19 +31,16 @@
             var camelCasePack = new ConventionPack { new CamelCaseElementNameConvention() };
             ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
 
-            var connectionString = ConnectionStringProvider.GetConnectionString();
+            _database = ClientProvider.Client.GetDatabase(_databaseName);
 
-            _client = new MongoClient(connectionString);
-            _database = _client.GetDatabase(_databaseName);
-
-            var storage = new SynchronizedStorage(_client, _databaseName, collectionNameConvention);
+            var storage = new SynchronizedStorage(ClientProvider.Client, _databaseName, collectionNameConvention);
 
             _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
             _sagaPersister = new SagaPersister(versionFieldName);
         }
 
         [TearDown]
-        public void TeardownContext() => _client.DropDatabase(_databaseName);
+        public void TeardownContext() => ClientProvider.Client.DropDatabase(_databaseName);
 
         protected void SetVersionFieldName(string versionFieldName)
         {
@@ -55,7 +52,7 @@
         {
             collectionNameConvention = convention;
 
-            var storage = new SynchronizedStorage(_client, _databaseName, convention);
+            var storage = new SynchronizedStorage(ClientProvider.Client, _databaseName, convention);
 
             _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
         }

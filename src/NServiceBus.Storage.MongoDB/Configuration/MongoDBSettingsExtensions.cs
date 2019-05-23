@@ -25,6 +25,12 @@
             return persistenceExtensions;
         }
 
+        /// <summary>
+        /// The version field name with MongoDB conventions applied
+        /// </summary>
+        /// <param name="persistenceExtensions"></param>
+        /// <param name="versionFieldName"></param>
+        /// <returns></returns>
         public static PersistenceExtensions<MongoDBPersistence> VersionFieldName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string versionFieldName)
         {
             persistenceExtensions.GetSettings().Set(SettingsKeys.VersionFieldName, versionFieldName);

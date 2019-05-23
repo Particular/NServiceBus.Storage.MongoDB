@@ -25,9 +25,9 @@
             return persistenceExtensions;
         }
 
-        public static PersistenceExtensions<MongoDBPersistence> VersionFieldName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string versionFieldnName)
+        public static PersistenceExtensions<MongoDBPersistence> VersionFieldName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string versionFieldName)
         {
-            persistenceExtensions.GetSettings().Set(SettingsKeys.VersionFieldName, versionFieldnName);
+            persistenceExtensions.GetSettings().Set(SettingsKeys.VersionFieldName, versionFieldName);
             return persistenceExtensions;
         }
 

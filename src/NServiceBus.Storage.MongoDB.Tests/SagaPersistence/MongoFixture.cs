@@ -2,8 +2,10 @@
 {
     using System;
     using System.Globalization;
+    using System.Linq;
     using System.Threading.Tasks;
     using global::MongoDB.Bson;
+    using global::MongoDB.Bson.Serialization;
     using global::MongoDB.Bson.Serialization.Conventions;
     using global::MongoDB.Driver;
     using NServiceBus.Extensibility;
@@ -59,11 +61,17 @@
 
         protected async Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName, Func<TSagaData, BsonDocument> convertSagaData) where TSagaData: IContainSagaData
         {
+            var sagaDataType = typeof(TSagaData);
+
             var document = convertSagaData(data);
 
-            var collection = _database.GetCollection<BsonDocument>(collectionNameConvention(typeof(TSagaData)));
+            var collection = _database.GetCollection<BsonDocument>(collectionNameConvention(sagaDataType));
 
-            await EnsureUniqueIndex(collection, data, correlationPropertyName);
+            var uniqueFieldName = BsonClassMap.LookupClassMap(sagaDataType).AllMemberMaps.First(m => m.MemberName == correlationPropertyName).ElementName;
+
+            var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() { Unique = true });
+
+            await collection.Indexes.CreateOneAsync(indexModel);
 
             await collection.InsertOneAsync(document);
         }

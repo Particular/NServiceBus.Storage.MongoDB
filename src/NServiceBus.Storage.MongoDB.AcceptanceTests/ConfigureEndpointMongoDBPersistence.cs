@@ -6,22 +6,23 @@ using NServiceBus.AcceptanceTesting.Support;
 
 class ConfigureEndpointMongoDBPersistence : IConfigureEndpointTestExecution
 {
+    const string databaseName = "AcceptanceTests";
+    static IMongoClient client;
+
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {
         var containerConnectionString = Environment.GetEnvironmentVariable("ContainerUrl");
 
-        var client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
+        client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
 
-        configuration.UsePersistence<MongoDBPersistence>().Client(client);
+        configuration.UsePersistence<MongoDBPersistence>().Client(client).DatabaseName(databaseName);
 
         return Task.FromResult(0);
     }
 
     public Task Cleanup()
     {
-        //TODO do we need cleanup?
-
-        return Task.FromResult(0);
+        return client.DropDatabaseAsync(databaseName);
     }
 }
 

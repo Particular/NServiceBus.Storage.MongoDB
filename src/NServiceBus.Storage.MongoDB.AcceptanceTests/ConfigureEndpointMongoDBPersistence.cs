@@ -9,9 +9,10 @@ class ConfigureEndpointMongoDBPersistence : IConfigureEndpointTestExecution
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {
         var containerConnectionString = Environment.GetEnvironmentVariable("ContainerUrl");
-        //TODO better error handling for connection string?
 
-        configuration.UsePersistence<MongoDBPersistence>().Client(new MongoClient(containerConnectionString));
+        var client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
+
+        configuration.UsePersistence<MongoDBPersistence>().Client(client);
 
         return Task.FromResult(0);
     }

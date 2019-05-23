@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization;
-    using global::MongoDB.Bson.Serialization.Conventions;
     using global::MongoDB.Driver;
     using NServiceBus.Extensibility;
     using NServiceBus.Persistence;
@@ -26,10 +25,6 @@
         [SetUp]
         public virtual void SetupContext()
         {
-
-            var camelCasePack = new ConventionPack { new CamelCaseElementNameConvention() };
-            ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
-
             var storage = new SynchronizedStorage(ClientProvider.Client, _databaseName, collectionNameConvention);
 
             _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();

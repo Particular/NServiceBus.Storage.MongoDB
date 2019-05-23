@@ -32,7 +32,7 @@ namespace NServiceBus.Storage.MongoDB
             await collection.InsertOneAsync(document).ConfigureAwait(false);
         }
 
-        public Task EnsureUniqueIndex(Type sagaDataType, string propertyName, IMongoCollection<BsonDocument> collection)
+        private Task EnsureUniqueIndex(Type sagaDataType, string propertyName, IMongoCollection<BsonDocument> collection)
         {
             if (propertyName == null)
             {

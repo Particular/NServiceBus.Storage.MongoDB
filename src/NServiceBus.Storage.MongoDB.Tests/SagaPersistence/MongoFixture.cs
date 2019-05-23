@@ -68,11 +68,6 @@
             await collection.InsertOneAsync(document);
         }
 
-        protected Task EnsureUniqueIndex(IMongoCollection<BsonDocument> collection, IContainSagaData saga, string correlationPropertyName)
-        {
-            return _sagaPersister.EnsureUniqueIndex(saga.GetType(), correlationPropertyName, collection);
-        }
-
         protected async Task SaveSaga<T>(T saga) where T : class, IContainSagaData
         {
             SagaCorrelationProperty correlationProperty = null;

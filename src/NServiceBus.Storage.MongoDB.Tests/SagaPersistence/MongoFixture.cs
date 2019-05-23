@@ -16,7 +16,6 @@
     [TestFixture]
     public class MongoFixture
     {
-        private IMongoDatabase _database;
         private CompletableSynchronizedStorageSession _session;
         private SagaPersister _sagaPersister;
 
@@ -30,8 +29,6 @@
 
             var camelCasePack = new ConventionPack { new CamelCaseElementNameConvention() };
             ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
-
-            _database = ClientProvider.Client.GetDatabase(_databaseName);
 
             var storage = new SynchronizedStorage(ClientProvider.Client, _databaseName, collectionNameConvention);
 
@@ -68,7 +65,7 @@
 
             var document = convertSagaData(data);
 
-            var collection = _database.GetCollection<BsonDocument>(collectionNameConvention(sagaDataType));
+            var collection = ClientProvider.Client.GetDatabase(_databaseName).GetCollection<BsonDocument>(collectionNameConvention(sagaDataType));
 
             var uniqueFieldName = BsonClassMap.LookupClassMap(sagaDataType).AllMemberMaps.First(m => m.MemberName == correlationPropertyName).ElementName;
 
@@ -113,7 +110,7 @@
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData
         {
-            var collection = _database.GetCollection<BsonDocument>(collectionNameConvention(typeof(T)));
+            var collection = ClientProvider.Client.GetDatabase(_databaseName).GetCollection<BsonDocument>(collectionNameConvention(typeof(T)));
 
             collection.UpdateOne(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
                 new BsonDocument("$set", new BsonDocument(versionFieldName, version))));

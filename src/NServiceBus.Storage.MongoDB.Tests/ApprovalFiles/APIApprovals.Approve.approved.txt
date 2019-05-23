@@ -7,8 +7,9 @@ namespace NServiceBus
     }
     public class static MongoDBSettingsExtensions
     {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> Client(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, MongoDB.Driver.IMongoClient client) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> CollectionNamingScheme(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, System.Func<System.Type, string> collectionNamingScheme) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> ConnectionString(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string connectionString) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> VersionFieldName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string versionFieldnName) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> DatabaseName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string databaseName) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> VersionFieldName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string versionFieldName) { }
     }
 }

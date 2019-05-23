@@ -35,7 +35,10 @@
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _session = new StorageSession(_database, new ContextBag(), collectionNameConvention);
+
+            var storage = new SynchronizedStorage(_client, _databaseName, collectionNameConvention);
+
+            _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
             _sagaPersister = new SagaPersister(versionFieldName);
         }
 
@@ -51,7 +54,10 @@
         protected void SetCollectionNamingConvention(Func<Type, string> convention)
         {
             collectionNameConvention = convention;
-            _session = new StorageSession(_database, new ContextBag(), convention);
+
+            var storage = new SynchronizedStorage(_client, _databaseName, convention);
+
+            _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
         }
 
         protected Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName) where TSagaData : IContainSagaData

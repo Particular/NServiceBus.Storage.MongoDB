@@ -2,8 +2,9 @@
 {
     static class SettingsKeys
     {
-        public const string ConnectionString = "MongoDBConnectionString";
         public const string VersionFieldName = "MongoDBVersionFieldName";
         public const string CollectionNamingScheme = "MongoDBCollectionNamingScheme";
+        public const string DatabaseName = "MongoDBDatabaseName";
+        public const string Client = "MongoDBClient";
     }
 }

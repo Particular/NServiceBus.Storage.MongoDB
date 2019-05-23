@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MongoDB.Driver;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 
@@ -10,7 +11,7 @@ class ConfigureEndpointMongoDBPersistence : IConfigureEndpointTestExecution
         var containerConnectionString = Environment.GetEnvironmentVariable("ContainerUrl");
         //TODO better error handling for connection string?
 
-        configuration.UsePersistence<MongoDBPersistence>().ConnectionString(containerConnectionString);
+        configuration.UsePersistence<MongoDBPersistence>().Client(new MongoClient(containerConnectionString));
 
         return Task.FromResult(0);
     }

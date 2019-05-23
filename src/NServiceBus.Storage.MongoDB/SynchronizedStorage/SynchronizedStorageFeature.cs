@@ -6,11 +6,6 @@ namespace NServiceBus.Storage.MongoDB
 {
     class SynchronizedStorageFeature : Feature
     {
-        public SynchronizedStorageFeature()
-        {
-            DependsOn<ConfigureMongoDBPersistence>();
-        }
-
         protected override void Setup(FeatureConfigurationContext context)
         {
             if (!context.Settings.TryGet(SettingsKeys.CollectionNamingScheme, out Func<Type, string> collectionNamingScheme))
@@ -18,7 +13,10 @@ namespace NServiceBus.Storage.MongoDB
                 collectionNamingScheme = type => type.Name.ToLower();
             }
 
-            context.Container.ConfigureComponent(builder => new SynchronizedStorage(builder.Build<IMongoDatabase>(), collectionNamingScheme), DependencyLifecycle.SingleInstance);
+            var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.Client)();
+            var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
+
+            context.Container.ConfigureComponent(() => new SynchronizedStorage(client, databaseName, collectionNamingScheme), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<SynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
         }
     }

@@ -2,13 +2,26 @@
 {
     using System;
     using Configuration.AdvancedExtensibility;
+    using MongoDB.Driver;
     using Storage.MongoDB;
 
     public static class MongoDBSettingsExtensions
     {
-        public static PersistenceExtensions<MongoDBPersistence> ConnectionString(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string connectionString)
+        public static PersistenceExtensions<MongoDBPersistence> Client(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, IMongoClient client)
         {
-            persistenceExtensions.GetSettings().Set(SettingsKeys.ConnectionString, connectionString);
+            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+            Guard.AgainstNull(nameof(client), client);
+
+            persistenceExtensions.GetSettings().Set(SettingsKeys.Client, (Func<IMongoClient>)(() => client));
+            return persistenceExtensions;
+        }
+
+        public static PersistenceExtensions<MongoDBPersistence> DatabaseName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string databaseName)
+        {
+            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+            Guard.AgainstNullAndEmpty(nameof(databaseName), databaseName);
+
+            persistenceExtensions.GetSettings().Set(SettingsKeys.DatabaseName, databaseName);
             return persistenceExtensions;
         }
 

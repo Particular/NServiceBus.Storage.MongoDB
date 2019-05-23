@@ -33,6 +33,11 @@
 
         public static PersistenceExtensions<MongoDBPersistence> CollectionNamingScheme(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, Func<Type, string> collectionNamingScheme)
         {
+            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+            Guard.AgainstNull(nameof(collectionNamingScheme), collectionNamingScheme);
+            
+            //TODO: make sure null isn't returned or throw with collectionNamingScheme
+
             persistenceExtensions.GetSettings().Set(SettingsKeys.CollectionNamingScheme, collectionNamingScheme);
             return persistenceExtensions;
         }

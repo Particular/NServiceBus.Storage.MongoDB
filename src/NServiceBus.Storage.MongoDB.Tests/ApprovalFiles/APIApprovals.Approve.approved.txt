@@ -1,6 +1,11 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("NServiceBus.Storage.MongoDB.Tests")]
 namespace NServiceBus
 {
+    public class CompatibilitySettings : NServiceBus.Configuration.AdvancedExtensibility.ExposeSettings
+    {
+        public NServiceBus.CompatibilitySettings CollectionNamingScheme(System.Func<System.Type, string> collectionNamingScheme) { }
+        public NServiceBus.CompatibilitySettings VersionFieldName(string versionFieldName) { }
+    }
     public class MongoDBPersistence : NServiceBus.Persistence.PersistenceDefinition
     {
         public MongoDBPersistence() { }
@@ -8,8 +13,8 @@ namespace NServiceBus
     public class static MongoDBSettingsExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> Client(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, MongoDB.Driver.IMongoClient client) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> CollectionNamingScheme(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, System.Func<System.Type, string> collectionNamingScheme) { }
+        public static NServiceBus.CompatibilitySettings CommunityPersistenceCompatibility(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> DatabaseName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string databaseName) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> VersionFieldName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string versionFieldName) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> UseTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, bool useTransactions) { }
     }
 }

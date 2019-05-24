@@ -23,6 +23,7 @@
                     }
                     return defaultClient;
                 }));
+
                 s.SetDefault(SettingsKeys.DatabaseName, "NServiceBus");
             });
 

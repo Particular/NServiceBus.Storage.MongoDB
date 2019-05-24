@@ -7,7 +7,9 @@
     {
         static IMongoClient client;
 
-        public static IMongoClient Client { get
+        public static IMongoClient Client
+        {
+            get
             {
                 if (client == null)
                 {

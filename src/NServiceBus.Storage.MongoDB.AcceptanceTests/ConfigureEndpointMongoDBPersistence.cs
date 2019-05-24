@@ -7,7 +7,7 @@ using NServiceBus.AcceptanceTesting.Support;
 class ConfigureEndpointMongoDBPersistence : IConfigureEndpointTestExecution
 {
     const string databaseName = "AcceptanceTests";
-    static IMongoClient client;
+    IMongoClient client;
 
     public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
     {

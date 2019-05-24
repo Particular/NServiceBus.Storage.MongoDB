@@ -33,30 +33,6 @@
             return persistenceExtensions;
         }
 
-        /// <summary>
-        /// The version field name with MongoDB conventions applied
-        /// </summary>
-        /// <param name="persistenceExtensions"></param>
-        /// <param name="versionFieldName"></param>
-        /// <returns></returns>
-        public static PersistenceExtensions<MongoDBPersistence> VersionFieldName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string versionFieldName)
-        {
-            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
-            Guard.AgainstNullAndEmpty(nameof(versionFieldName), versionFieldName);
-
-            persistenceExtensions.GetSettings().Set(SettingsKeys.VersionFieldName, versionFieldName);
-            return persistenceExtensions;
-        }
-
-        public static PersistenceExtensions<MongoDBPersistence> CollectionNamingScheme(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, Func<Type, string> collectionNamingScheme)
-        {
-            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
-            Guard.AgainstNull(nameof(collectionNamingScheme), collectionNamingScheme);
-
-            //TODO: make sure null isn't returned or throw with collectionNamingScheme
-
-            persistenceExtensions.GetSettings().Set(SettingsKeys.CollectionNamingScheme, collectionNamingScheme);
-            return persistenceExtensions;
-        }
+        public static CompatibilitySettings CommunityPersistenceCompatibility(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions) => new CompatibilitySettings(persistenceExtensions.GetSettings());
     }
 }

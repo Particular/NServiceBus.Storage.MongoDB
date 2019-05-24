@@ -16,7 +16,28 @@ namespace NServiceBus.Storage.MongoDB
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.Client)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
 
-            context.Container.ConfigureComponent(() => new SynchronizedStorage(client, databaseName, collectionNamingScheme), DependencyLifecycle.SingleInstance);
+            if (!context.Settings.TryGet(SettingsKeys.UseTransactions, out bool useTransactions))
+            {
+                useTransactions = true;
+            }
+
+            if (useTransactions)
+            {
+                try
+                {
+                    using (var session = client.StartSession())
+                    {
+                        session.StartTransaction();
+                        session.AbortTransaction();
+                    }
+                }
+                catch (NotSupportedException ex)
+                {
+                    throw new Exception("error message", ex);
+                }
+            }
+
+            context.Container.ConfigureComponent(() => new SynchronizedStorage(client, useTransactions, databaseName, collectionNamingScheme), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<SynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
         }
     }

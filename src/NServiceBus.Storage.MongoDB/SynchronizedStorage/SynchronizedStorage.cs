@@ -8,9 +8,10 @@ namespace NServiceBus.Storage.MongoDB
 {
     class SynchronizedStorage : ISynchronizedStorage
     {
-        public SynchronizedStorage(IMongoClient client, string databaseName, Func<Type, string> collectionNamingScheme)
+        public SynchronizedStorage(IMongoClient client, bool useTransactions, string databaseName, Func<Type, string> collectionNamingScheme)
         {
             this.client = client;
+            this.useTransactions = useTransactions;
             this.databaseName = databaseName;
             this.collectionNamingScheme = collectionNamingScheme;
         }
@@ -19,10 +20,16 @@ namespace NServiceBus.Storage.MongoDB
         {
             var mongoSession = await client.StartSessionAsync().ConfigureAwait(false);
 
+            if (useTransactions)
+            {
+                mongoSession.StartTransaction();
+            }
+
             return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingScheme);
         }
 
         readonly IMongoClient client;
+        readonly bool useTransactions;
         readonly string databaseName;
         readonly Func<Type, string> collectionNamingScheme;
     }

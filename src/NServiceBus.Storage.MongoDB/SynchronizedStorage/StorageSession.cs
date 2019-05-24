@@ -12,8 +12,6 @@ namespace NServiceBus.Storage.MongoDB
     {
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingScheme)
         {
-            Guard.AgainstNull(nameof(mongoSession), mongoSession);
-
             this.mongoSession = mongoSession;
 
             database = mongoSession.Client.GetDatabase(databaseName, new MongoDatabaseSettings
@@ -36,8 +34,9 @@ namespace NServiceBus.Storage.MongoDB
         {
             if (mongoSession.IsInTransaction)
             {
-                mongoSession.CommitTransaction();
+                return mongoSession.CommitTransactionAsync();
             }
+
             return TaskEx.CompletedTask;
         }
 
@@ -54,12 +53,13 @@ namespace NServiceBus.Storage.MongoDB
                     Log.Warn("Exception thrown while aborting transaction", ex);
                 }
             }
+
             mongoSession.Dispose();
         }
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
 
-        IClientSessionHandle mongoSession;
+        readonly IClientSessionHandle mongoSession;
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingScheme;

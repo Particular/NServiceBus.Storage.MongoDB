@@ -6,5 +6,6 @@
         public const string CollectionNamingScheme = "MongoDBCollectionNamingScheme";
         public const string DatabaseName = "MongoDBDatabaseName";
         public const string Client = "MongoDBClient";
+        public const string UseTransactions = "MongoDBUseTransactions";
     }
 }

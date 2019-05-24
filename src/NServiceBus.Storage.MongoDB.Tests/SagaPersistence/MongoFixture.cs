@@ -25,7 +25,7 @@
         [SetUp]
         public virtual void SetupContext()
         {
-            var storage = new SynchronizedStorage(ClientProvider.Client, _databaseName, collectionNameConvention);
+            var storage = new SynchronizedStorage(ClientProvider.Client, useTransactions: true, _databaseName, collectionNameConvention);
 
             _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
             _sagaPersister = new SagaPersister(versionFieldName);
@@ -44,17 +44,17 @@
         {
             collectionNameConvention = convention;
 
-            var storage = new SynchronizedStorage(ClientProvider.Client, _databaseName, convention);
+            var storage = new SynchronizedStorage(ClientProvider.Client, useTransactions: true, _databaseName, convention);
 
             _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
         }
 
         protected Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName) where TSagaData : IContainSagaData
         {
-            return PrepareSagaCollection(data, correlationPropertyName, d => d.ToBsonDocument());     
+            return PrepareSagaCollection(data, correlationPropertyName, d => d.ToBsonDocument());
         }
 
-        protected async Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName, Func<TSagaData, BsonDocument> convertSagaData) where TSagaData: IContainSagaData
+        protected async Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName, Func<TSagaData, BsonDocument> convertSagaData) where TSagaData : IContainSagaData
         {
             var sagaDataType = typeof(TSagaData);
 

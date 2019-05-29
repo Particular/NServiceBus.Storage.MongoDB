@@ -17,4 +17,8 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> DatabaseName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string databaseName) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> UseTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, bool useTransactions) { }
     }
+    public class static SynchronizedStorageSessionExtensions
+    {
+        public static MongoDB.Driver.IMongoCollection<T> GetCollection<T>(this NServiceBus.Persistence.SynchronizedStorageSession session, string name, MongoDB.Driver.MongoCollectionSettings settings = null) { }
+    }
 }

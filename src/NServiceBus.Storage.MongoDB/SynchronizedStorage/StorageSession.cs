@@ -26,6 +26,8 @@ namespace NServiceBus.Storage.MongoDB
 
         public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingScheme(type));
 
+        public IMongoCollection<T> GetCollection<T>(string name, MongoCollectionSettings settings = null) => database.GetCollection<T>(name, settings);
+
         public void StoreVersion(Type type, BsonValue version) => contextBag.Set(type.FullName, version);
 
         public BsonValue RetrieveVersion(Type type) => contextBag.Get<BsonValue>(type.FullName);

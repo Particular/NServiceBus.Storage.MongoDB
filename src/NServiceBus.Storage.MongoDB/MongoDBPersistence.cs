@@ -2,8 +2,8 @@
 {
     using System;
     using MongoDB.Driver;
-    using NServiceBus.Features;
-    using NServiceBus.Persistence;
+    using Features;
+    using Persistence;
     using NServiceBus.Storage.MongoDB;
 
     public class MongoDBPersistence : PersistenceDefinition

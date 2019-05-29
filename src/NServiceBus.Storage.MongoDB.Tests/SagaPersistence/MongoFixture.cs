@@ -7,9 +7,9 @@
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization;
     using global::MongoDB.Driver;
-    using NServiceBus.Extensibility;
-    using NServiceBus.Persistence;
-    using NServiceBus.Sagas;
+    using Extensibility;
+    using Persistence;
+    using Sagas;
     using NUnit.Framework;
 
     [TestFixture]
@@ -25,7 +25,7 @@
         [SetUp]
         public virtual void SetupContext()
         {
-            var storage = new SynchronizedStorage(ClientProvider.Client, useTransactions: true, _databaseName, collectionNameConvention);
+            var storage = new SynchronizedStorage(client: ClientProvider.Client, useTransactions: true, databaseName: _databaseName, collectionNamingScheme: collectionNameConvention);
 
             _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
             _sagaPersister = new SagaPersister(versionFieldName);
@@ -44,7 +44,7 @@
         {
             collectionNameConvention = convention;
 
-            var storage = new SynchronizedStorage(ClientProvider.Client, useTransactions: true, _databaseName, convention);
+            var storage = new SynchronizedStorage(client: ClientProvider.Client, useTransactions: true, databaseName: _databaseName, collectionNamingScheme: convention);
 
             _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
         }

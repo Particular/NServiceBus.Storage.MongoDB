@@ -1,6 +1,6 @@
 namespace NServiceBus.Storage.MongoDB
 {
-    using NServiceBus.Features;
+    using Features;
 
     class SagaStorage : Feature
     {

@@ -7,9 +7,9 @@ namespace NServiceBus.Storage.MongoDB
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
-    using NServiceBus.Persistence;
-    using NServiceBus.Sagas;
+    using Extensibility;
+    using Persistence;
+    using Sagas;
 
     class SagaPersister : ISagaPersister
     {

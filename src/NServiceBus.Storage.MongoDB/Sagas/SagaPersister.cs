@@ -87,6 +87,15 @@ namespace NServiceBus.Storage.MongoDB
                 doc.Remove(versionFieldName);
                 storageSession.StoreVersion(sagaDataType, version);
 
+                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
+                {
+                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
+                    {
+                        cm.AutoMap();
+                        cm.SetIgnoreExtraElements(true);
+                    });
+                }
+
                 return BsonSerializer.Deserialize<TSagaData>(doc);
             }
 
@@ -109,6 +118,15 @@ namespace NServiceBus.Storage.MongoDB
                 var version = doc.GetValue(versionFieldName);
                 doc.Remove(versionFieldName);
                 storageSession.StoreVersion(sagaDataType, version);
+
+                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
+                {
+                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
+                    {
+                        cm.AutoMap();
+                        cm.SetIgnoreExtraElements(true);
+                    });
+                }
 
                 return BsonSerializer.Deserialize<TSagaData>(doc);
             }

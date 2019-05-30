@@ -146,15 +146,15 @@ namespace NServiceBus.Storage.MongoDB
 
         string GetElementName(BsonClassMap classMap, string property)
         {
-            foreach(var element in classMap.AllMemberMaps)
+            foreach(var memberMap in classMap.AllMemberMaps)
             {
-                if (element.MemberName == property)
+                if (memberMap.MemberName == property)
                 {
-                    return element.ElementName;
+                    return memberMap.ElementName;
                 }
             }
 
-            throw new ArgumentException($"Property '{property}' not found in class map.", nameof(property));
+            throw new ArgumentException($"Property '{property}' not found in class member map.", nameof(property));
         }
 
         const string idElementName = "_id";

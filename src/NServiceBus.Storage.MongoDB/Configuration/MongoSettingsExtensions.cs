@@ -5,7 +5,7 @@ using NServiceBus.Storage.MongoDB;
 
 namespace NServiceBus
 {
-    public static class MongoDBSettingsExtensions
+    public static class MongoSettingsExtensions
     {
         /// <summary>
         /// Override the default MongoClient creation by providing a pre-configured IMongoClient
@@ -13,7 +13,7 @@ namespace NServiceBus
         /// <param name="persistenceExtensions"></param>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static PersistenceExtensions<MongoDBPersistence> Client(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, IMongoClient client)
+        public static PersistenceExtensions<MongoPersistence> Client(this PersistenceExtensions<MongoPersistence> persistenceExtensions, IMongoClient client)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
             Guard.AgainstNull(nameof(client), client);
@@ -28,7 +28,7 @@ namespace NServiceBus
         /// <param name="persistenceExtensions"></param>
         /// <param name="databaseName"></param>
         /// <returns></returns>
-        public static PersistenceExtensions<MongoDBPersistence> DatabaseName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string databaseName)
+        public static PersistenceExtensions<MongoPersistence> DatabaseName(this PersistenceExtensions<MongoPersistence> persistenceExtensions, string databaseName)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
             Guard.AgainstNullAndEmpty(nameof(databaseName), databaseName);
@@ -43,7 +43,7 @@ namespace NServiceBus
         /// <param name="persistenceExtensions"></param>
         /// <param name="useTransactions"></param>
         /// <returns></returns>
-        public static PersistenceExtensions<MongoDBPersistence> UseTransactions(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, bool useTransactions)
+        public static PersistenceExtensions<MongoPersistence> UseTransactions(this PersistenceExtensions<MongoPersistence> persistenceExtensions, bool useTransactions)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
 
@@ -56,6 +56,6 @@ namespace NServiceBus
         /// </summary>
         /// <param name="persistenceExtensions"></param>
         /// <returns></returns>
-        public static CompatibilitySettings CommunityPersistenceCompatibility(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions) => new CompatibilitySettings(persistenceExtensions.GetSettings());
+        public static CompatibilitySettings CommunityPersistenceCompatibility(this PersistenceExtensions<MongoPersistence> persistenceExtensions) => new CompatibilitySettings(persistenceExtensions.GetSettings());
     }
 }

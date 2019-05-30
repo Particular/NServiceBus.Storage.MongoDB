@@ -9,14 +9,14 @@ namespace NServiceBus
     /// <summary>
     /// 
     /// </summary>
-    public class MongoDBPersistence : PersistenceDefinition
+    public class MongoPersistence : PersistenceDefinition
     {
         static IMongoClient defaultClient;
 
         /// <summary>
         /// 
         /// </summary>
-        public MongoDBPersistence()
+        public MongoPersistence()
         {
             Defaults(s =>
             {

@@ -11,14 +11,14 @@ namespace NServiceBus
         /// Override the default MongoClient creation by providing a pre-configured IMongoClient
         /// </summary>
         /// <param name="persistenceExtensions"></param>
-        /// <param name="client"></param>
+        /// <param name="mongoClient"></param>
         /// <returns></returns>
-        public static PersistenceExtensions<MongoPersistence> Client(this PersistenceExtensions<MongoPersistence> persistenceExtensions, IMongoClient client)
+        public static PersistenceExtensions<MongoPersistence> MongoClient(this PersistenceExtensions<MongoPersistence> persistenceExtensions, IMongoClient mongoClient)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
-            Guard.AgainstNull(nameof(client), client);
+            Guard.AgainstNull(nameof(mongoClient), mongoClient);
 
-            persistenceExtensions.GetSettings().Set(SettingsKeys.Client, (Func<IMongoClient>)(() => client));
+            persistenceExtensions.GetSettings().Set(SettingsKeys.Client, (Func<IMongoClient>)(() => mongoClient));
             return persistenceExtensions;
         }
 

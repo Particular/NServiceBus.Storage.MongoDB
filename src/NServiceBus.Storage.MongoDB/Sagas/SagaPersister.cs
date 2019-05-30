@@ -24,27 +24,19 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = sagaData.GetType();
             var collection = storageSession.GetCollection(sagaDataType);
 
-            await EnsureUniqueIndex(sagaDataType, correlationProperty?.Name, collection).ConfigureAwait(false);
+            if (correlationProperty != null)
+            {
+                var uniqueFieldName = GetFieldName(BsonClassMap.LookupClassMap(sagaDataType), correlationProperty.Name);
+
+                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() {Unique = true});
+
+                await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+            }
 
             var document = sagaData.ToBsonDocument();
             document.Add(versionFieldName, 0);
 
             await collection.InsertOneAsync(document).ConfigureAwait(false);
-        }
-
-        private Task EnsureUniqueIndex(Type sagaDataType, string propertyName, IMongoCollection<BsonDocument> collection)
-        {
-            if (propertyName == null)
-            {
-                return Task.FromResult(0);
-            }
-
-            var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var uniqueFieldName = GetFieldName(classmap, propertyName);
-
-            var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() { Unique = true });
-
-            return collection.Indexes.CreateOneAsync(indexModel);
         }
 
         public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)

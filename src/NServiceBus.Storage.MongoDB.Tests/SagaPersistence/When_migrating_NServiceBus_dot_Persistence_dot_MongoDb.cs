@@ -19,7 +19,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
                 SomeUpdatableSagaData = GetHashCode()
             };
 
-            SetVersionFieldName(nameof(legacySagaData.Version));
+            SetVersionElementName(nameof(legacySagaData.Version));
 
             await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId));
 

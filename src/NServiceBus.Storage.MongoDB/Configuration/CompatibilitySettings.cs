@@ -10,15 +10,15 @@ namespace NServiceBus
         internal CompatibilitySettings(SettingsHolder settingsHolder) : base(settingsHolder) { }
 
         /// <summary>
-        /// The version field name with MongoDB conventions applied
+        /// The version element name with MongoDB conventions applied
         /// </summary>
-        /// <param name="versionFieldName"></param>
+        /// <param name="versionElementName"></param>
         /// <returns></returns>
-        public CompatibilitySettings VersionFieldName(string versionFieldName)
+        public CompatibilitySettings VersionElementName(string versionElementName)
         {
-            Guard.AgainstNullAndEmpty(nameof(versionFieldName), versionFieldName);
+            Guard.AgainstNullAndEmpty(nameof(versionElementName), versionElementName);
 
-            this.GetSettings().Set(SettingsKeys.VersionFieldName, versionFieldName);
+            this.GetSettings().Set(SettingsKeys.VersionElementName, versionElementName);
             return this;
         }
 

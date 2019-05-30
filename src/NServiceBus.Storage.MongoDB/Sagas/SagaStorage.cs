@@ -12,12 +12,12 @@ namespace NServiceBus.Storage.MongoDB
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            if (!context.Settings.TryGet(SettingsKeys.VersionFieldName, out string versionFieldName))
+            if (!context.Settings.TryGet(SettingsKeys.VersionElementName, out string versionElementName))
             {
-                versionFieldName = "_version";
+                versionElementName = "_version";
             }
 
-            context.Container.ConfigureComponent(() => new SagaPersister(versionFieldName), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(() => new SagaPersister(versionElementName), DependencyLifecycle.SingleInstance);
         }
     }
 }

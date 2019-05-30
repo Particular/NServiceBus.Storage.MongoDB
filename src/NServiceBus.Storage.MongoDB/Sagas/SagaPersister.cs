@@ -12,9 +12,9 @@ namespace NServiceBus.Storage.MongoDB
 {
     class SagaPersister : ISagaPersister
     {
-        public SagaPersister(string versionFieldName)
+        public SagaPersister(string versionElementName)
         {
-            this.versionFieldName = versionFieldName;
+            this.versionElementName = versionElementName;
         }
 
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
@@ -25,9 +25,9 @@ namespace NServiceBus.Storage.MongoDB
 
             if (correlationProperty != null && !createdIndexCache.ContainsKey(sagaDataType.Name))
             {
-                var uniqueFieldName = GetFieldName(BsonClassMap.LookupClassMap(sagaDataType), correlationProperty.Name);
+                var propertyElementName = GetElementName(BsonClassMap.LookupClassMap(sagaDataType), correlationProperty.Name);
 
-                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() { Unique = true });
+                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
 
                 await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
 
@@ -35,7 +35,7 @@ namespace NServiceBus.Storage.MongoDB
             }
 
             var document = sagaData.ToBsonDocument();
-            document.Add(versionFieldName, 0);
+            document.Add(versionElementName, 0);
 
             await collection.InsertOneAsync(document).ConfigureAwait(false);
         }
@@ -49,17 +49,17 @@ namespace NServiceBus.Storage.MongoDB
             var version = storageSession.RetrieveVersion(sagaDataType);
 
             var fbuilder = Builders<BsonDocument>.Filter;
-            var filter = fbuilder.Eq(idField, sagaData.Id) & fbuilder.Eq(versionFieldName, version);
+            var filter = fbuilder.Eq(idElementName, sagaData.Id) & fbuilder.Eq(versionElementName, version);
 
             var bsonDoc = sagaData.ToBsonDocument();
             var ubuilder = Builders<BsonDocument>.Update;
-            var update = ubuilder.Inc(versionFieldName, 1);
+            var update = ubuilder.Inc(versionElementName, 1);
 
-            foreach (var field in bsonDoc)
+            foreach (var element in bsonDoc)
             {
-                if (field.Name != versionFieldName && field.Name != idField)
+                if (element.Name != versionElementName && element.Name != idElementName)
                 {
-                    update = update.Set(field.Name, field.Value);
+                    update = update.Set(element.Name, element.Value);
                 }
             }
 
@@ -80,12 +80,12 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = typeof(TSagaData);
             var collection = storageSession.GetCollection(sagaDataType);
 
-            var doc = await collection.Find(new BsonDocument(idField, sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
+            var doc = await collection.Find(new BsonDocument(idElementName, sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
 
             if (doc != null)
             {
-                var version = doc.GetValue(versionFieldName);
-                doc.Remove(versionFieldName);
+                var version = doc.GetValue(versionElementName);
+                doc.Remove(versionElementName);
                 storageSession.StoreVersion(sagaDataType, version);
 
                 if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
@@ -110,14 +110,14 @@ namespace NServiceBus.Storage.MongoDB
             var collection = storageSession.GetCollection(sagaDataType);
 
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var propertyFieldName = GetFieldName(classmap, propertyName);
+            var propertyElementName = GetElementName(classmap, propertyName);
 
-            var doc = await collection.Find(new BsonDocument(propertyFieldName, BsonValue.Create(propertyValue))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
+            var doc = await collection.Find(new BsonDocument(propertyElementName, BsonValue.Create(propertyValue))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
 
             if (doc != null)
             {
-                var version = doc.GetValue(versionFieldName);
-                doc.Remove(versionFieldName);
+                var version = doc.GetValue(versionElementName);
+                doc.Remove(versionElementName);
                 storageSession.StoreVersion(sagaDataType, version);
 
                 if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
@@ -141,10 +141,10 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = sagaData.GetType();
             var collection = storageSession.GetCollection(sagaDataType);
 
-            return collection.DeleteOneAsync(new BsonDocument(idField, sagaData.Id));
+            return collection.DeleteOneAsync(new BsonDocument(idElementName, sagaData.Id));
         }
 
-        string GetFieldName(BsonClassMap classMap, string property)
+        string GetElementName(BsonClassMap classMap, string property)
         {
             foreach(var element in classMap.AllMemberMaps)
             {
@@ -157,8 +157,8 @@ namespace NServiceBus.Storage.MongoDB
             throw new ArgumentException($"Property '{property}' not found in class map.", nameof(property));
         }
 
-        const string idField = "_id";
-        readonly string versionFieldName;
+        const string idElementName = "_id";
+        readonly string versionElementName;
         readonly ConcurrentDictionary<string, bool> createdIndexCache = new ConcurrentDictionary<string, bool>();
     }
 }

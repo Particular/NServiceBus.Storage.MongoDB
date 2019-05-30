@@ -46,7 +46,7 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            context.Container.ConfigureComponent(() => new SynchronizedStorage(client, useTransactions, databaseName, collectionNamingScheme), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(() => new SynchronizedStorageFactory(client, useTransactions, databaseName, collectionNamingScheme), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<SynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
         }
     }

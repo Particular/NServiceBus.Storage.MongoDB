@@ -4,7 +4,7 @@ using NServiceBus.Features;
 
 namespace NServiceBus.Storage.MongoDB
 {
-    class SynchronizedStorageFeature : Feature
+    class SynchronizedStorage : Feature
     {
         protected override void Setup(FeatureConfigurationContext context)
         {

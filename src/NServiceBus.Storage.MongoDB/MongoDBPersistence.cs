@@ -14,7 +14,7 @@ namespace NServiceBus
         {
             Defaults(s =>
             {
-                s.EnableFeatureByDefault<SynchronizedStorageFeature>();
+                s.EnableFeatureByDefault<SynchronizedStorage>();
 
                 s.SetDefault(SettingsKeys.Client, (Func<IMongoClient>)(() => {
                     if (defaultClient == null)

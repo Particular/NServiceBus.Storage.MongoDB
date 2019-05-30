@@ -15,38 +15,38 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
     [TestFixture]
     public class MongoFixture
     {
-        private CompletableSynchronizedStorageSession _session;
-        private SagaPersister _sagaPersister;
+        CompletableSynchronizedStorageSession session;
+        SagaPersister sagaPersister;
 
-        private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
-        private string versionFieldName = "_version";
+        readonly string databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+        string versionFieldName = "_version";
         Func<Type, string> collectionNameConvention = t => t.Name.ToLower();
 
         [SetUp]
         public virtual void SetupContext()
         {
-            var storage = new SynchronizedStorage(client: ClientProvider.Client, useTransactions: true, databaseName: _databaseName, collectionNamingScheme: collectionNameConvention);
+            var storage = new SynchronizedStorage(client: ClientProvider.Client, useTransactions: true, databaseName: databaseName, collectionNamingScheme: collectionNameConvention);
 
-            _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
-            _sagaPersister = new SagaPersister(versionFieldName);
+            session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
+            sagaPersister = new SagaPersister(versionFieldName);
         }
 
         [TearDown]
-        public void TeardownContext() => ClientProvider.Client.DropDatabase(_databaseName);
+        public void TeardownContext() => ClientProvider.Client.DropDatabase(databaseName);
 
         protected void SetVersionFieldName(string versionFieldName)
         {
             this.versionFieldName = versionFieldName;
-            _sagaPersister = new SagaPersister(versionFieldName);
+            sagaPersister = new SagaPersister(versionFieldName);
         }
 
         protected void SetCollectionNamingConvention(Func<Type, string> convention)
         {
             collectionNameConvention = convention;
 
-            var storage = new SynchronizedStorage(client: ClientProvider.Client, useTransactions: true, databaseName: _databaseName, collectionNamingScheme: convention);
+            var storage = new SynchronizedStorage(client: ClientProvider.Client, useTransactions: true, databaseName: databaseName, collectionNamingScheme: convention);
 
-            _session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
+            session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
         }
 
         protected Task PrepareSagaCollection<TSagaData>(TSagaData data, string correlationPropertyName) where TSagaData : IContainSagaData
@@ -60,7 +60,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
             var document = convertSagaData(data);
 
-            var collection = ClientProvider.Client.GetDatabase(_databaseName).GetCollection<BsonDocument>(collectionNameConvention(sagaDataType));
+            var collection = ClientProvider.Client.GetDatabase(databaseName).GetCollection<BsonDocument>(collectionNameConvention(sagaDataType));
 
             var uniqueFieldName = BsonClassMap.LookupClassMap(sagaDataType).AllMemberMaps.First(m => m.MemberName == correlationPropertyName).ElementName;
 
@@ -80,19 +80,19 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
                 correlationProperty = new SagaCorrelationProperty("UniqueString", String.Empty);
             }
 
-            await _sagaPersister.Save(saga, correlationProperty, _session, null);
+            await sagaPersister.Save(saga, correlationProperty, session, null);
         }
 
         protected async Task<T> LoadSaga<T>(Guid id) where T : class, IContainSagaData
         {
-            return await _sagaPersister.Get<T>(id, _session, null);
+            return await sagaPersister.Get<T>(id, session, null);
         }
 
         protected async Task CompleteSaga<T>(Guid sagaId) where T : class, IContainSagaData
         {
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga);
-            await _sagaPersister.Complete(saga, _session, null).ConfigureAwait(false);
+            await sagaPersister.Complete(saga, session, null).ConfigureAwait(false);
         }
 
         protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : class, IContainSagaData
@@ -100,12 +100,12 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga, "Could not update saga. Saga not found");
             update(saga);
-            await _sagaPersister.Update(saga, _session, null).ConfigureAwait(false);
+            await sagaPersister.Update(saga, session, null).ConfigureAwait(false);
         }
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData
         {
-            var collection = ClientProvider.Client.GetDatabase(_databaseName).GetCollection<BsonDocument>(collectionNameConvention(typeof(T)));
+            var collection = ClientProvider.Client.GetDatabase(databaseName).GetCollection<BsonDocument>(collectionNameConvention(typeof(T)));
 
             collection.UpdateOne(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
                 new BsonDocument("$set", new BsonDocument(versionFieldName, version))));

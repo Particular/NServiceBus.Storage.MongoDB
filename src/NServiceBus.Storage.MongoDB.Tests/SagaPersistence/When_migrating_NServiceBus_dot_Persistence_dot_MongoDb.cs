@@ -35,9 +35,13 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         class NServiceBusPersistenceMongoDBLegacySagaData : IContainSagaData
         {
             public Guid Id { get; set; }
+
             public string OriginalMessageId { get; set; }
+
             public string Originator { get; set; }
+
             public Guid SomeCorrelationPropertyId { get; set; }
+
             public int SomeUpdatableSagaData { get; set; }
         }
     }
@@ -48,10 +52,15 @@ namespace NServiceBus.Persistence.MongoDB
     class NServiceBusPersistenceMongoDBLegacySagaData : IContainSagaData
     {
         public Guid Id { get; set; }
+
         public string OriginalMessageId { get; set; }
+
         public string Originator { get; set; }
+
         public int Version { get; set; }
+
         public Guid SomeCorrelationPropertyId { get; set; }
+
         public int SomeUpdatableSagaData { get; set; }
     }
 }

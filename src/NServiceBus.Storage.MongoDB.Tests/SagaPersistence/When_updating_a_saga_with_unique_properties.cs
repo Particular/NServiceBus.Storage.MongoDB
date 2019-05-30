@@ -18,10 +18,9 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
                             };
 
             await SaveSaga(saga1).ConfigureAwait(false);
-
             await UpdateSaga<SagaWithUniqueProperty>(saga1.Id, s => s.NonUniqueString = "notUnique2").ConfigureAwait(false);
-
             saga1 = await LoadSaga<SagaWithUniqueProperty>(saga1.Id).ConfigureAwait(false);
+
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
 

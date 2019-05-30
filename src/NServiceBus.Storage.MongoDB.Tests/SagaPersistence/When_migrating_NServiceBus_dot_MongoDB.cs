@@ -8,7 +8,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 {
     class When_migrating_NServiceBus_dot_MongoDB : MongoFixture
     {
-        Func<Type, string> collectionNameConvention = t => t.Name;
+        readonly Func<Type, string> collectionNameConvention = t => t.Name;
 
         [Test]
         public async Task Persister_works_with_existing_sagas()
@@ -48,9 +48,13 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         class NServiceBusMongoDBLegacySagaData : IContainSagaData
         {
             public Guid Id { get; set; }
+
             public string OriginalMessageId { get; set; }
+
             public string Originator { get; set; }
+
             public Guid SomeCorrelationPropertyId { get; set; }
+
             public int SomeUpdatableSagaData { get; set; }
         }
     }
@@ -61,11 +65,17 @@ namespace NServiceBus.MongoDB
     class NServiceBusMongoDBLegacySagaData : IContainSagaData
     {
         public Guid Id { get; set; }
+
         public string OriginalMessageId { get; set; }
+
         public string Originator { get; set; }
+
         public int DocumentVersion { get; set; } //From NServiceBus.MongoDB.IHaveDocumentVersion
+
         public int ETag { get; set; } //From NServiceBus.MongoDB.IHaveDocumentVersion
+
         public Guid SomeCorrelationPropertyId { get; set; }
+
         public int SomeUpdatableSagaData { get; set; }
     }
 }

@@ -142,7 +142,7 @@ namespace NServiceBus.Storage.MongoDB
             return collection.DeleteOneAsync(new BsonDocument(idField, sagaData.Id));
         }
 
-        private string GetFieldName(BsonClassMap classMap, string property)
+        string GetFieldName(BsonClassMap classMap, string property)
         {
             var element = classMap.AllMemberMaps.First(m => m.MemberName == property);
             return element.ElementName;

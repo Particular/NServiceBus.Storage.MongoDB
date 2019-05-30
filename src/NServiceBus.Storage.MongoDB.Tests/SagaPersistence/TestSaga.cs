@@ -34,6 +34,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             return base.GetHashCode();
         }
     }
+
     public class PolymorpicProperty : PolymorpicPropertyBase
     {
         public virtual int SomeInt { get; set; }

@@ -25,6 +25,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             }).ConfigureAwait(false);
 
             saga1 = await LoadSaga<SagaWithoutUniqueProperties>(saga1.Id).ConfigureAwait(false);
+
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
 

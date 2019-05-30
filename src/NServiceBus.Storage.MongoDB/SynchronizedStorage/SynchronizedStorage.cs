@@ -30,20 +30,27 @@ namespace NServiceBus.Storage.MongoDB
                 throw new Exception($"The persistence database name '{databaseName}' is invalid. Configure a valid database name by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoDBPersistence)}>().DatabaseName(databaseName)'.", ex);
             }
 
-            if (useTransactions)
+            try
             {
-                try
+                using (var session = client.StartSession())
                 {
-                    using (var session = client.StartSession())
+                    if (useTransactions)
                     {
-                        session.StartTransaction();
-                        session.AbortTransaction();
+                        try
+                        {
+                            session.StartTransaction();
+                            session.AbortTransaction();
+                        }
+                        catch (NotSupportedException ex)
+                        {
+                            throw new Exception("Transactions are not supported by the MongoDB server/cluster. Disable support for transactions by calling the 'persistence.UseTransactions(false)' API.", ex);
+                        }
                     }
                 }
-                catch (NotSupportedException ex)
-                {
-                    throw new Exception("Transactions are not supported by the MongoDB server/cluster. Disable support for transactions by calling the 'persistence.UseTransactions(false)' API.", ex);
-                }
+            }
+            catch (TimeoutException ex)
+            {
+                throw new Exception($"Unable to connect to MongoDB. Check your connection settings and verify MongoDB is running and accessible.", ex);
             }
 
             context.Container.ConfigureComponent(() => new SynchronizedStorageFactory(client, useTransactions, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);

@@ -21,6 +21,15 @@ namespace NServiceBus.Storage.MongoDB
                 useTransactions = true;
             }
 
+            try
+            {
+                client.GetDatabase(databaseName);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new Exception($"Invalid database name specified '{databaseName}'. Configure a valid database name by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoDBPersistence)}>().DatabaseName(databaseName)'.", ex);
+            }
+
             if (useTransactions)
             {
                 try

@@ -5,6 +5,7 @@ using MongoDB.Driver;
 namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading.Tasks;
     using Extensibility;
@@ -24,13 +25,15 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = sagaData.GetType();
             var collection = storageSession.GetCollection(sagaDataType);
 
-            if (correlationProperty != null)
+            if (correlationProperty != null && !createdIndexCache.ContainsKey(sagaDataType.Name))
             {
                 var uniqueFieldName = GetFieldName(BsonClassMap.LookupClassMap(sagaDataType), correlationProperty.Name);
 
-                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() {Unique = true});
+                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(uniqueFieldName, 1)), new CreateIndexOptions() { Unique = true });
 
                 await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+
+                createdIndexCache.GetOrAdd(sagaDataType.Name, true);
             }
 
             var document = sagaData.ToBsonDocument();
@@ -130,5 +133,6 @@ namespace NServiceBus.Storage.MongoDB
 
         const string idField = "_id";
         readonly string versionFieldName;
+        readonly ConcurrentDictionary<string, bool> createdIndexCache = new ConcurrentDictionary<string, bool>();
     }
 }

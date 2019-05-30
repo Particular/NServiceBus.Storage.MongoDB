@@ -70,7 +70,7 @@ namespace NServiceBus.Storage.MongoDB
 
             if (modifyResult == null)
             {
-                throw new Exception("Concurrency"); //TODO real exception message
+                throw new Exception($"The '{sagaDataType.Name}' saga with id '{sagaData.Id}' was updated by another process or no longer exists.");
             }
         }
 

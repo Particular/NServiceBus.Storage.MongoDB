@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -56,9 +55,12 @@ namespace NServiceBus.Storage.MongoDB
             var ubuilder = Builders<BsonDocument>.Update;
             var update = ubuilder.Inc(versionFieldName, 1);
 
-            foreach (var field in bsonDoc.Where(field => field.Name != versionFieldName && field.Name != idField))
+            foreach (var field in bsonDoc)
             {
-                update = update.Set(field.Name, field.Value);
+                if (field.Name != versionFieldName && field.Name != idField)
+                {
+                    update = update.Set(field.Name, field.Value);
+                }
             }
 
             var modifyResult = await collection.FindOneAndUpdateAsync(
@@ -144,8 +146,15 @@ namespace NServiceBus.Storage.MongoDB
 
         string GetFieldName(BsonClassMap classMap, string property)
         {
-            var element = classMap.AllMemberMaps.First(m => m.MemberName == property);
-            return element.ElementName;
+            foreach(var element in classMap.AllMemberMaps)
+            {
+                if (element.MemberName == property)
+                {
+                    return element.ElementName;
+                }
+            }
+
+            throw new ArgumentException($"Property '{property}' not found in class map.", nameof(property));
         }
 
         const string idField = "_id";

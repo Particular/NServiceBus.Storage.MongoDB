@@ -3,7 +3,7 @@ namespace NServiceBus
 {
     public class CompatibilitySettings : NServiceBus.Configuration.AdvancedExtensibility.ExposeSettings
     {
-        public NServiceBus.CompatibilitySettings CollectionNamingScheme(System.Func<System.Type, string> collectionNamingScheme) { }
+        public NServiceBus.CompatibilitySettings CollectionNamingConvention(System.Func<System.Type, string> collectionNamingConvention) { }
         public NServiceBus.CompatibilitySettings VersionFieldName(string versionFieldName) { }
     }
     public class MongoDBPersistence : NServiceBus.Persistence.PersistenceDefinition

@@ -10,7 +10,7 @@ namespace NServiceBus.Storage.MongoDB
 {
     class StorageSession : CompletableSynchronizedStorageSession
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingScheme)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention)
         {
             this.mongoSession = mongoSession;
 
@@ -21,10 +21,10 @@ namespace NServiceBus.Storage.MongoDB
             });
 
             this.contextBag = contextBag;
-            this.collectionNamingScheme = collectionNamingScheme;
+            this.collectionNamingConvention = collectionNamingConvention;
         }
 
-        public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingScheme(type));
+        public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingConvention(type));
 
         public IMongoCollection<T> GetCollection<T>(string name, MongoCollectionSettings settings = null) => database.GetCollection<T>(name, settings);
 
@@ -64,6 +64,6 @@ namespace NServiceBus.Storage.MongoDB
         readonly IClientSessionHandle mongoSession;
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
-        readonly Func<Type, string> collectionNamingScheme;
+        readonly Func<Type, string> collectionNamingConvention;
     }
 }

@@ -22,13 +22,13 @@ namespace NServiceBus
             return this;
         }
 
-        public CompatibilitySettings CollectionNamingScheme(Func<Type, string> collectionNamingScheme)
+        public CompatibilitySettings CollectionNamingConvention(Func<Type, string> collectionNamingConvention)
         {
-            Guard.AgainstNull(nameof(collectionNamingScheme), collectionNamingScheme);
+            Guard.AgainstNull(nameof(collectionNamingConvention), collectionNamingConvention);
 
-            //TODO: make sure null isn't returned or throw with collectionNamingScheme
+            //TODO: make sure null isn't returned or throw with collectionNamingConvention
 
-            this.GetSettings().Set(SettingsKeys.CollectionNamingScheme, collectionNamingScheme);
+            this.GetSettings().Set(SettingsKeys.CollectionNamingConvention, collectionNamingConvention);
             return this;
         }
     }

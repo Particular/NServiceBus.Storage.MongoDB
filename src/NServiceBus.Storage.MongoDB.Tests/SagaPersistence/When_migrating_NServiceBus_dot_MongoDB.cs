@@ -8,7 +8,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 {
     class When_migrating_NServiceBus_dot_MongoDB : MongoFixture
     {
-        readonly Func<Type, string> collectionNameConvention = t => t.Name;
+        readonly Func<Type, string> collectionNamingConvention = t => t.Name;
 
         [Test]
         public async Task Persister_works_with_existing_sagas()
@@ -24,7 +24,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             };
 
             SetVersionFieldName(nameof(legacySagaData.DocumentVersion));
-            SetCollectionNamingConvention(collectionNameConvention);
+            SetCollectionNamingConvention(collectionNamingConvention);
 
             await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId), d =>
             {

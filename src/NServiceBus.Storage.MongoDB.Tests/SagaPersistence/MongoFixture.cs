@@ -20,12 +20,12 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
         readonly string databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
         string versionFieldName = "_version";
-        Func<Type, string> collectionNameConvention = t => t.Name.ToLower();
+        Func<Type, string> collectionNamingConvention = t => t.Name.ToLower();
 
         [SetUp]
         public virtual void SetupContext()
         {
-            var storage = new SynchronizedStorageFactory(client: ClientProvider.Client, useTransactions: true, databaseName: databaseName, collectionNamingScheme: collectionNameConvention);
+            var storage = new SynchronizedStorageFactory(ClientProvider.Client, true, databaseName, collectionNamingConvention);
 
             session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
             sagaPersister = new SagaPersister(versionFieldName);
@@ -42,9 +42,9 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
         protected void SetCollectionNamingConvention(Func<Type, string> convention)
         {
-            collectionNameConvention = convention;
+            collectionNamingConvention = convention;
 
-            var storage = new SynchronizedStorageFactory(client: ClientProvider.Client, useTransactions: true, databaseName: databaseName, collectionNamingScheme: convention);
+            var storage = new SynchronizedStorageFactory(ClientProvider.Client,  true, databaseName, convention);
 
             session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
         }
@@ -60,7 +60,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
             var document = convertSagaData(data);
 
-            var collection = ClientProvider.Client.GetDatabase(databaseName).GetCollection<BsonDocument>(collectionNameConvention(sagaDataType));
+            var collection = ClientProvider.Client.GetDatabase(databaseName).GetCollection<BsonDocument>(collectionNamingConvention(sagaDataType));
 
             var uniqueFieldName = BsonClassMap.LookupClassMap(sagaDataType).AllMemberMaps.First(m => m.MemberName == correlationPropertyName).ElementName;
 
@@ -105,7 +105,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version) where T : class, IContainSagaData
         {
-            var collection = ClientProvider.Client.GetDatabase(databaseName).GetCollection<BsonDocument>(collectionNameConvention(typeof(T)));
+            var collection = ClientProvider.Client.GetDatabase(databaseName).GetCollection<BsonDocument>(collectionNamingConvention(typeof(T)));
 
             collection.UpdateOne(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
                 new BsonDocument("$set", new BsonDocument(versionFieldName, version))));

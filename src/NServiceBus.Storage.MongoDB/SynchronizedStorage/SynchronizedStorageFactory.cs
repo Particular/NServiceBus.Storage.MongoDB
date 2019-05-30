@@ -8,12 +8,12 @@ namespace NServiceBus.Storage.MongoDB
 {
     class SynchronizedStorageFactory : ISynchronizedStorage
     {
-        public SynchronizedStorageFactory(IMongoClient client, bool useTransactions, string databaseName, Func<Type, string> collectionNamingScheme)
+        public SynchronizedStorageFactory(IMongoClient client, bool useTransactions, string databaseName, Func<Type, string> collectionNamingConvention)
         {
             this.client = client;
             this.useTransactions = useTransactions;
             this.databaseName = databaseName;
-            this.collectionNamingScheme = collectionNamingScheme;
+            this.collectionNamingConvention = collectionNamingConvention;
         }
 
         public async Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
@@ -25,12 +25,12 @@ namespace NServiceBus.Storage.MongoDB
                 mongoSession.StartTransaction();
             }
 
-            return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingScheme);
+            return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention);
         }
 
         readonly IMongoClient client;
         readonly bool useTransactions;
         readonly string databaseName;
-        readonly Func<Type, string> collectionNamingScheme;
+        readonly Func<Type, string> collectionNamingConvention;
     }
 }

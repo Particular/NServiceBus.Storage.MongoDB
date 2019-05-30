@@ -8,9 +8,9 @@ namespace NServiceBus.Storage.MongoDB
     {
         protected override void Setup(FeatureConfigurationContext context)
         {
-            if (!context.Settings.TryGet(SettingsKeys.CollectionNamingScheme, out Func<Type, string> collectionNamingScheme))
+            if (!context.Settings.TryGet(SettingsKeys.CollectionNamingConvention, out Func<Type, string> collectionNamingConvention))
             {
-                collectionNamingScheme = type => type.Name.ToLower();
+                collectionNamingConvention = type => type.Name.ToLower();
             }
 
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.Client)();
@@ -46,7 +46,7 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            context.Container.ConfigureComponent(() => new SynchronizedStorageFactory(client, useTransactions, databaseName, collectionNamingScheme), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(() => new SynchronizedStorageFactory(client, useTransactions, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<SynchronizedStorageAdapter>(DependencyLifecycle.SingleInstance);
         }
     }

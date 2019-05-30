@@ -48,13 +48,13 @@ namespace NServiceBus.Storage.MongoDB
             var version = storageSession.RetrieveVersion(sagaDataType);
 
             var fbuilder = Builders<BsonDocument>.Filter;
-            var filter = fbuilder.Eq("_id", sagaData.Id) & fbuilder.Eq(versionFieldName, version);
+            var filter = fbuilder.Eq(idField, sagaData.Id) & fbuilder.Eq(versionFieldName, version);
 
             var bsonDoc = sagaData.ToBsonDocument();
             var ubuilder = Builders<BsonDocument>.Update;
             var update = ubuilder.Inc(versionFieldName, 1);
 
-            foreach (var field in bsonDoc.Where(field => field.Name != versionFieldName && field.Name != "_id"))
+            foreach (var field in bsonDoc.Where(field => field.Name != versionFieldName && field.Name != idField))
             {
                 update = update.Set(field.Name, field.Value);
             }
@@ -76,7 +76,7 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = typeof(TSagaData);
             var collection = storageSession.GetCollection(sagaDataType);
 
-            var doc = await collection.Find(new BsonDocument("_id", sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
+            var doc = await collection.Find(new BsonDocument(idField, sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
 
             if (doc != null)
             {
@@ -119,7 +119,7 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = sagaData.GetType();
             var collection = storageSession.GetCollection(sagaDataType);
 
-            return collection.DeleteOneAsync(new BsonDocument("_id", sagaData.Id));
+            return collection.DeleteOneAsync(new BsonDocument(idField, sagaData.Id));
         }
 
         private string GetFieldName(BsonClassMap classMap, string property)
@@ -128,6 +128,7 @@ namespace NServiceBus.Storage.MongoDB
             return element.ElementName;
         }
 
+        const string idField = "_id";
         readonly string versionFieldName;
     }
 }

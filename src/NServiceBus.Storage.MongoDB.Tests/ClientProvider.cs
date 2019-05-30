@@ -13,7 +13,7 @@
             {
                 if (client == null)
                 {
-                    var containerConnectionString = Environment.GetEnvironmentVariable("ContainerUrl");
+                    var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
 
                     client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
                 }

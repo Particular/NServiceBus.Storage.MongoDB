@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Text.RegularExpressions;
     using MongoDB.Driver;
     using Features;
     using Persistence;
@@ -24,10 +25,12 @@
                     return defaultClient;
                 }));
 
-                s.SetDefault(SettingsKeys.DatabaseName, "NServiceBus");
+                s.SetDefault(SettingsKeys.DatabaseName, SanitizeEndpointName(s.EndpointName()));
             });
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
         }
+
+        string SanitizeEndpointName(string endpointName) => Regex.Replace(endpointName, Regex.Escape(@"/\. ""$*<>:|?"), "_");
     }
 }

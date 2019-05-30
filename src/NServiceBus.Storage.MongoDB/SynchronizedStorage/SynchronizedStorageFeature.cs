@@ -33,7 +33,7 @@ namespace NServiceBus.Storage.MongoDB
                 }
                 catch (NotSupportedException ex)
                 {
-                    throw new Exception("error message", ex);
+                    throw new Exception("Transactions are not supported by the MongoDB server/cluster. Disable support for transactions by calling the 'persistence.UseTransactions(false)' API.", ex);
                 }
             }
 

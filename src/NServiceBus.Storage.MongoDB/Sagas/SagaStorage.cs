@@ -1,6 +1,7 @@
 namespace NServiceBus.Storage.MongoDB
 {
     using Features;
+    using global::MongoDB.Bson.Serialization.Conventions;
 
     class SagaStorage : Feature
     {
@@ -16,6 +17,10 @@ namespace NServiceBus.Storage.MongoDB
             {
                 versionFieldName = "_version";
             }
+
+            var pack = new ConventionPack();
+            pack.Add(new IgnoreExtraElementsConvention(true));
+            ConventionRegistry.Register("Ignore Extra Saga Data Elements", pack, t => t.IsAssignableFrom(typeof(IContainSagaData)));
 
             context.Container.ConfigureComponent(() => new SagaPersister(versionFieldName), DependencyLifecycle.SingleInstance);
         }

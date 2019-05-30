@@ -24,7 +24,7 @@
                     return defaultClient;
                 }));
 
-                s.SetDefault(SettingsKeys.DatabaseName, "NServiceBus");
+                s.SetDefault(SettingsKeys.DatabaseName, s.EndpointName());
             });
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());

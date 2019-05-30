@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using NUnit.Framework;
 
 namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
@@ -44,7 +43,6 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             Assert.AreEqual(legacySagaData.SomeUpdatableSagaData, retrievedSagaData.SomeUpdatableSagaData, "SomeUpdatableSagaData does not match");
         }
 
-        [BsonIgnoreExtraElements]
         class NServiceBusMongoDBLegacySagaData : IContainSagaData
         {
             public Guid Id { get; set; }

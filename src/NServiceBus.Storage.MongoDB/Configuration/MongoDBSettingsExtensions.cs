@@ -7,6 +7,12 @@ namespace NServiceBus
 {
     public static class MongoDBSettingsExtensions
     {
+        /// <summary>
+        /// Override the default MongoClient creation by providing a pre-configured IMongoClient
+        /// </summary>
+        /// <param name="persistenceExtensions"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
         public static PersistenceExtensions<MongoDBPersistence> Client(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, IMongoClient client)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
@@ -16,6 +22,12 @@ namespace NServiceBus
             return persistenceExtensions;
         }
 
+        /// <summary>
+        /// Override the default database used by the persistence
+        /// </summary>
+        /// <param name="persistenceExtensions"></param>
+        /// <param name="databaseName"></param>
+        /// <returns></returns>
         public static PersistenceExtensions<MongoDBPersistence> DatabaseName(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, string databaseName)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
@@ -25,6 +37,12 @@ namespace NServiceBus
             return persistenceExtensions;
         }
 
+        /// <summary>
+        /// Configure whether the persistence should use MongoDB transactions
+        /// </summary>
+        /// <param name="persistenceExtensions"></param>
+        /// <param name="useTransactions"></param>
+        /// <returns></returns>
         public static PersistenceExtensions<MongoDBPersistence> UseTransactions(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, bool useTransactions)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
@@ -33,6 +51,11 @@ namespace NServiceBus
             return persistenceExtensions;
         }
 
+        /// <summary>
+        /// Community persistence compatibility settings
+        /// </summary>
+        /// <param name="persistenceExtensions"></param>
+        /// <returns></returns>
         public static CompatibilitySettings CommunityPersistenceCompatibility(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions) => new CompatibilitySettings(persistenceExtensions.GetSettings());
     }
 }

@@ -22,6 +22,11 @@ namespace NServiceBus
             return this;
         }
 
+        /// <summary>
+        /// Sets the convention for saga collection naming based on the saga data type
+        /// </summary>
+        /// <param name="collectionNamingConvention"></param>
+        /// <returns></returns>
         public CompatibilitySettings CollectionNamingConvention(Func<Type, string> collectionNamingConvention)
         {
             Guard.AgainstNull(nameof(collectionNamingConvention), collectionNamingConvention);

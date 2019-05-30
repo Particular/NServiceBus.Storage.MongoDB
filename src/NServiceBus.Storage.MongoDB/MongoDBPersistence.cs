@@ -6,10 +6,16 @@ using NServiceBus.Storage.MongoDB;
 
 namespace NServiceBus
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class MongoDBPersistence : PersistenceDefinition
     {
         static IMongoClient defaultClient;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MongoDBPersistence()
         {
             Defaults(s =>

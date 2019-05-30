@@ -6,16 +6,16 @@ namespace NServiceBus
         public NServiceBus.CompatibilitySettings CollectionNamingConvention(System.Func<System.Type, string> collectionNamingConvention) { }
         public NServiceBus.CompatibilitySettings VersionElementName(string versionElementName) { }
     }
-    public class MongoDBPersistence : NServiceBus.Persistence.PersistenceDefinition
+    public class MongoPersistence : NServiceBus.Persistence.PersistenceDefinition
     {
-        public MongoDBPersistence() { }
+        public MongoPersistence() { }
     }
-    public class static MongoDBSettingsExtensions
+    public class static MongoSettingsExtensions
     {
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> Client(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, MongoDB.Driver.IMongoClient client) { }
-        public static NServiceBus.CompatibilitySettings CommunityPersistenceCompatibility(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> DatabaseName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, string databaseName) { }
-        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> UseTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.MongoDBPersistence> persistenceExtensions, bool useTransactions) { }
+        public static NServiceBus.CompatibilitySettings CommunityPersistenceCompatibility(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> DatabaseName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, string databaseName) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> MongoClient(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, MongoDB.Driver.IMongoClient mongoClient) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> UseTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, bool useTransactions) { }
     }
     public class static SynchronizedStorageSessionExtensions
     {

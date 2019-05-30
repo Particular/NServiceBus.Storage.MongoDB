@@ -1,10 +1,10 @@
-﻿namespace NServiceBus.Storage.MongoDB
-{
-    using System;
-    using System.Collections;
-    using System.Linq;
-    using System.Reflection;
+﻿using System;
+using System.Collections;
+using System.Linq;
+using System.Reflection;
 
+namespace NServiceBus.Storage.MongoDB
+{
     static class Guard
     {
         // ReSharper disable UnusedParameter.Global

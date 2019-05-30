@@ -1,9 +1,9 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests
-{
-    using NUnit.Framework;
-    using Particular.Approvals;
-    using PublicApiGenerator;
+﻿using NUnit.Framework;
+using Particular.Approvals;
+using PublicApiGenerator;
 
+namespace NServiceBus.Storage.MongoDB.Tests
+{
     [TestFixture]
     public class APIApprovals
     {

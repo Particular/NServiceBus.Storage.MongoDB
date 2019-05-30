@@ -1,10 +1,10 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
-{
-    using System;
-    using System.Threading.Tasks;
-    using global::MongoDB.Driver;
-    using NUnit.Framework;
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Driver;
+using NUnit.Framework;
 
+namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+{
     public class When_updating_a_saga_with_unique_properties : MongoFixture
     {
         [Test]

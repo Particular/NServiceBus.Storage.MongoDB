@@ -1,10 +1,10 @@
-﻿namespace NServiceBus
-{
-    using System;
-    using Configuration.AdvancedExtensibility;
-    using MongoDB.Driver;
-    using Storage.MongoDB;
+﻿using System;
+using MongoDB.Driver;
+using NServiceBus.Configuration.AdvancedExtensibility;
+using NServiceBus.Storage.MongoDB;
 
+namespace NServiceBus
+{
     public static class MongoDBSettingsExtensions
     {
         public static PersistenceExtensions<MongoDBPersistence> Client(this PersistenceExtensions<MongoDBPersistence> persistenceExtensions, IMongoClient client)

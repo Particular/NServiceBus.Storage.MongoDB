@@ -1,9 +1,9 @@
+using System;
+using System.Threading.Tasks;
+using NUnit.Framework;
+
 namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 {
-    using System;
-    using System.Threading.Tasks;
-    using NUnit.Framework;
-
     public class When_updating_a_saga_without_unique_properties : MongoFixture
     {
         [Test]

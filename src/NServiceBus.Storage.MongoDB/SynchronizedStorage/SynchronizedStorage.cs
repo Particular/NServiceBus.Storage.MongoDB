@@ -1,8 +1,8 @@
-﻿using MongoDB.Driver;
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Driver;
 using NServiceBus.Extensibility;
 using NServiceBus.Persistence;
-using System;
-using System.Threading.Tasks;
 
 namespace NServiceBus.Storage.MongoDB
 {

@@ -1,11 +1,11 @@
-﻿namespace NServiceBus
-{
-    using System;
-    using MongoDB.Driver;
-    using Features;
-    using Persistence;
-    using NServiceBus.Storage.MongoDB;
+﻿using System;
+using MongoDB.Driver;
+using NServiceBus.Features;
+using NServiceBus.Persistence;
+using NServiceBus.Storage.MongoDB;
 
+namespace NServiceBus
+{
     public class MongoDBPersistence : PersistenceDefinition
     {
         static IMongoClient defaultClient;

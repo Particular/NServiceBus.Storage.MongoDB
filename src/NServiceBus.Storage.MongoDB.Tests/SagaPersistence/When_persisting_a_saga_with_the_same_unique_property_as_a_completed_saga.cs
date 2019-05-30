@@ -1,9 +1,9 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
-{
-    using System;
-    using System.Threading.Tasks;
-    using NUnit.Framework;
+﻿using System;
+using System.Threading.Tasks;
+using NUnit.Framework;
 
+namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+{
     public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga : MongoFixture
     {
         [Test]

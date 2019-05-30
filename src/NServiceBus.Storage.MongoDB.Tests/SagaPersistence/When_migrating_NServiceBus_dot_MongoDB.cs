@@ -1,8 +1,8 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using NUnit.Framework;
-using System;
-using System.Threading.Tasks;
 
 namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 {
@@ -13,7 +13,6 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         [Test]
         public async Task Persister_works_with_existing_sagas()
         {
-            
             var legacySagaData = new NServiceBus.MongoDB.NServiceBusMongoDBLegacySagaData
             {
                 Id = Guid.NewGuid(),
@@ -27,7 +26,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             SetVersionFieldName(nameof(legacySagaData.DocumentVersion));
             SetCollectionNamingConvention(collectionNameConvention);
 
-            await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId), d => 
+            await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId), d =>
             {
                 var document = d.ToBsonDocument();
 

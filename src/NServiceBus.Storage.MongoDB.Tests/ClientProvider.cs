@@ -1,8 +1,8 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests
-{
-    using System;
-    using global::MongoDB.Driver;
+﻿using System;
+using MongoDB.Driver;
 
+namespace NServiceBus.Storage.MongoDB.Tests
+{
     static class ClientProvider
     {
         static IMongoClient client;

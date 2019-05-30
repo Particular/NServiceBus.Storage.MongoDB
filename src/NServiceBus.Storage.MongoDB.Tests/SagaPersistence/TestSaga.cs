@@ -1,9 +1,9 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
-{
-    using System;
-    using System.Collections.Generic;
-    using global::MongoDB.Bson.Serialization.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using MongoDB.Bson.Serialization.Attributes;
 
+namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+{
     public class TestSaga : IContainSagaData
     {
         public virtual Guid Id { get; set; }

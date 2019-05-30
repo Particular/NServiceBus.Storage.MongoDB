@@ -1,9 +1,9 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
-{
-    using System;
-    using System.Threading.Tasks;
-    using NUnit.Framework;
+﻿using System;
+using System.Threading.Tasks;
+using NUnit.Framework;
 
+namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+{
     public class When_persisting_a_saga_entity_with_related_entities : MongoFixture
     {
         RelatedClass _relatedClass;

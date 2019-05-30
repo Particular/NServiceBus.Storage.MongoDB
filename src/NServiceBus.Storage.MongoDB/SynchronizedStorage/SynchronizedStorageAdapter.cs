@@ -1,8 +1,8 @@
-﻿using NServiceBus.Extensibility;
+﻿using System.Threading.Tasks;
+using NServiceBus.Extensibility;
 using NServiceBus.Outbox;
 using NServiceBus.Persistence;
 using NServiceBus.Transport;
-using System.Threading.Tasks;
 
 namespace NServiceBus.Storage.MongoDB
 {

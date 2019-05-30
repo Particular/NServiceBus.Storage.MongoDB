@@ -1,13 +1,12 @@
+using NServiceBus.Features;
+
 namespace NServiceBus.Storage.MongoDB
 {
-    using Features;
-    using global::MongoDB.Bson.Serialization.Conventions;
-
     class SagaStorage : Feature
     {
         SagaStorage()
         {
-            DependsOn<Sagas>();
+            DependsOn<Features.Sagas>();
             DependsOn<SynchronizedStorageFeature>();
         }
 

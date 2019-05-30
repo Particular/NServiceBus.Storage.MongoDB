@@ -20,9 +20,14 @@ class ConfigureEndpointMongoDBPersistence : IConfigureEndpointTestExecution
         return Task.FromResult(0);
     }
 
-    public Task Cleanup()
+    public async Task Cleanup()
     {
-        return client.DropDatabaseAsync(databaseName);
+        try
+        {
+            await client.DropDatabaseAsync(databaseName);
+        }
+        catch (Exception)
+        { }
     }
 }
 

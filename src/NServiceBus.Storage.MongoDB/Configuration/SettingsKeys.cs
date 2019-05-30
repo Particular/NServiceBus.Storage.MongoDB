@@ -2,10 +2,11 @@
 {
     static class SettingsKeys
     {
-        public const string VersionFieldName = "MongoDBVersionFieldName";
-        public const string CollectionNamingScheme = "MongoDBCollectionNamingScheme";
-        public const string DatabaseName = "MongoDBDatabaseName";
-        public const string Client = "MongoDBClient";
-        public const string UseTransactions = "MongoDBUseTransactions";
+        const string baseName = "MongoDB.";
+        public const string VersionFieldName = baseName + nameof(VersionFieldName);
+        public const string CollectionNamingScheme = baseName + nameof(CollectionNamingScheme);
+        public const string DatabaseName = baseName + nameof(DatabaseName);
+        public const string Client = baseName + nameof(Client);
+        public const string UseTransactions = baseName + nameof(UseTransactions);
     }
 }

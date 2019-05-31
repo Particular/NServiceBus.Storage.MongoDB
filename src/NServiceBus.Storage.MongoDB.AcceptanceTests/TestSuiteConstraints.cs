@@ -16,6 +16,6 @@ namespace NServiceBus.AcceptanceTests
 
         public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsNativeDeferral);
 
-        public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointMongoDBPersistence();
+        public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointMongoPersistence();
     }
 }

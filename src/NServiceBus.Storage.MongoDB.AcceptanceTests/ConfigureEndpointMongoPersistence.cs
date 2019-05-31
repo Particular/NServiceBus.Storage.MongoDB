@@ -4,7 +4,7 @@ using MongoDB.Driver;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 
-class ConfigureEndpointMongoDBPersistence : IConfigureEndpointTestExecution
+class ConfigureEndpointMongoPersistence : IConfigureEndpointTestExecution
 {
     const string databaseName = "AcceptanceTests";
     IMongoClient client;

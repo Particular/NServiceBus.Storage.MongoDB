@@ -5,6 +5,9 @@ using NServiceBus.Storage.MongoDB;
 
 namespace NServiceBus
 {
+    /// <summary>
+    ///
+    /// </summary>
     public class CompatibilitySettings : ExposeSettings
     {
         internal CompatibilitySettings(SettingsHolder settingsHolder) : base(settingsHolder) { }

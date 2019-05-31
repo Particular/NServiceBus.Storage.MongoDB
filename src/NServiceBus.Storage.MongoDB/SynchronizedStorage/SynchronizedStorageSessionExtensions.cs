@@ -5,8 +5,19 @@ using NServiceBus.Storage.MongoDB;
 
 namespace NServiceBus
 {
+    /// <summary>
+    ///
+    /// </summary>
     public static class SynchronizedStorageSessionExtensions
     {
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="session"></param>
+        /// <param name="name"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         public static IMongoCollection<T> GetCollection<T>(this SynchronizedStorageSession session, string name, MongoCollectionSettings settings = null)
         {
             Guard.AgainstNull(nameof(session), session);

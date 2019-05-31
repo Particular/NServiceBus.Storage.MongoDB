@@ -1,9 +1,8 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
-{
-    using System;
-    using System.Collections.Generic;
-    using global::MongoDB.Bson.Serialization.Attributes;
+﻿using System;
+using System.Collections.Generic;
 
+namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+{
     public class TestSaga : IContainSagaData
     {
         public virtual Guid Id { get; set; }
@@ -22,7 +21,7 @@
 
         public virtual TestComponent TestComponent { get; set; }
 
-        public virtual PolymorpicPropertyBase PolymorpicRelatedProperty { get; set; }
+        public virtual PolymorphicPropertyBase PolymorphicRelatedProperty { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -33,11 +32,9 @@
         {
             return base.GetHashCode();
         }
-
-        [DocumentVersion]
-        public int Version { get; set; }
     }
-    public class PolymorpicProperty : PolymorpicPropertyBase
+
+    public class PolymorphicProperty : PolymorphicPropertyBase
     {
         public virtual int SomeInt { get; set; }
 
@@ -52,7 +49,7 @@
         }
     }
 
-    public class PolymorpicPropertyBase
+    public class PolymorphicPropertyBase
     {
         public virtual Guid Id { get; set; }
     }
@@ -64,8 +61,10 @@
 
     public class TestComponent
     {
+        // ReSharper disable once MemberCanBePrivate.Global
         public string Property { get; set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public string AnotherProperty { get; set; }
 
         public override bool Equals(object obj)
@@ -93,7 +92,6 @@
         public virtual Guid Id { get; set; }
     }
 
-    [BsonIgnoreExtraElements]
     public class SagaWithUniqueProperty : IContainSagaData
     {
         public virtual Guid Id { get; set; }
@@ -105,12 +103,8 @@
         public virtual string UniqueString { get; set; }
 
         public string NonUniqueString { get; set; }
-
-        [DocumentVersion]
-        public int Version { get; set; }
     }
 
-    [BsonIgnoreExtraElements]
     public class SagaWithoutUniqueProperties : IContainSagaData
     {
         public virtual Guid Id { get; set; }
@@ -122,8 +116,5 @@
         public virtual string UniqueString { get; set; }
 
         public string NonUniqueString { get; set; }
-
-        [DocumentVersion]
-        public int Version { get; set; }
     }
 }

@@ -1,9 +1,9 @@
+using System;
+using System.Threading.Tasks;
+using NUnit.Framework;
+
 namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 {
-    using System;
-    using System.Threading.Tasks;
-    using NUnit.Framework;
-
     public class When_updating_a_saga_without_unique_properties : MongoFixture
     {
         [Test]
@@ -25,6 +25,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             }).ConfigureAwait(false);
 
             saga1 = await LoadSaga<SagaWithoutUniqueProperties>(saga1.Id).ConfigureAwait(false);
+
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
 
@@ -40,10 +41,9 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
             await SaveSaga(saga1).ConfigureAwait(false);
 
-            Assert.ThrowsAsync<MongoDBSagaConcurrentUpdateException>(() =>
+            Assert.ThrowsAsync<Exception>(() =>
                 UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
                 {
-                    Assert.AreEqual(s.Version, 0);
                     s.NonUniqueString = "notUnique2";
                     s.UniqueString = "whatever2";
 

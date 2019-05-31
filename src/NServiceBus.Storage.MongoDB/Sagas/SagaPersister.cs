@@ -1,76 +1,143 @@
-﻿using MongoDB.Bson.Serialization;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
+using NServiceBus.Extensibility;
+using NServiceBus.Persistence;
+using NServiceBus.Sagas;
 
 namespace NServiceBus.Storage.MongoDB
 {
-    using System;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using NServiceBus.Extensibility;
-    using NServiceBus.Persistence;
-    using NServiceBus.Sagas;
-
     class SagaPersister : ISagaPersister
     {
-        private readonly SagaRepository _repo;
-
-        public SagaPersister(SagaRepository repo)
+        public SagaPersister(string versionElementName)
         {
-            _repo = repo;
+            this.versionElementName = versionElementName;
         }
 
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
-            DocumentVersionAttribute.SetPropertyValue(sagaData, 0);
-            await EnsureUniqueIndex(sagaData.GetType(), correlationProperty?.Name).ConfigureAwait(false);
+            var storageSession = (StorageSession)session;
+            var sagaDataType = sagaData.GetType();
+            var collection = storageSession.GetCollection(sagaDataType);
 
-            await _repo.Insert(sagaData).ConfigureAwait(false);
-        }
-
-        private Task EnsureUniqueIndex(Type sagaDataType, string propertyName)
-        {
-            if (propertyName == null)
+            if (correlationProperty != null && !createdIndexCache.ContainsKey(sagaDataType.Name))
             {
-                return Task.FromResult(0);
+                var propertyElementName = GetElementName(sagaDataType, correlationProperty.Name);
+
+                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
+
+                await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+
+                createdIndexCache.GetOrAdd(sagaDataType.Name, true);
             }
 
-            var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var uniqueFieldName = GetFieldName(classmap, propertyName);
+            var document = sagaData.ToBsonDocument();
+            document.Add(versionElementName, 0);
 
-            return _repo.EnsureUniqueIndex(sagaDataType, uniqueFieldName);
+            await collection.InsertOneAsync(document).ConfigureAwait(false);
         }
 
-        public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            var versionProperty = DocumentVersionAttribute.GetProperty(sagaData);
+            var storageSession = (StorageSession)session;
+            var sagaDataType = sagaData.GetType();
+            var collection = storageSession.GetCollection(sagaDataType);
 
-            var classmap = BsonClassMap.LookupClassMap(sagaData.GetType());
-            var versionFieldName = GetFieldName(classmap, versionProperty.Key);
+            var version = storageSession.RetrieveVersion(sagaDataType);
 
-            return _repo.Update(sagaData, versionFieldName, versionProperty.Value);
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version);
+
+            var document = sagaData.ToBsonDocument();
+            var updateBuilder = Builders<BsonDocument>.Update;
+            var update = updateBuilder.Inc(versionElementName, 1);
+
+            foreach (var element in document)
+            {
+                if (element.Name != versionElementName && element.Name != idElementName)
+                {
+                    update = update.Set(element.Name, element.Value);
+                }
+            }
+
+            var modifyResult = await collection.FindOneAndUpdateAsync(
+                filter,
+                update,
+                new FindOneAndUpdateOptions<BsonDocument> { IsUpsert = false, ReturnDocument = ReturnDocument.After }).ConfigureAwait(false);
+
+            if (modifyResult == null)
+            {
+                throw new Exception($"The '{sagaDataType.Name}' saga with id '{sagaData.Id}' was updated by another process or no longer exists.");
+            }
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
-        {
-            return _repo.FindById<TSagaData>(sagaId);
-        }
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData => GetSagaData<TSagaData>(typeof(TSagaData), idElementName, sagaId, session);
 
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
-            var classmap = BsonClassMap.LookupClassMap(typeof(TSagaData));
-            var propertyFieldName = GetFieldName(classmap, propertyName);
+            var sagaDataType = typeof(TSagaData);
+            var propertyElementName = GetElementName(sagaDataType, propertyName);
 
-            return _repo.FindByFieldName<TSagaData>(propertyFieldName, propertyValue);
+            return GetSagaData<TSagaData>(sagaDataType, propertyElementName, propertyValue, session);
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            return _repo.Remove(sagaData);
+            var storageSession = (StorageSession)session;
+            var sagaDataType = sagaData.GetType();
+            var collection = storageSession.GetCollection(sagaDataType);
+
+            return collection.DeleteOneAsync(new BsonDocument(idElementName, sagaData.Id));
         }
 
-        private string GetFieldName(BsonClassMap classMap, string property)
+        async Task<TSagaData> GetSagaData<TSagaData>(Type sagaDataType, string elementName, object elementValue, SynchronizedStorageSession session)
         {
-            var element = classMap.AllMemberMaps.First(m => m.MemberName == property);
-            return element.ElementName;
+            var storageSession = (StorageSession)session;
+            var collection = storageSession.GetCollection(sagaDataType);
+
+            var document = await collection.Find(new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
+
+            if (document != null)
+            {
+                var version = document.GetValue(versionElementName);
+                document.Remove(versionElementName);
+                storageSession.StoreVersion(sagaDataType, version);
+
+                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
+                {
+                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
+                    {
+                        cm.AutoMap();
+                        cm.SetIgnoreExtraElements(true);
+                    });
+                }
+
+                return BsonSerializer.Deserialize<TSagaData>(document);
+            }
+
+            return default;
         }
+
+        string GetElementName(Type type, string property)
+        {
+            var classMap = BsonClassMap.LookupClassMap(type);
+
+            foreach (var memberMap in classMap.AllMemberMaps)
+            {
+                if (memberMap.MemberName == property)
+                {
+                    return memberMap.ElementName;
+                }
+            }
+
+            throw new InvalidOperationException($"Property '{property}' not found in '{type}' class map.");
+        }
+
+        const string idElementName = "_id";
+        readonly string versionElementName;
+        readonly ConcurrentDictionary<string, bool> createdIndexCache = new ConcurrentDictionary<string, bool>();
     }
 }

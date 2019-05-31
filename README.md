@@ -1,130 +1,102 @@
-## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/9cfq3u3vd0rf4kl2/branch/master?svg=true)](https://ci.appveyor.com/project/tekmaven/nservicebus-persistence-mongodb/branch/master) [![NuGet version](https://badge.fury.io/nu/NServiceBus.Persistence.MongoDb.svg)](http://badge.fury.io/nu/NServiceBus.Persistence.MongoDb)##
+## NServiceBus.Storage.MongoDB
 
-This package includes MongoDB persistence implementations for NServiceBus v6:
+This package includes [MongoDB](https://www.mongodb.com/) persistence implementations for NServiceBus v7:
 
-- Timeouts
-- Subscriptions
 - Sagas
-- DataBus
+
+Transactions
 
 ## Install ##
-Add the `NServiceBus.Persistence.MongoDb` package to your NServiceBus service host project.
+Add the `NServiceBus.Storage.MongoDB` package to your NServiceBus project.
 
- ```Install-Package NServiceBus.Persistence.MongoDb```   
+ ```Install-Package NServiceBus.Storage.MongoDB```   
+
+
 
 ## Configuration ##
+
 **1** Set the `EndpointConfiguration` object to use `MongoDbPersistence`
 
 ```csharp
 using NServiceBus;
-using NServiceBus.Persistence.MongoDB;
 
-namespace Example
+class Program
 {
-    public class EndpointConfig : IConfigureThisEndpoint
+    public async Task Main()
     {
-        public void Customize(EndpointConfiguration configuration)
-        {
-            configuration.UsePersistence<MongoDbPersistence>();
-        }
+        var endpointConfiguration = new EndpointConfiguration("Endpoint Name");
+        endpointConfiguration.UsePersistence<MongoDBPersistence>();
     }
 }
 ```
 
-**2** Add your MongoDB connection string to your ```app.config```:
+**2** Hit F5. Assuming your MongoDB server is at `mongourl://localhost:27017` it will just work.
 
-```xml
-<connectionStrings>
-    <add name="NServiceBus/Persistence/MongoDB"
-		connectionString="mongodb://localhost/databaseName"/>
-</connectionStrings>
-```
 
-**3** Hit F5. Yes, it is that simple.
 
-## Custom Connection String Options ##
-The persistence configuration model provides a reach API. This enables to override the default  
-connection string name by calling ```.SetConnectionStringName(string)``` extension method.
+## Customizing the MongoDB connection ##
+
+Provide a custom `MongoClient` by calling the ```.Client(client)``` extension method.
 
 ```csharp
-config
-	.UsePersistence<MongoDbPersistence>()
-	.SetConnectionStringName("SharedConnectionString");
+endpointConfiguration
+	.UsePersistence<MongoDBPersistence>()
+	.Client(new MongoClient("Custom Mongo URL"));
 ```
 
-If you are resolving your configuration setting from a different source at run-time which is  
-very common in cloud based deployments. Then you can use  ```.SetConnectionString(string)```  
-to provide it.
+
+
+## Customizing the MongoDB connection
+
+By default the persistence will use a [sanitized](https://docs.mongodb.com/manual/reference/limits/#Restrictions-on-Database-Names-for-Windows) version of the endpoint name as the database to store NServiceBus objects. Provide a custom database name for by calling the ```.DatabaseName(name)``` extension method:
 
 ```csharp
-config
-	.UsePersistence<MongoDbPersistence>()
-	.SetConnectionString("mongodb://localhost/databaseName");
+endpointConfiguration
+	.UsePersistence<MongoDBPersistence>()
+	.DatabaseName("MyCustomName");
 ```
 
-## Saga definition guideline##
-In order to get Sagas working correctly you need to enforce following
 
-* your saga state should implement ```IContainSagaData```
-* requires a property ```Version``` decorated with attribute ```[DocumentVersion]```
 
-Here is an example
+## Transactions
+
+By default the persistence will use session [transactions](https://docs.mongodb.com/manual/core/transactions/) for making changes to Saga data. This allows atomic guarantees when multiple sagas are invoked by a single message. To support older MongoDB servers (< 4) and MongoDB sharded clusters you can disable transactions by calling the `.UseTransactions(false)` extension method:
+
+
 
 ```csharp
-public class OrderBillingSagaData : IContainSagaData
+endpointConfiguration
+	.UsePersistence<MongoDBPersistence>()
+	.UseTransactions(false);
+```
+
+
+
+You can join the existing MongoDB session transaction in your handlers by obtaining a reference to a database collection from the `IMessageHandlerContext`:
+
+```c#
+public Task Handle(MyMessage message, IMessageHandlerContext context)
 {
-    public string OrderId { get; set; }
-
-    [DocumentVersion]
-    public int Version { get; set; }
-
-    public bool Canceled { get; set; }
-
-    public Guid Id { get; set; }
-    public string Originator { get; set; }
-    public string OriginalMessageId { get; set; }
-}
-```
-## Dealing with concurrency ##
-The key concurrency safeguards that sagas guarantee depend heavily on the underlying data store.   
-The two specific cases that NServiceBus relies on the underling data store are [concurrent access to   
-   non-existing saga instances](http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency#concurrent-access-to-non-existing-saga-instances) and [concurrent access to existing saga instances](http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency#concurrent-access-to-existing-saga-instances).
-
-**Here is how we deal with them**  
-
-*Concurrent access to non-existing saga instances*. The persister uses MongoDb's [Unique Indexes](http://docs.mongodb.org/manual/core/index-unique/)  
- to ensure only one document can contain the unique data.  
-
-*Concurrent access to existing saga instances*. The persister uses a document versioning  
-scheme built on top of MongoDb's [findAndModify](http://docs.mongodb.org/manual/reference/command/findAndModify/) command to atomically update the existing  
-persisted data only if it has not been changed since it was retrieved. Since the update   
-is atomic, it will ensure that if there are multiple simultaneous updates to a saga, only one  
-will succeed.
-
-
-## DataBus ##
-Do you use [DataBus](http://docs.particular.net/nservicebus/attachments-databus-sample)?  We also supply an implimentation that is backed with MongoDB's GridFS.  To configure, just add this line to your busConfiguration:
-
-```csharp
-using NServiceBus;
-using NServiceBus.Persistence.MongoDB;
-
-namespace Example
-{
-    public class EndpointConfig : IConfigureThisEndpoint
-    {
-        public void Customize(EndpointConfiguration configuration)
-        {
-            configuration.UsePersistence<MongoDbPersistence>();
-            configuration.UseDataBus<MongoDbDataBus>(); //add this line!
-        }
-    }
+    var collection = context.SynchronizedStorageSession().GetCollection<MyBusinessObject>("collectionname");    
 }
 ```
 
-## NServiceBus Documentation Sample
-http://docs.particular.net/samples/mongodb/
+The transaction and session will be automatically completed by NServiceBus when handler processing is complete.
 
-## Thanks to our contributors ##
-[@ruslanrusu](https://twitter.com/ruslanrusu)  
-[CRuppert](https://github.com/CRuppert)
+
+
+## Running Tests Locally
+
+By default both the AcceptanceTests and Tests projects will connect to any MongoDB server running at the default address of `mongodb://localhost:27017`
+
+Instructions for installing MongoDB can be found on the [MongoDB website](https://docs.mongodb.com/manual/installation/).
+
+For developers using Docker containers the following docker command will quickly setup a container configured to use the default port:
+
+`docker run -d -p 27017:27017 --name="Test MongoDB" mongo:latest`
+
+
+
+## Full Documentation
+
+Full documentation and samples can be found at http://docs.particular.net/persistence/mongodb

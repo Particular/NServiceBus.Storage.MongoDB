@@ -1,11 +1,10 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
-{
-    using System;
+﻿using System;
 
+namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+{
     public static class EqualityExtensions
     {
-        public static bool EqualTo<T>(this T item, object obj, Func<T, T, bool> equals)
-            where T : class
+        public static bool EqualTo<T>(this T item, object obj, Func<T, T, bool> equals) where T : class
         {
             var x = obj as T;
 

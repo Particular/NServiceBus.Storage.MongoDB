@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 {
@@ -93,7 +92,6 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         public virtual Guid Id { get; set; }
     }
 
-    [BsonIgnoreExtraElements]
     public class SagaWithUniqueProperty : IContainSagaData
     {
         public virtual Guid Id { get; set; }
@@ -107,7 +105,6 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         public string NonUniqueString { get; set; }
     }
 
-    [BsonIgnoreExtraElements]
     public class SagaWithoutUniqueProperties : IContainSagaData
     {
         public virtual Guid Id { get; set; }

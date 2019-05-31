@@ -25,7 +25,7 @@ namespace NServiceBus.Storage.MongoDB
 
             if (correlationProperty != null && !createdIndexCache.ContainsKey(sagaDataType.Name))
             {
-                var propertyElementName = GetElementName(BsonClassMap.LookupClassMap(sagaDataType), correlationProperty.Name);
+                var propertyElementName = GetElementName(sagaDataType, correlationProperty.Name);
 
                 var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
 
@@ -79,8 +79,7 @@ namespace NServiceBus.Storage.MongoDB
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
             var sagaDataType = typeof(TSagaData);
-            var classMap = BsonClassMap.LookupClassMap(sagaDataType);
-            var propertyElementName = GetElementName(classMap, propertyName);
+            var propertyElementName = GetElementName(sagaDataType, propertyName);
 
             return GetSagaData<TSagaData>(session, sagaDataType, propertyElementName, propertyValue);
         }
@@ -122,8 +121,10 @@ namespace NServiceBus.Storage.MongoDB
             return default;
         }
 
-        string GetElementName(BsonClassMap classMap, string property)
+        string GetElementName(Type type, string property)
         {
+            var classMap = BsonClassMap.LookupClassMap(type);
+
             foreach (var memberMap in classMap.AllMemberMaps)
             {
                 if (memberMap.MemberName == property)
@@ -132,7 +133,7 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            throw new ArgumentException($"Property '{property}' not found in class member map.", nameof(property));
+            throw new InvalidOperationException($"Property '{property}' not found in '{type}' class map.");
         }
 
         const string idElementName = "_id";

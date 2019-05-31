@@ -50,7 +50,7 @@ namespace NServiceBus.Storage.MongoDB
             }
             catch (TimeoutException ex)
             {
-                throw new Exception($"Unable to connect to MongoDB. Check your connection settings and verify MongoDB is running and accessible.", ex);
+                throw new Exception("Unable to connect to MongoDB. Check your connection settings and verify MongoDB is running and accessible.", ex);
             }
 
             context.Container.ConfigureComponent(() => new SynchronizedStorageFactory(client, useTransactions, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);

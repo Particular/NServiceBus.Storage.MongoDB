@@ -62,8 +62,10 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
 
     public class TestComponent
     {
+        // ReSharper disable once MemberCanBePrivate.Global
         public string Property { get; set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public string AnotherProperty { get; set; }
 
         public override bool Equals(object obj)

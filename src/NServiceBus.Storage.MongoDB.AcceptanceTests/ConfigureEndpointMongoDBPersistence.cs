@@ -15,7 +15,7 @@ class ConfigureEndpointMongoDBPersistence : IConfigureEndpointTestExecution
 
         client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
 
-        configuration.UsePersistence<MongoPersistence>().Client(client).DatabaseName(databaseName);
+        configuration.UsePersistence<MongoPersistence>().MongoClient(client).DatabaseName(databaseName);
 
         return Task.FromResult(0);
     }

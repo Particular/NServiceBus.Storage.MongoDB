@@ -74,65 +74,15 @@ namespace NServiceBus.Storage.MongoDB
             }
         }
 
-        public async Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData => GetSagaData<TSagaData>(session, typeof(TSagaData), idElementName, sagaId);
+
+        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
-            var storageSession = (StorageSession)session;
             var sagaDataType = typeof(TSagaData);
-            var collection = storageSession.GetCollection(sagaDataType);
-
-            var document = await collection.Find(new BsonDocument(idElementName, sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
-
-            if (document != null)
-            {
-                var version = document.GetValue(versionElementName);
-                document.Remove(versionElementName);
-                storageSession.StoreVersion(sagaDataType, version);
-
-                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
-                {
-                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
-                    {
-                        cm.AutoMap();
-                        cm.SetIgnoreExtraElements(true);
-                    });
-                }
-
-                return BsonSerializer.Deserialize<TSagaData>(document);
-            }
-
-            return default;
-        }
-
-        public async Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
-        {
-            var storageSession = (StorageSession)session;
-            var sagaDataType = typeof(TSagaData);
-            var collection = storageSession.GetCollection(sagaDataType);
-
             var classMap = BsonClassMap.LookupClassMap(sagaDataType);
             var propertyElementName = GetElementName(classMap, propertyName);
 
-            var document = await collection.Find(new BsonDocument(propertyElementName, BsonValue.Create(propertyValue))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
-
-            if (document != null)
-            {
-                var version = document.GetValue(versionElementName);
-                document.Remove(versionElementName);
-                storageSession.StoreVersion(sagaDataType, version);
-
-                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
-                {
-                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
-                    {
-                        cm.AutoMap();
-                        cm.SetIgnoreExtraElements(true);
-                    });
-                }
-
-                return BsonSerializer.Deserialize<TSagaData>(document);
-            }
-
-            return default;
+            return GetSagaData<TSagaData>(session, sagaDataType, propertyElementName, propertyValue);
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
@@ -144,9 +94,37 @@ namespace NServiceBus.Storage.MongoDB
             return collection.DeleteOneAsync(new BsonDocument(idElementName, sagaData.Id));
         }
 
+        async Task<TSagaData> GetSagaData<TSagaData>(SynchronizedStorageSession session, Type sagaDataType, string elementName, object elementValue)
+        {
+            var storageSession = (StorageSession)session;
+            var collection = storageSession.GetCollection(sagaDataType);
+
+            var document = await collection.Find(new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
+
+            if (document != null)
+            {
+                var version = document.GetValue(versionElementName);
+                document.Remove(versionElementName);
+                storageSession.StoreVersion(sagaDataType, version);
+
+                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
+                {
+                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
+                    {
+                        cm.AutoMap();
+                        cm.SetIgnoreExtraElements(true);
+                    });
+                }
+
+                return BsonSerializer.Deserialize<TSagaData>(document);
+            }
+
+            return default;
+        }
+
         string GetElementName(BsonClassMap classMap, string property)
         {
-            foreach(var memberMap in classMap.AllMemberMaps)
+            foreach (var memberMap in classMap.AllMemberMaps)
             {
                 if (memberMap.MemberName == property)
                 {

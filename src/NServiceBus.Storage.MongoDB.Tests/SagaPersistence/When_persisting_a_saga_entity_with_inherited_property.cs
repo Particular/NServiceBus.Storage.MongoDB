@@ -15,7 +15,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
             entity = new TestSaga
             {
                 Id = Guid.NewGuid(),
-                PolymorpicRelatedProperty = new PolymorpicProperty {SomeInt = 9}
+                PolymorphicRelatedProperty = new PolymorphicProperty {SomeInt = 9}
             };
 
             await SaveSaga(entity).ConfigureAwait(false);
@@ -26,7 +26,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         [Test]
         public void Inherited_property_classes_should_be_persisted()
         {
-            Assert.AreEqual(entity.PolymorpicRelatedProperty, savedEntity.PolymorpicRelatedProperty);
+            Assert.AreEqual(entity.PolymorphicRelatedProperty, savedEntity.PolymorphicRelatedProperty);
         }
     }
 }

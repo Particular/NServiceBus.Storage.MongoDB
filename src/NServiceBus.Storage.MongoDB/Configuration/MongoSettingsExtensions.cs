@@ -18,7 +18,7 @@ namespace NServiceBus
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
             Guard.AgainstNull(nameof(mongoClient), mongoClient);
 
-            persistenceExtensions.GetSettings().Set(SettingsKeys.Client, (Func<IMongoClient>)(() => mongoClient));
+            persistenceExtensions.GetSettings().Set(SettingsKeys.MongoClient, (Func<IMongoClient>)(() => mongoClient));
             return persistenceExtensions;
         }
 

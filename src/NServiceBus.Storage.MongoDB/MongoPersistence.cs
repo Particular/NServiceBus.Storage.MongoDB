@@ -22,7 +22,7 @@ namespace NServiceBus
             {
                 s.EnableFeatureByDefault<SynchronizedStorage>();
 
-                s.SetDefault(SettingsKeys.Client, (Func<IMongoClient>)(() => {
+                s.SetDefault(SettingsKeys.MongoClient, (Func<IMongoClient>)(() => {
                     if (defaultClient == null)
                     {
                         defaultClient = new MongoClient();

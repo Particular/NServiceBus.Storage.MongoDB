@@ -13,7 +13,7 @@ namespace NServiceBus.Storage.MongoDB
                 collectionNamingConvention = type => type.Name.ToLower();
             }
 
-            var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.Client)();
+            var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
 
             if (!context.Settings.TryGet(SettingsKeys.UseTransactions, out bool useTransactions))

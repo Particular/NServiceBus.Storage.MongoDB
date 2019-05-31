@@ -7,14 +7,14 @@ using NServiceBus.Storage.MongoDB;
 namespace NServiceBus
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class MongoPersistence : PersistenceDefinition
     {
         static IMongoClient defaultClient;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public MongoPersistence()
         {

@@ -48,14 +48,14 @@ namespace NServiceBus.Storage.MongoDB
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
-            var fbuilder = Builders<BsonDocument>.Filter;
-            var filter = fbuilder.Eq(idElementName, sagaData.Id) & fbuilder.Eq(versionElementName, version);
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version);
 
-            var bsonDoc = sagaData.ToBsonDocument();
-            var ubuilder = Builders<BsonDocument>.Update;
-            var update = ubuilder.Inc(versionElementName, 1);
+            var document = sagaData.ToBsonDocument();
+            var updateBuilder = Builders<BsonDocument>.Update;
+            var update = updateBuilder.Inc(versionElementName, 1);
 
-            foreach (var element in bsonDoc)
+            foreach (var element in document)
             {
                 if (element.Name != versionElementName && element.Name != idElementName)
                 {
@@ -80,12 +80,12 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = typeof(TSagaData);
             var collection = storageSession.GetCollection(sagaDataType);
 
-            var doc = await collection.Find(new BsonDocument(idElementName, sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
+            var document = await collection.Find(new BsonDocument(idElementName, sagaId)).FirstOrDefaultAsync().ConfigureAwait(false);
 
-            if (doc != null)
+            if (document != null)
             {
-                var version = doc.GetValue(versionElementName);
-                doc.Remove(versionElementName);
+                var version = document.GetValue(versionElementName);
+                document.Remove(versionElementName);
                 storageSession.StoreVersion(sagaDataType, version);
 
                 if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
@@ -97,7 +97,7 @@ namespace NServiceBus.Storage.MongoDB
                     });
                 }
 
-                return BsonSerializer.Deserialize<TSagaData>(doc);
+                return BsonSerializer.Deserialize<TSagaData>(document);
             }
 
             return default;
@@ -109,15 +109,15 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = typeof(TSagaData);
             var collection = storageSession.GetCollection(sagaDataType);
 
-            var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var propertyElementName = GetElementName(classmap, propertyName);
+            var classMap = BsonClassMap.LookupClassMap(sagaDataType);
+            var propertyElementName = GetElementName(classMap, propertyName);
 
-            var doc = await collection.Find(new BsonDocument(propertyElementName, BsonValue.Create(propertyValue))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
+            var document = await collection.Find(new BsonDocument(propertyElementName, BsonValue.Create(propertyValue))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
 
-            if (doc != null)
+            if (document != null)
             {
-                var version = doc.GetValue(versionElementName);
-                doc.Remove(versionElementName);
+                var version = document.GetValue(versionElementName);
+                document.Remove(versionElementName);
                 storageSession.StoreVersion(sagaDataType, version);
 
                 if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
@@ -129,7 +129,7 @@ namespace NServiceBus.Storage.MongoDB
                     });
                 }
 
-                return BsonSerializer.Deserialize<TSagaData>(doc);
+                return BsonSerializer.Deserialize<TSagaData>(document);
             }
 
             return default;

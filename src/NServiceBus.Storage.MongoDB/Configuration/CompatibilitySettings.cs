@@ -34,8 +34,6 @@ namespace NServiceBus
         {
             Guard.AgainstNull(nameof(collectionNamingConvention), collectionNamingConvention);
 
-            //TODO: make sure null isn't returned or throw with collectionNamingConvention
-
             this.GetSettings().Set(SettingsKeys.CollectionNamingConvention, collectionNamingConvention);
             return this;
         }

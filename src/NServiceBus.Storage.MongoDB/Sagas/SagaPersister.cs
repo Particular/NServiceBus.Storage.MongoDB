@@ -74,14 +74,14 @@ namespace NServiceBus.Storage.MongoDB
             }
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData => GetSagaData<TSagaData>(session, typeof(TSagaData), idElementName, sagaId);
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData => GetSagaData<TSagaData>(typeof(TSagaData), idElementName, sagaId, session);
 
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
             var sagaDataType = typeof(TSagaData);
             var propertyElementName = GetElementName(sagaDataType, propertyName);
 
-            return GetSagaData<TSagaData>(session, sagaDataType, propertyElementName, propertyValue);
+            return GetSagaData<TSagaData>(sagaDataType, propertyElementName, propertyValue, session);
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
@@ -93,7 +93,7 @@ namespace NServiceBus.Storage.MongoDB
             return collection.DeleteOneAsync(new BsonDocument(idElementName, sagaData.Id));
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(SynchronizedStorageSession session, Type sagaDataType, string elementName, object elementValue)
+        async Task<TSagaData> GetSagaData<TSagaData>(Type sagaDataType, string elementName, object elementValue, SynchronizedStorageSession session)
         {
             var storageSession = (StorageSession)session;
             var collection = storageSession.GetCollection(sagaDataType);

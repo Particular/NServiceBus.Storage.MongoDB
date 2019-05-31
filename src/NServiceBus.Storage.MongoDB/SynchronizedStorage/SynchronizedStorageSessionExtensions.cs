@@ -17,7 +17,7 @@ namespace NServiceBus
                 return storageSession.GetCollection<T>(name, settings);
             }
 
-            throw new Exception("Cannot access the MongoDB synchronized storage session. Ensure that the endpoint has been configued to use MongoDB persistence.");
+            throw new Exception($"Cannot access the synchronized storage session. Ensure that 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>()' has been called.");
         }
     }
 }

@@ -43,14 +43,14 @@ namespace NServiceBus.Storage.MongoDB
                         }
                         catch (NotSupportedException ex)
                         {
-                            throw new Exception("Transactions are not supported by the MongoDB server/cluster. Disable support for transactions by calling the 'persistence.UseTransactions(false)' API.", ex);
+                            throw new Exception($"Transactions are not supported by the MongoDB server. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.", ex);
                         }
                     }
                 }
             }
             catch (TimeoutException ex)
             {
-                throw new Exception("Unable to connect to MongoDB. Check your connection settings and verify MongoDB is running and accessible.", ex);
+                throw new Exception("Unable to connect to the MongoDB server. Check the connection settings, and verify the server is running and accessible.", ex);
             }
 
             context.Container.ConfigureComponent(() => new SynchronizedStorageFactory(client, useTransactions, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);

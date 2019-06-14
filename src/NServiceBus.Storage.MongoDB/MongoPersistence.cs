@@ -34,6 +34,7 @@ namespace NServiceBus
             });
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
+            Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<OutboxStorage>());
         }
     }
 }

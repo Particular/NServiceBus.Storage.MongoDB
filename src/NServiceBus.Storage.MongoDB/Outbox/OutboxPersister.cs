@@ -21,7 +21,7 @@ namespace NServiceBus.Storage.MongoDB
         {
             var record = await client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox").Find(filter => filter.Id == messageId).SingleOrDefaultAsync().ConfigureAwait(false);
 
-            return record?.OutboxMessage;
+            return record != null ? new OutboxMessage(record.Id, record.TransportOperations) : null;
         }
 
         public async Task<OutboxTransaction> BeginTransaction(ContextBag context)
@@ -38,7 +38,7 @@ namespace NServiceBus.Storage.MongoDB
             var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
             var collection = mongoOutboxTransaction.GetCollection();
 
-            return collection.InsertOneAsync(new OutboxRecord { Id = message.MessageId, OutboxMessage = message });
+            return collection.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = message.TransportOperations });
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag context)
@@ -46,7 +46,7 @@ namespace NServiceBus.Storage.MongoDB
             var collection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox");
 
             var updateBuilder = Builders<OutboxRecord>.Update;
-            var update = updateBuilder.Set(field => field.OutboxMessage.TransportOperations, new TransportOperation[0]);
+            var update = updateBuilder.Set(field => field.TransportOperations, new TransportOperation[0]);
 
             await collection.UpdateOneAsync(filter => filter.Id == messageId, update).ConfigureAwait(false);
         }
@@ -58,7 +58,6 @@ namespace NServiceBus.Storage.MongoDB
     class OutboxRecord
     {
         public string Id { get; set; }
-
-        public OutboxMessage OutboxMessage { get; set; }
+        public TransportOperation[] TransportOperations { get; set; }
     }
 }

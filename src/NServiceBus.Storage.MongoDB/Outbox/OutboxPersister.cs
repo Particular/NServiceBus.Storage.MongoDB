@@ -11,14 +11,15 @@ namespace NServiceBus.Storage.MongoDB
 {
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(IMongoClient client)
+        public OutboxPersister(IMongoClient client, string databaseName)
         {
             this.client = client;
+            this.databaseName = databaseName;
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag context)
         {
-            var record = await client.GetDatabase("databasename").GetCollection<OutboxRecord>("outbox").Find(filter => filter.Id == messageId).SingleOrDefaultAsync().ConfigureAwait(false);
+            var record = await client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox").Find(filter => filter.Id == messageId).SingleOrDefaultAsync().ConfigureAwait(false);
 
             return record?.OutboxMessage;
         }
@@ -29,7 +30,7 @@ namespace NServiceBus.Storage.MongoDB
 
             mongoSession.StartTransaction();
 
-            return new MongoOutboxTransaction(mongoSession);
+            return new MongoOutboxTransaction(mongoSession, databaseName);
         }
 
         public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
@@ -42,7 +43,7 @@ namespace NServiceBus.Storage.MongoDB
 
         public async Task SetAsDispatched(string messageId, ContextBag context)
         {
-            var collection = client.GetDatabase("databasename").GetCollection<OutboxRecord>("outbox");
+            var collection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox");
 
             var updateBuilder = Builders<OutboxRecord>.Update;
             var update = updateBuilder.Set(field => field.OutboxMessage.TransportOperations, new TransportOperation[0]);
@@ -51,6 +52,7 @@ namespace NServiceBus.Storage.MongoDB
         }
 
         readonly IMongoClient client;
+        readonly string databaseName;
     }
 
     class OutboxRecord

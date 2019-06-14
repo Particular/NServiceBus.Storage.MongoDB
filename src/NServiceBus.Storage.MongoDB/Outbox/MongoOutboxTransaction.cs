@@ -11,12 +11,13 @@ namespace NServiceBus.Storage.MongoDB
 {
     class MongoOutboxTransaction : OutboxTransaction
     {
-        public MongoOutboxTransaction(IClientSessionHandle mongoSession)
+        public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName)
         {
             this.mongoSession = mongoSession;
+            this.databaseName = databaseName;
         }
 
-        public IMongoCollection<OutboxRecord> GetCollection() => mongoSession.Client.GetDatabase("databasename").GetCollection<OutboxRecord>("outbox");
+        public IMongoCollection<OutboxRecord> GetCollection() => mongoSession.Client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox");
 
         public Task Commit()
         {
@@ -40,5 +41,6 @@ namespace NServiceBus.Storage.MongoDB
         static readonly ILog Log = LogManager.GetLogger<MongoOutboxTransaction>();
 
         readonly IClientSessionHandle mongoSession;
+        readonly string databaseName;
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using NServiceBus.Extensibility;
@@ -11,15 +8,18 @@ namespace NServiceBus.Storage.MongoDB
 {
     class OutboxPersister : IOutboxStorage
     {
-        public OutboxPersister(IMongoClient client, string databaseName)
+        public OutboxPersister(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention)
         {
             this.client = client;
             this.databaseName = databaseName;
+            this.collectionNamingConvention = collectionNamingConvention;
+
+            outboxRecordCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)));
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag context)
         {
-            var record = await client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox").Find(filter => filter.Id == messageId).SingleOrDefaultAsync().ConfigureAwait(false);
+            var record = await outboxRecordCollection.Find(filter => filter.Id == messageId).SingleOrDefaultAsync().ConfigureAwait(false);
 
             return record != null ? new OutboxMessage(record.Id, record.TransportOperations) : null;
         }
@@ -30,29 +30,29 @@ namespace NServiceBus.Storage.MongoDB
 
             mongoSession.StartTransaction();
 
-            return new MongoOutboxTransaction(mongoSession, databaseName);
+            return new MongoOutboxTransaction(mongoSession, databaseName, collectionNamingConvention, context);
         }
 
         public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
             var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
-            var collection = mongoOutboxTransaction.GetCollection();
+            var collection = mongoOutboxTransaction.StorageSession.GetCollection<OutboxRecord>();
 
             return collection.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = message.TransportOperations });
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag context)
         {
-            var collection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox");
-
             var updateBuilder = Builders<OutboxRecord>.Update;
             var update = updateBuilder.Set(field => field.TransportOperations, new TransportOperation[0]);
 
-            await collection.UpdateOneAsync(filter => filter.Id == messageId, update).ConfigureAwait(false);
+            await outboxRecordCollection.UpdateOneAsync(filter => filter.Id == messageId, update).ConfigureAwait(false);
         }
 
         readonly IMongoClient client;
         readonly string databaseName;
+        readonly Func<Type, string> collectionNamingConvention;
+        readonly IMongoCollection<OutboxRecord> outboxRecordCollection;
     }
 
     class OutboxRecord

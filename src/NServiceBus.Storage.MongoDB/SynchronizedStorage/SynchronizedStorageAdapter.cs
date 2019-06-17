@@ -10,7 +10,15 @@ namespace NServiceBus.Storage.MongoDB
     {
         static readonly Task<CompletableSynchronizedStorageSession> emptyResult = Task.FromResult((CompletableSynchronizedStorageSession)null);
 
-        public Task<CompletableSynchronizedStorageSession> TryAdapt(OutboxTransaction transaction, ContextBag context) => emptyResult;
+        public Task<CompletableSynchronizedStorageSession> TryAdapt(OutboxTransaction transaction, ContextBag context)
+        {
+            if (transaction is MongoOutboxTransaction mongoOutboxTransaction)
+            {
+                return Task.FromResult((CompletableSynchronizedStorageSession)mongoOutboxTransaction.StorageSession);
+            }
+
+            return emptyResult;
+        }
 
         public Task<CompletableSynchronizedStorageSession> TryAdapt(TransportTransaction transportTransaction, ContextBag context) => emptyResult;
     }

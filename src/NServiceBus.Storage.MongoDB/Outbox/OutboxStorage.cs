@@ -22,6 +22,11 @@ namespace NServiceBus.Storage.MongoDB
 
         protected override void Setup(FeatureConfigurationContext context)
         {
+            if (!context.Settings.TryGet(SettingsKeys.CollectionNamingConvention, out Func<Type, string> collectionNamingConvention))
+            {
+                collectionNamingConvention = type => type.Name.ToLower();
+            }
+
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
 
@@ -35,7 +40,7 @@ namespace NServiceBus.Storage.MongoDB
                 });
             }
 
-            context.Container.ConfigureComponent(() => new OutboxPersister(client, databaseName), DependencyLifecycle.SingleInstance); //TODO
+            context.Container.ConfigureComponent(() => new OutboxPersister(client, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance); //TODO
         }
     }
 }

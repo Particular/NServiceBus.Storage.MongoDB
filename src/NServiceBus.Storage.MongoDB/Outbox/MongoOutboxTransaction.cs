@@ -1,46 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using NServiceBus.Logging;
+using NServiceBus.Extensibility;
 using NServiceBus.Outbox;
 
 namespace NServiceBus.Storage.MongoDB
 {
     class MongoOutboxTransaction : OutboxTransaction
     {
-        public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName)
-        {
-            this.mongoSession = mongoSession;
-            this.databaseName = databaseName;
-        }
+        public StorageSession StorageSession { get; }
 
-        public IMongoCollection<OutboxRecord> GetCollection() => mongoSession.Client.GetDatabase(databaseName).GetCollection<OutboxRecord>("outbox");
+        public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, Func<Type, string> collectionNamingConvention, ContextBag context)
+        {
+            StorageSession = new StorageSession(mongoSession, databaseName, context, collectionNamingConvention, false);
+        }
 
         public Task Commit()
         {
-            return mongoSession.CommitTransactionAsync();
+            return StorageSession.InternalCompleteAsync();
         }
 
         public void Dispose()
         {
-            try
-            {
-                mongoSession.AbortTransaction();
-            }
-            catch (Exception ex)
-            {
-                Log.Warn("Exception thrown while aborting transaction", ex);
-            }
-
-            mongoSession.Dispose();
+            StorageSession.InternalDispose();
         }
-
-        static readonly ILog Log = LogManager.GetLogger<MongoOutboxTransaction>();
-
-        readonly IClientSessionHandle mongoSession;
-        readonly string databaseName;
     }
 }

@@ -25,7 +25,7 @@ namespace NServiceBus.Storage.MongoDB
                 mongoSession.StartTransaction();
             }
 
-            return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention);
+            return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention, true);
         }
 
         readonly IMongoClient client;

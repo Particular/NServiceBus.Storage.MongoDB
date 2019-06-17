@@ -22,6 +22,11 @@ namespace NServiceBus.Storage.MongoDB
 
         protected override void Setup(FeatureConfigurationContext context)
         {
+            if (context.Settings.TryGet(SettingsKeys.UseTransactions, out bool useTransactions) && useTransactions == false)
+            {
+                throw new Exception($"Transactions are required when the Outbox is enabled, but they have been disabled by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
+            }
+
             if (!context.Settings.TryGet(SettingsKeys.CollectionNamingConvention, out Func<Type, string> collectionNamingConvention))
             {
                 collectionNamingConvention = type => type.Name.ToLower();

@@ -8,13 +8,9 @@ namespace NServiceBus.Storage.MongoDB
     {
         protected override void Setup(FeatureConfigurationContext context)
         {
-            if (!context.Settings.TryGet(SettingsKeys.CollectionNamingConvention, out Func<Type, string> collectionNamingConvention))
-            {
-                collectionNamingConvention = type => type.Name.ToLower();
-            }
-
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
+            var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
             if (!context.Settings.TryGet(SettingsKeys.UseTransactions, out bool useTransactions))
             {

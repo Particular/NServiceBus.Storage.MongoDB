@@ -10,10 +10,7 @@ namespace NServiceBus.Storage.MongoDB
     {
         public OutboxPersister(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention)
         {
-            this.client = client;
-            this.databaseName = databaseName;
-            this.collectionNamingConvention = collectionNamingConvention;
-
+            outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, collectionNamingConvention);
             outboxRecordCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)));
         }
 
@@ -24,14 +21,7 @@ namespace NServiceBus.Storage.MongoDB
             return outboxRecord != null ? new OutboxMessage(outboxRecord.Id, outboxRecord.TransportOperations) : null;
         }
 
-        public async Task<OutboxTransaction> BeginTransaction(ContextBag context)
-        {
-            var mongoSession = await client.StartSessionAsync().ConfigureAwait(false);
-
-            mongoSession.StartTransaction();
-
-            return new MongoOutboxTransaction(mongoSession, databaseName, context, collectionNamingConvention);
-        }
+        public Task<OutboxTransaction> BeginTransaction(ContextBag context) => outboxTransactionFactory.BeginTransaction(context);
 
         public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
@@ -49,9 +39,7 @@ namespace NServiceBus.Storage.MongoDB
             await outboxRecordCollection.UpdateOneAsync(record => record.Id == messageId, update).ConfigureAwait(false);
         }
 
-        readonly IMongoClient client;
-        readonly string databaseName;
-        readonly Func<Type, string> collectionNamingConvention;
+        readonly MongoOutboxTransactionFactory outboxTransactionFactory;
         readonly IMongoCollection<OutboxRecord> outboxRecordCollection;
     }
 }

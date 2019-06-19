@@ -38,7 +38,7 @@ namespace NServiceBus.Storage.MongoDB
                 });
             }
 
-            context.Container.ConfigureComponent(() => new OutboxPersister(client, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance); //TODO
+            context.Container.ConfigureComponent(() => new OutboxPersister(client, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);
         }
     }
 }

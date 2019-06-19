@@ -10,7 +10,7 @@ namespace NServiceBus.Storage.MongoDB
 {
     class StorageSession : CompletableSynchronizedStorageSession
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsSession)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession)
         {
             this.mongoSession = mongoSession;
 
@@ -22,7 +22,7 @@ namespace NServiceBus.Storage.MongoDB
 
             this.contextBag = contextBag;
             this.collectionNamingConvention = collectionNamingConvention;
-            this.ownsSession = ownsSession;
+            this.ownsMongoSession = ownsMongoSession;
         }
 
         public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingConvention(type));
@@ -37,7 +37,7 @@ namespace NServiceBus.Storage.MongoDB
 
         public Task CompleteAsync()
         {
-            if (ownsSession)
+            if (ownsMongoSession)
             {
                 return InternalCompleteAsync();
             }
@@ -57,7 +57,7 @@ namespace NServiceBus.Storage.MongoDB
 
         public void Dispose()
         {
-            if (ownsSession)
+            if (ownsMongoSession)
             {
                 InternalDispose();
             }
@@ -86,6 +86,6 @@ namespace NServiceBus.Storage.MongoDB
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;
-        readonly bool ownsSession;
+        readonly bool ownsMongoSession;
     }
 }

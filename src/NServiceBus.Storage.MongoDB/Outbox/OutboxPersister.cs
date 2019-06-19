@@ -19,9 +19,9 @@ namespace NServiceBus.Storage.MongoDB
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag context)
         {
-            var record = await outboxRecordCollection.Find(filter => filter.Id == messageId).SingleOrDefaultAsync().ConfigureAwait(false);
+            var outboxRecord = await outboxRecordCollection.Find(record => record.Id == messageId).SingleOrDefaultAsync().ConfigureAwait(false);
 
-            return record != null ? new OutboxMessage(record.Id, record.TransportOperations) : null;
+            return outboxRecord != null ? new OutboxMessage(outboxRecord.Id, outboxRecord.TransportOperations) : null;
         }
 
         public async Task<OutboxTransaction> BeginTransaction(ContextBag context)
@@ -44,9 +44,9 @@ namespace NServiceBus.Storage.MongoDB
         public async Task SetAsDispatched(string messageId, ContextBag context)
         {
             var updateBuilder = Builders<OutboxRecord>.Update;
-            var update = updateBuilder.Set(field => field.TransportOperations, new TransportOperation[0]);
+            var update = updateBuilder.Set(record => record.TransportOperations, new TransportOperation[0]);
 
-            await outboxRecordCollection.UpdateOneAsync(filter => filter.Id == messageId, update).ConfigureAwait(false);
+            await outboxRecordCollection.UpdateOneAsync(record => record.Id == messageId, update).ConfigureAwait(false);
         }
 
         readonly IMongoClient client;

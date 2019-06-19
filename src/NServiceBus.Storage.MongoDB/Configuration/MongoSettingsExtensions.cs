@@ -55,6 +55,20 @@ namespace NServiceBus
         }
 
         /// <summary>
+        /// Configure the time to live for completed outbox messages
+        /// </summary>
+        /// <param name="persistenceExtensions"></param>
+        /// <param name="timeToLive">A non-negative TimeSpan</param>
+        /// <returns></returns>
+        public static PersistenceExtensions<MongoPersistence> OutboxTimeToLive(this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToLive)
+        {
+            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+
+            persistenceExtensions.GetSettings().Set(SettingsKeys.OutboxTimeSpan, timeToLive);
+            return persistenceExtensions;
+        }
+
+        /// <summary>
         /// Community persistence compatibility settings
         /// </summary>
         /// <param name="persistenceExtensions"></param>

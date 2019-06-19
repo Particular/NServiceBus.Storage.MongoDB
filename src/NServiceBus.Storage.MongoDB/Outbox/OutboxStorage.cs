@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Options;
 using MongoDB.Bson.Serialization.Serializers;
@@ -36,6 +37,44 @@ namespace NServiceBus.Storage.MongoDB
                     cm.MapMember(c => c.Headers).SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
                     cm.MapMember(c => c.Options).SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
                 });
+            }
+
+            if (!context.Settings.TryGet(SettingsKeys.OutboxTimeSpan, out TimeSpan outboxExpiresAfter))
+            {
+                outboxExpiresAfter = TimeSpan.FromDays(7);
+            }
+
+            var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)));
+
+            var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == "OutboxCleanup");
+
+            if (outboxCleanupIndex == null)
+            {
+                var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(m => m.Dispatched), new CreateIndexOptions
+                {
+                    ExpireAfter = outboxExpiresAfter,
+                    Name = "OutboxCleanup",
+                    Background = true
+                });
+
+                outboxCollection.Indexes.CreateOne(indexModel);
+            }
+            else
+            {
+                var existingValue = outboxCleanupIndex.GetElement("expireAfterSeconds").Value.ToInt32();
+                if (TimeSpan.FromSeconds(existingValue) != outboxExpiresAfter)
+                {
+                    outboxCollection.Indexes.DropOne("OutboxCleanup");
+
+                    var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(m => m.Dispatched), new CreateIndexOptions
+                    {
+                        ExpireAfter = outboxExpiresAfter,
+                        Name = "OutboxCleanup",
+                        Background = true
+                    });
+
+                    outboxCollection.Indexes.CreateOne(indexModel);
+                }
             }
 
             context.Container.ConfigureComponent(() => new OutboxPersister(client, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);

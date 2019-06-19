@@ -54,11 +54,4 @@ namespace NServiceBus.Storage.MongoDB
         readonly Func<Type, string> collectionNamingConvention;
         readonly IMongoCollection<OutboxRecord> outboxRecordCollection;
     }
-
-    class OutboxRecord
-    {
-        public string Id { get; set; }
-
-        public TransportOperation[] TransportOperations { get; set; }
-    }
 }

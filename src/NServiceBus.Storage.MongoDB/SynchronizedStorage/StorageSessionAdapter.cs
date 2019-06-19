@@ -6,7 +6,7 @@ using NServiceBus.Transport;
 
 namespace NServiceBus.Storage.MongoDB
 {
-    class SynchronizedStorageAdapter : ISynchronizedStorageAdapter
+    class StorageSessionAdapter : ISynchronizedStorageAdapter
     {
         static readonly Task<CompletableSynchronizedStorageSession> emptyResult = Task.FromResult((CompletableSynchronizedStorageSession)null);
 

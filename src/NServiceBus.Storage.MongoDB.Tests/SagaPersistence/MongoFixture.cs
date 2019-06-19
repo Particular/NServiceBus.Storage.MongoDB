@@ -25,7 +25,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         [SetUp]
         public virtual void SetupContext()
         {
-            var storage = new SynchronizedStorageFactory(ClientProvider.Client, true, databaseName, collectionNamingConvention);
+            var storage = new StorageSessionFactory(ClientProvider.Client, true, databaseName, collectionNamingConvention);
 
             session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
             sagaPersister = new SagaPersister(versionElementName);
@@ -44,7 +44,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         {
             collectionNamingConvention = convention;
 
-            var storage = new SynchronizedStorageFactory(ClientProvider.Client, true, databaseName, convention);
+            var storage = new StorageSessionFactory(ClientProvider.Client, true, databaseName, convention);
 
             session = storage.OpenSession(new ContextBag()).GetAwaiter().GetResult();
         }

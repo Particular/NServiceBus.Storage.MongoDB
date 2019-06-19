@@ -10,7 +10,7 @@ namespace NServiceBus.Storage.MongoDB
     {
         public StorageSession StorageSession { get; }
 
-        public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, Func<Type, string> collectionNamingConvention, ContextBag context)
+        public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, ContextBag context, Func<Type, string> collectionNamingConvention)
         {
             StorageSession = new StorageSession(mongoSession, databaseName, context, collectionNamingConvention, false);
         }

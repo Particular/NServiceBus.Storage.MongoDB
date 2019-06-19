@@ -30,7 +30,7 @@ namespace NServiceBus.Storage.MongoDB
 
             mongoSession.StartTransaction();
 
-            return new MongoOutboxTransaction(mongoSession, databaseName, collectionNamingConvention, context);
+            return new MongoOutboxTransaction(mongoSession, databaseName, context, collectionNamingConvention);
         }
 
         public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)

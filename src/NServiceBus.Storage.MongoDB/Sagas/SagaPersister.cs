@@ -51,9 +51,10 @@ namespace NServiceBus.Storage.MongoDB
             var filterBuilder = Builders<BsonDocument>.Filter;
             var filter = filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version);
 
+            var update = Builders<BsonDocument>.Update
+                .Inc(versionElementName, 1);
+
             var document = sagaData.ToBsonDocument();
-            var updateBuilder = Builders<BsonDocument>.Update;
-            var update = updateBuilder.Inc(versionElementName, 1);
 
             foreach (var element in document)
             {

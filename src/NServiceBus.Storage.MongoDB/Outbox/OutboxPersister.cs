@@ -33,10 +33,9 @@ namespace NServiceBus.Storage.MongoDB
 
         public async Task SetAsDispatched(string messageId, ContextBag context)
         {
-            var updateBuilder = Builders<OutboxRecord>.Update;
-            var update = updateBuilder.Set(record => record.TransportOperations, new TransportOperation[0]);
-            
-            update = update.CurrentDate(record => record.Dispatched);
+            var update = Builders<OutboxRecord>.Update
+                .Set(record => record.TransportOperations, new TransportOperation[0])
+                .CurrentDate(record => record.Dispatched);
 
             await outboxRecordCollection.UpdateOneAsync(record => record.Id == messageId, update).ConfigureAwait(false);
         }

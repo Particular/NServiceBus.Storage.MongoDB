@@ -90,6 +90,8 @@ The transaction and session will be automatically completed by NServiceBus when 
 
 By default both the AcceptanceTests and Tests projects will connect to any MongoDB server running at the default address of `mongodb://localhost:27017`
 
+To use a different Mongo URl you can set the `NServiceBusStorageMongoDB_ConnectionString` environment variable.
+
 Instructions for installing MongoDB can be found on the [MongoDB website](https://docs.mongodb.com/manual/installation/).
 
 For developers using Docker containers the following docker command will quickly setup a container configured to use the default port:

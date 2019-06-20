@@ -63,6 +63,7 @@ namespace NServiceBus
         public static PersistenceExtensions<MongoPersistence> TimeToKeepOutboxDeduplicationData(this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToKeepOutboxDeduplicationData)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+            Guard.AgainstNegativeAndZero(nameof(timeToKeepOutboxDeduplicationData), timeToKeepOutboxDeduplicationData);
 
             persistenceExtensions.GetSettings().Set(SettingsKeys.TimeToKeepOutboxDeduplicationData, timeToKeepOutboxDeduplicationData);
             return persistenceExtensions;

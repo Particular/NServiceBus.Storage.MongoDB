@@ -45,39 +45,32 @@ namespace NServiceBus.Storage.MongoDB
             }
 
             var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)));
+            var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == outboxCleanupIndexName);
+            var existingExpiration = outboxCleanupIndex?.GetElement("expireAfterSeconds").Value.ToInt32();
 
-            var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == "OutboxCleanup");
+            bool createIndex = outboxCleanupIndex is null;
 
-            if (outboxCleanupIndex == null)
+            if (existingExpiration.HasValue && TimeSpan.FromSeconds(existingExpiration.Value) != timeToKeepOutboxDeduplicationData)
             {
-                var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(m => m.Dispatched), new CreateIndexOptions
+                outboxCollection.Indexes.DropOne(outboxCleanupIndexName);
+                createIndex = true;
+            }
+
+            if (createIndex)
+            {
+                var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(record => record.Dispatched), new CreateIndexOptions
                 {
                     ExpireAfter = timeToKeepOutboxDeduplicationData,
-                    Name = "OutboxCleanup",
+                    Name = outboxCleanupIndexName,
                     Background = true
                 });
 
                 outboxCollection.Indexes.CreateOne(indexModel);
             }
-            else
-            {
-                var existingValue = outboxCleanupIndex.GetElement("expireAfterSeconds").Value.ToInt32();
-                if (TimeSpan.FromSeconds(existingValue) != timeToKeepOutboxDeduplicationData)
-                {
-                    outboxCollection.Indexes.DropOne("OutboxCleanup");
-
-                    var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(m => m.Dispatched), new CreateIndexOptions
-                    {
-                        ExpireAfter = timeToKeepOutboxDeduplicationData,
-                        Name = "OutboxCleanup",
-                        Background = true
-                    });
-
-                    outboxCollection.Indexes.CreateOne(indexModel);
-                }
-            }
 
             context.Container.ConfigureComponent(() => new OutboxPersister(client, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);
         }
+
+        const string outboxCleanupIndexName = "OutboxCleanup";
     }
 }

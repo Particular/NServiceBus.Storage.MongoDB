@@ -39,9 +39,9 @@ namespace NServiceBus.Storage.MongoDB
                 });
             }
 
-            if (!context.Settings.TryGet(SettingsKeys.OutboxTimeSpan, out TimeSpan outboxExpiresAfter))
+            if (!context.Settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData, out TimeSpan timeToKeepOutboxDeduplicationData))
             {
-                outboxExpiresAfter = TimeSpan.FromDays(7);
+                timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
             }
 
             var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)));
@@ -52,7 +52,7 @@ namespace NServiceBus.Storage.MongoDB
             {
                 var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(m => m.Dispatched), new CreateIndexOptions
                 {
-                    ExpireAfter = outboxExpiresAfter,
+                    ExpireAfter = timeToKeepOutboxDeduplicationData,
                     Name = "OutboxCleanup",
                     Background = true
                 });
@@ -62,13 +62,13 @@ namespace NServiceBus.Storage.MongoDB
             else
             {
                 var existingValue = outboxCleanupIndex.GetElement("expireAfterSeconds").Value.ToInt32();
-                if (TimeSpan.FromSeconds(existingValue) != outboxExpiresAfter)
+                if (TimeSpan.FromSeconds(existingValue) != timeToKeepOutboxDeduplicationData)
                 {
                     outboxCollection.Indexes.DropOne("OutboxCleanup");
 
                     var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(m => m.Dispatched), new CreateIndexOptions
                     {
-                        ExpireAfter = outboxExpiresAfter,
+                        ExpireAfter = timeToKeepOutboxDeduplicationData,
                         Name = "OutboxCleanup",
                         Background = true
                     });

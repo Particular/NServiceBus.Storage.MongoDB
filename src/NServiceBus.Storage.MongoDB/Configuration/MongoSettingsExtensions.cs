@@ -55,16 +55,16 @@ namespace NServiceBus
         }
 
         /// <summary>
-        /// Configure the time to live for completed outbox messages
+        /// Configures the amount of time to keep outbox deduplication data.
         /// </summary>
         /// <param name="persistenceExtensions"></param>
-        /// <param name="timeToLive">A non-negative TimeSpan</param>
+        /// <param name="timeToKeepOutboxDeduplicationData">A non-negative TimeSpan</param>
         /// <returns></returns>
-        public static PersistenceExtensions<MongoPersistence> OutboxTimeToLive(this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToLive)
+        public static PersistenceExtensions<MongoPersistence> TimeToKeepOutboxDeduplicationData(this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToKeepOutboxDeduplicationData)
         {
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
 
-            persistenceExtensions.GetSettings().Set(SettingsKeys.OutboxTimeSpan, timeToLive);
+            persistenceExtensions.GetSettings().Set(SettingsKeys.TimeToKeepOutboxDeduplicationData, timeToKeepOutboxDeduplicationData);
             return persistenceExtensions;
         }
 

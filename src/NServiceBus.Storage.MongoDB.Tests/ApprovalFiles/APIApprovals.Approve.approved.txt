@@ -15,6 +15,7 @@ namespace NServiceBus
         public static NServiceBus.CompatibilitySettings CommunityPersistenceCompatibility(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> DatabaseName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, string databaseName) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> MongoClient(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, MongoDB.Driver.IMongoClient mongoClient) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> OutboxTimeToLive(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, System.TimeSpan timeToLive) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> UseTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, bool useTransactions) { }
     }
     public class static SynchronizedStorageSessionExtensions

@@ -3,6 +3,7 @@
 This package includes [MongoDB](https://www.mongodb.com/) persistence implementations for NServiceBus v7:
 
 - Sagas
+- Outbox
 
 Transactions
 

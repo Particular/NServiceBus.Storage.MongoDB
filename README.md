@@ -25,7 +25,7 @@ class Program
     public async Task Main()
     {
         var endpointConfiguration = new EndpointConfiguration("Endpoint Name");
-        endpointConfiguration.UsePersistence<MongoDBPersistence>();
+        endpointConfiguration.UsePersistence<MongoPersistence>();
     }
 }
 ```
@@ -41,7 +41,7 @@ Provide a custom `MongoClient` by calling the ```.Client(client)``` extension me
 ```csharp
 endpointConfiguration
 	.UsePersistence<MongoDBPersistence>()
-	.Client(new MongoClient("Custom Mongo URL"));
+	.MongoClient(new MongoClient("Custom Mongo URL"));
 ```
 
 

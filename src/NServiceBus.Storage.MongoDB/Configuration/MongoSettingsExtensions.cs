@@ -65,7 +65,9 @@ namespace NServiceBus
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
             Guard.AgainstNegativeAndZero(nameof(timeToKeepOutboxDeduplicationData), timeToKeepOutboxDeduplicationData);
 
-            persistenceExtensions.GetSettings().Set(SettingsKeys.TimeToKeepOutboxDeduplicationData, timeToKeepOutboxDeduplicationData);
+            var seconds = Math.Ceiling(timeToKeepOutboxDeduplicationData.TotalSeconds);
+
+            persistenceExtensions.GetSettings().Set(SettingsKeys.TimeToKeepOutboxDeduplicationData, TimeSpan.FromSeconds(seconds));
             return persistenceExtensions;
         }
 

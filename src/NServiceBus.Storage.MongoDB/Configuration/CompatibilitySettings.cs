@@ -26,7 +26,7 @@ namespace NServiceBus
         }
 
         /// <summary>
-        /// Sets the convention for saga collection naming based on the saga data type
+        /// Sets the convention for collection naming based on the data type
         /// </summary>
         /// <param name="collectionNamingConvention"></param>
         /// <returns></returns>

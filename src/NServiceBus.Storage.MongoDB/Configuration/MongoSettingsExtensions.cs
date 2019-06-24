@@ -55,6 +55,23 @@ namespace NServiceBus
         }
 
         /// <summary>
+        /// Configures the amount of time to keep outbox deduplication data.
+        /// </summary>
+        /// <param name="persistenceExtensions"></param>
+        /// <param name="timeToKeepOutboxDeduplicationData">A non-negative TimeSpan</param>
+        /// <returns></returns>
+        public static PersistenceExtensions<MongoPersistence> TimeToKeepOutboxDeduplicationData(this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToKeepOutboxDeduplicationData)
+        {
+            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+            Guard.AgainstNegativeAndZero(nameof(timeToKeepOutboxDeduplicationData), timeToKeepOutboxDeduplicationData);
+
+            var seconds = Math.Ceiling(timeToKeepOutboxDeduplicationData.TotalSeconds);
+
+            persistenceExtensions.GetSettings().Set(SettingsKeys.TimeToKeepOutboxDeduplicationData, TimeSpan.FromSeconds(seconds));
+            return persistenceExtensions;
+        }
+
+        /// <summary>
         /// Community persistence compatibility settings
         /// </summary>
         /// <param name="persistenceExtensions"></param>

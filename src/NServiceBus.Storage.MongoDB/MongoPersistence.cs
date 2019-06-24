@@ -22,7 +22,8 @@ namespace NServiceBus
             {
                 s.EnableFeatureByDefault<SynchronizedStorage>();
 
-                s.SetDefault(SettingsKeys.MongoClient, (Func<IMongoClient>)(() => {
+                s.SetDefault(SettingsKeys.MongoClient, (Func<IMongoClient>)(() =>
+                {
                     if (defaultClient == null)
                     {
                         defaultClient = new MongoClient();
@@ -31,9 +32,12 @@ namespace NServiceBus
                 }));
 
                 s.SetDefault(SettingsKeys.DatabaseName, s.EndpointName());
+
+                s.SetDefault(SettingsKeys.CollectionNamingConvention, (Func<Type, string>)(type => type.Name.ToLower()));
             });
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
+            Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<OutboxStorage>());
         }
     }
 }

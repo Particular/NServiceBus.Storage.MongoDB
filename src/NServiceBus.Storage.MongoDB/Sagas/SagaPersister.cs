@@ -51,9 +51,10 @@ namespace NServiceBus.Storage.MongoDB
             var filterBuilder = Builders<BsonDocument>.Filter;
             var filter = filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version);
 
+            var update = Builders<BsonDocument>.Update
+                .Inc(versionElementName, 1);
+
             var document = sagaData.ToBsonDocument();
-            var updateBuilder = Builders<BsonDocument>.Update;
-            var update = updateBuilder.Inc(versionElementName, 1);
 
             foreach (var element in document)
             {
@@ -63,12 +64,9 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            var modifyResult = await collection.FindOneAndUpdateAsync(
-                filter,
-                update,
-                new FindOneAndUpdateOptions<BsonDocument> { IsUpsert = false, ReturnDocument = ReturnDocument.After }).ConfigureAwait(false);
+            var result = await collection.UpdateOneAsync(filter, update).ConfigureAwait(false);
 
-            if (modifyResult == null)
+            if (result.ModifiedCount != 1)
             {
                 throw new Exception($"The '{sagaDataType.Name}' saga with id '{sagaData.Id}' was updated by another process or no longer exists.");
             }

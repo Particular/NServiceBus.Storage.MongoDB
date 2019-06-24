@@ -12,7 +12,7 @@ namespace NServiceBus.AcceptanceTests
 
         public bool SupportsNativeDeferral => true;
 
-        public bool SupportsOutbox => false;
+        public bool SupportsOutbox => true;
 
         public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsNativeDeferral);
 

@@ -6,9 +6,9 @@ using NServiceBus.Persistence;
 
 namespace NServiceBus.Storage.MongoDB
 {
-    class SynchronizedStorageFactory : ISynchronizedStorage
+    class StorageSessionFactory : ISynchronizedStorage
     {
-        public SynchronizedStorageFactory(IMongoClient client, bool useTransactions, string databaseName, Func<Type, string> collectionNamingConvention)
+        public StorageSessionFactory(IMongoClient client, bool useTransactions, string databaseName, Func<Type, string> collectionNamingConvention)
         {
             this.client = client;
             this.useTransactions = useTransactions;
@@ -25,7 +25,7 @@ namespace NServiceBus.Storage.MongoDB
                 mongoSession.StartTransaction();
             }
 
-            return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention);
+            return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention, true);
         }
 
         readonly IMongoClient client;

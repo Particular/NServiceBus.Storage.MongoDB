@@ -48,7 +48,7 @@ namespace NServiceBus.Storage.MongoDB
             var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == outboxCleanupIndexName);
             var existingExpiration = outboxCleanupIndex?.GetElement("expireAfterSeconds").Value.ToInt32();
 
-            bool createIndex = outboxCleanupIndex is null;
+            var createIndex = outboxCleanupIndex is null;
 
             if (existingExpiration.HasValue && TimeSpan.FromSeconds(existingExpiration.Value) != timeToKeepOutboxDeduplicationData)
             {

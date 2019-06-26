@@ -25,6 +25,11 @@ namespace NServiceBus.Storage.MongoDB
             this.ownsMongoSession = ownsMongoSession;
         }
 
+        public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(mongoSession, document);
+
+
+
+
         public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingConvention(type));
 
         public IMongoCollection<T> GetCollection<T>() => database.GetCollection<T>(collectionNamingConvention(typeof(T)));

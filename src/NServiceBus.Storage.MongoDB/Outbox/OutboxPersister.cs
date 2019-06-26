@@ -26,9 +26,9 @@ namespace NServiceBus.Storage.MongoDB
         public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context)
         {
             var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
-            var collection = mongoOutboxTransaction.StorageSession.GetCollection<OutboxRecord>();
+            var storageSession = mongoOutboxTransaction.StorageSession;
 
-            return collection.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = message.TransportOperations });
+            return storageSession.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = message.TransportOperations });
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag context)

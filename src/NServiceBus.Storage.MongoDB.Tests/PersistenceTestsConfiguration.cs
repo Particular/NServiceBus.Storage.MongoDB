@@ -2,12 +2,10 @@
 {
     using System;
     using System.Globalization;
-    using System.Threading;
     using System.Threading.Tasks;
     using Gateway.Deduplication;
     using NServiceBus.Storage.MongoDB;
     using NServiceBus.Storage.MongoDB.Tests;
-    using NUnit.Framework;
     using Outbox;
     using Sagas;
     using Timeout.Core;
@@ -15,11 +13,15 @@
 
     public partial class PersistenceTestsConfiguration
     {
+        readonly string databaseName;
+        readonly Func<Type, string> collectionNamingConvention;
+
         public PersistenceTestsConfiguration()
         {
-            var databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+            databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+            collectionNamingConvention = t => t.Name.ToLower();
+
             var versionElementName = "_version";
-            Func<Type, string> collectionNamingConvention = t => t.Name.ToLower();
             var useTransactions = true;
 
             SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, useTransactions, databaseName, collectionNamingConvention);
@@ -33,29 +35,41 @@
         }
 
         public bool SupportsDtc { get; } = false;
+
         public bool SupportsOutbox { get; } = true;
+
         public bool SupportsFinders { get; } = true;
+
         public bool SupportsSubscriptions { get; } = false;
+
         public bool SupportsTimeouts { get; } = false;
+
         public ISagaIdGenerator SagaIdGenerator { get; }
 
         public ISagaPersister SagaStorage { get; }
+
         public ISynchronizedStorage SynchronizedStorage { get; }
+
         public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; }
+
         public ISubscriptionStorage SubscriptionStorage { get; }
+
         public IPersistTimeouts TimeoutStorage { get; }
+
         public IQueryTimeouts TimeoutQuery { get; }
+
         public IOutboxStorage OutboxStorage { get; }
+
         public IDeduplicateMessages GatewayStorage { get; }
 
-        public Task Configure()
+        public async Task Configure()
         {
-            return Task.FromResult(0);
+            await ClientProvider.Client.GetDatabase(databaseName).CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
         }
 
-        public Task Cleanup()
+        public async Task Cleanup()
         {
-            return Task.FromResult(0);
+            await ClientProvider.Client.DropDatabaseAsync(databaseName);
         }
 
         public Task CleanupMessagesOlderThan(DateTimeOffset beforeStore)

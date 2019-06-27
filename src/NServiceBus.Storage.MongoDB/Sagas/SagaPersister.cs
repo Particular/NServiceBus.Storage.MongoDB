@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -21,17 +20,6 @@ namespace NServiceBus.Storage.MongoDB
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
-
-            if (correlationProperty != null && !createdIndexCache.ContainsKey(sagaDataType.Name))
-            {
-                var propertyElementName = GetElementName(sagaDataType, correlationProperty.Name);
-
-                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
-
-                await storageSession.IndexesCreateOneAsync(sagaDataType, indexModel).ConfigureAwait(false);
-
-                createdIndexCache.GetOrAdd(sagaDataType.Name, true);
-            }
 
             var document = sagaData.ToBsonDocument();
             document.Add(versionElementName, 0);
@@ -132,6 +120,5 @@ namespace NServiceBus.Storage.MongoDB
 
         const string idElementName = "_id";
         readonly string versionElementName;
-        readonly ConcurrentDictionary<string, bool> createdIndexCache = new ConcurrentDictionary<string, bool>();
     }
 }

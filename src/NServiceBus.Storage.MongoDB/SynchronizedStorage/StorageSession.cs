@@ -25,8 +25,6 @@ namespace NServiceBus.Storage.MongoDB
             this.ownsMongoSession = ownsMongoSession;
         }
 
-        public Task<string> IndexesCreateOneAsync(Type type, CreateIndexModel<BsonDocument> model) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Indexes.CreateOneAsync(model);
-
         public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(mongoSession, document);
 
         public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(mongoSession, document);

@@ -10,6 +10,7 @@
     using Sagas;
     using Timeout.Core;
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
+    using static NServiceBus.Persistence.ComponentTests.When_saga_not_found_return_default;
 
     public partial class PersistenceTestsConfiguration
     {
@@ -63,12 +64,18 @@
         public IDeduplicateMessages GatewayStorage { get; }
 
         public async Task Configure()
-        {
+        {            
             var database = ClientProvider.Client.GetDatabase(databaseName);
 
             await database.CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
             await database.CreateCollectionAsync(collectionNamingConvention(typeof(SagaWithoutCorrelationPropertyData)));
             await database.CreateCollectionAsync(collectionNamingConvention(typeof(AnotherSagaWithoutCorrelationPropertyData)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(AnotherSagaWithCorrelatedPropertyData)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SagaWithComplexTypeEntity)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SagaWithCorrelationPropertyData)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SimpleSagaEntity)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(TestSagaData)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(AnotherSimpleSagaEntity)));
         }
 
         public async Task Cleanup()

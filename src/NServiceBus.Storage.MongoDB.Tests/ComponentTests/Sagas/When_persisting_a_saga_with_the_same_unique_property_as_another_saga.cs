@@ -36,10 +36,7 @@
             using (var losingSession = await configuration.SynchronizedStorage.OpenSession(losingContextBag))
             {
                 var correlationPropertySaga2 = SetActiveSagaInstanceForSave(losingContextBag, new SagaWithCorrelationProperty(), saga2);
-                await persister.Save(saga2, correlationPropertySaga2, losingSession, losingContextBag);
-
-                // ReSharper disable once AccessToDisposedClosure
-                Assert.That(async () => await losingSession.CompleteAsync(), Throws.InstanceOf<Exception>().And.Message.EndsWith($"The saga with the correlation id 'Name: {nameof(SagaWithCorrelationPropertyData.CorrelatedProperty)} Value: {correlationPropertyData}' already exists."));
+                Assert.That(async () => await persister.Save(saga2, correlationPropertySaga2, losingSession, losingContextBag), Throws.InstanceOf<Exception>());
             }
         }
     }

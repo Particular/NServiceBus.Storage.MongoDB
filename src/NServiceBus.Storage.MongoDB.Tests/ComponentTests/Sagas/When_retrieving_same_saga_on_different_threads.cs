@@ -63,8 +63,7 @@ namespace NServiceBus.Persistence.ComponentTests
                     await firstTask;
 
                     staleRecord.DateTimeProperty = DateTime.UtcNow.AddHours(1);
-                    await persister.Update(staleRecord, losingSaveSession, losingSaveContext);
-                    Assert.That(async () => await losingSaveSession.CompleteAsync(), Throws.InstanceOf<Exception>().And.Message.EndsWith($"concurrency violation: saga entity Id[{generatedSagaId}] already saved."));
+                    Assert.That(async () => await persister.Update(staleRecord, losingSaveSession, losingSaveContext), Throws.InstanceOf<Exception>());
                 }
             });
 

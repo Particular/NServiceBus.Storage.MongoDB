@@ -8,10 +8,9 @@
     public class When_saga_not_found_return_default : SagaPersisterTests<SimpleSagaEntitySaga, SimpleSagaEntity>
     {
         [Test]
-        public async Task Should_return_default_when_using_finding_saga_with_property()
+        public void Should_throw_when_using_finding_saga_with_property()
         {
-            var result = await GetByCorrelationProperty("propertyNotFound", "someValue");
-            Assert.IsNull(result);
+            Assert.That(async () => await GetByCorrelationProperty("propertyNotFound", "someValue"), Throws.InstanceOf<Exception>());
         }
 
         [Test]

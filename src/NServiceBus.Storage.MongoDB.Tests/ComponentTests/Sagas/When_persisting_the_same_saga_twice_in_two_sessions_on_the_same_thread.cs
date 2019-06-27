@@ -54,8 +54,7 @@ namespace NServiceBus.Persistence.ComponentTests
 
             try
             {
-                await persister.Update(staleRecord1, losingSaveSession1, losingContext1);
-                Assert.That(async () => await losingSaveSession1.CompleteAsync(), Throws.InstanceOf<Exception>().And.Message.EndsWith($"concurrency violation: saga entity Id[{saga.Id}] already saved."));
+                Assert.That(async () => await persister.Update(staleRecord1, losingSaveSession1, losingContext1), Throws.InstanceOf<Exception>());
             }
             finally
             {
@@ -91,8 +90,7 @@ namespace NServiceBus.Persistence.ComponentTests
 
             try
             {
-                await persister.Update(staleRecord2, losingSaveSession2, losingContext2);
-                Assert.That(async () => await losingSaveSession2.CompleteAsync(), Throws.InstanceOf<Exception>().And.Message.EndsWith($"concurrency violation: saga entity Id[{saga.Id}] already saved."));
+                Assert.That(async () => await persister.Update(staleRecord2, losingSaveSession2, losingContext2), Throws.InstanceOf<Exception>());
             }
             finally
             {

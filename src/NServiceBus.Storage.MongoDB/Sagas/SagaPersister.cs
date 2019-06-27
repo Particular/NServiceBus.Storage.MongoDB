@@ -63,7 +63,7 @@ namespace NServiceBus.Storage.MongoDB
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
         {
             var sagaDataType = typeof(TSagaData);
-            var propertyElementName = GetElementName(sagaDataType, propertyName);
+            var propertyElementName = sagaDataType.GetElementName(propertyName);
 
             return GetSagaData<TSagaData>(sagaDataType, propertyElementName, propertyValue, session);
         }
@@ -101,21 +101,6 @@ namespace NServiceBus.Storage.MongoDB
             }
 
             return default;
-        }
-
-        string GetElementName(Type type, string property)
-        {
-            var classMap = BsonClassMap.LookupClassMap(type);
-
-            foreach (var memberMap in classMap.AllMemberMaps)
-            {
-                if (memberMap.MemberName == property)
-                {
-                    return memberMap.ElementName;
-                }
-            }
-
-            throw new InvalidOperationException($"Property '{property}' not found in '{type}' class map.");
         }
 
         const string idElementName = "_id";

@@ -25,16 +25,30 @@ namespace NServiceBus.Storage.MongoDB
             this.ownsMongoSession = ownsMongoSession;
         }
 
+        public Task<string> IndexesCreateOneAsync(Type type, CreateIndexModel<BsonDocument> model) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Indexes.CreateOneAsync(mongoSession, model);
+
         public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(mongoSession, document);
 
+        public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(mongoSession, document);
+
+        public Task<UpdateResult> UpdateOneAsync(Type type, FilterDefinition<BsonDocument> filter, UpdateDefinition<BsonDocument> update) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).UpdateOneAsync(mongoSession, filter, update);
+
+        public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(mongoSession, filter);
+
+        public IFindFluent<BsonDocument, BsonDocument> Find(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Find(mongoSession, filter);
 
 
 
-        public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingConvention(type));
 
-        public IMongoCollection<T> GetCollection<T>() => database.GetCollection<T>(collectionNamingConvention(typeof(T)));
+
+
+
 
         public IMongoCollection<T> GetCollection<T>(string name, MongoCollectionSettings settings = null) => database.GetCollection<T>(name, settings);
+
+
+
+
 
         public void StoreVersion(Type type, BsonValue version) => contextBag.Set(type.FullName, version);
 

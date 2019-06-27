@@ -21,7 +21,6 @@ namespace NServiceBus.Storage.MongoDB
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
-            var collection = storageSession.GetCollection(sagaDataType);
 
             if (correlationProperty != null && !createdIndexCache.ContainsKey(sagaDataType.Name))
             {
@@ -29,7 +28,7 @@ namespace NServiceBus.Storage.MongoDB
 
                 var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
 
-                await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+                await storageSession.IndexesCreateOneAsync(sagaDataType, indexModel).ConfigureAwait(false);
 
                 createdIndexCache.GetOrAdd(sagaDataType.Name, true);
             }
@@ -37,14 +36,13 @@ namespace NServiceBus.Storage.MongoDB
             var document = sagaData.ToBsonDocument();
             document.Add(versionElementName, 0);
 
-            await collection.InsertOneAsync(document).ConfigureAwait(false);
+            await storageSession.InsertOneAsync(sagaDataType, document).ConfigureAwait(false);
         }
 
         public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
-            var collection = storageSession.GetCollection(sagaDataType);
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
@@ -64,7 +62,7 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            var result = await collection.UpdateOneAsync(filter, update).ConfigureAwait(false);
+            var result = await storageSession.UpdateOneAsync(sagaDataType, filter, update).ConfigureAwait(false);
 
             if (result.ModifiedCount != 1)
             {
@@ -86,17 +84,15 @@ namespace NServiceBus.Storage.MongoDB
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
-            var collection = storageSession.GetCollection(sagaDataType);
 
-            return collection.DeleteOneAsync(new BsonDocument(idElementName, sagaData.Id));
+            return storageSession.DeleteOneAsync(sagaDataType, new BsonDocument(idElementName, sagaData.Id));
         }
 
         async Task<TSagaData> GetSagaData<TSagaData>(Type sagaDataType, string elementName, object elementValue, SynchronizedStorageSession session)
         {
             var storageSession = (StorageSession)session;
-            var collection = storageSession.GetCollection(sagaDataType);
 
-            var document = await collection.Find(new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
+            var document = await storageSession.Find(sagaDataType, new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
 
             if (document != null)
             {

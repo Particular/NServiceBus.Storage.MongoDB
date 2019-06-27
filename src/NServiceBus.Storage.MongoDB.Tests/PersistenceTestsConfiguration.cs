@@ -64,7 +64,11 @@
 
         public async Task Configure()
         {
-            await ClientProvider.Client.GetDatabase(databaseName).CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
+            var database = ClientProvider.Client.GetDatabase(databaseName);
+
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SagaWithoutCorrelationPropertyData)));
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(AnotherSagaWithoutCorrelationPropertyData)));
         }
 
         public async Task Cleanup()

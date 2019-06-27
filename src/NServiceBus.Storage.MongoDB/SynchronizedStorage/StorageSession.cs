@@ -25,7 +25,7 @@ namespace NServiceBus.Storage.MongoDB
             this.ownsMongoSession = ownsMongoSession;
         }
 
-        public Task<string> IndexesCreateOneAsync(Type type, CreateIndexModel<BsonDocument> model) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Indexes.CreateOneAsync(mongoSession, model);
+        public Task<string> IndexesCreateOneAsync(Type type, CreateIndexModel<BsonDocument> model) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Indexes.CreateOneAsync(model);
 
         public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(mongoSession, document);
 
@@ -35,7 +35,7 @@ namespace NServiceBus.Storage.MongoDB
 
         public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(mongoSession, filter);
 
-        public IFindFluent<BsonDocument, BsonDocument> Find(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Find(mongoSession, filter);
+        public IFindFluent<BsonDocument, BsonDocument> Find(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Find(filter);
 
 
 

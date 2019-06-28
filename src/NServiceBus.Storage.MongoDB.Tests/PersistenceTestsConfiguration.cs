@@ -62,19 +62,13 @@
 
         public IDeduplicateMessages GatewayStorage { get; }
 
-        public async Task Configure()
+        public Task Configure()
         {
             var database = ClientProvider.Client.GetDatabase(databaseName);
 
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SagaWithoutCorrelationPropertyData)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(AnotherSagaWithoutCorrelationPropertyData)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(AnotherSagaWithCorrelatedPropertyData)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SagaWithComplexTypeEntity)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SagaWithCorrelationPropertyData)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(SimpleSagaEntity)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(TestSagaData)));
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(When_saga_not_found_return_default.AnotherSimpleSagaEntity)));
+            Storage.MongoDB.SagaStorage.CreateIndexes(database, collectionNamingConvention, SagaMetadataCollection);
+
+            return Task.FromResult(0);
         }
 
         public async Task Cleanup()

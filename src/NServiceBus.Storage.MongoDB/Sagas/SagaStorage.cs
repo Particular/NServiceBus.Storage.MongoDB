@@ -23,11 +23,17 @@ namespace NServiceBus.Storage.MongoDB
 
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
+            var database = client.GetDatabase(databaseName);
             var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
             var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 
-            var database = client.GetDatabase(databaseName);
+            CreateIndexes(database, collectionNamingConvention, sagaMetadataCollection);
 
+            context.Container.ConfigureComponent(() => new SagaPersister(versionElementName), DependencyLifecycle.SingleInstance);
+        }
+
+        internal static void CreateIndexes(IMongoDatabase database, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
+        {
             foreach (var sagaMetadata in sagaMetadataCollection)
             {
                 var collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
@@ -45,14 +51,12 @@ namespace NServiceBus.Storage.MongoDB
                     {
                         database.CreateCollection(collectionName);
                     }
-                    catch(MongoCommandException ex) when (ex.Code == 48 && ex.CodeName == "NamespaceExists")
+                    catch (MongoCommandException ex) when (ex.Code == 48 && ex.CodeName == "NamespaceExists")
                     {
                         //Collection already exists, so swallow the exception
                     }
                 }
             }
-
-            context.Container.ConfigureComponent(() => new SagaPersister(versionElementName), DependencyLifecycle.SingleInstance);
         }
     }
 }

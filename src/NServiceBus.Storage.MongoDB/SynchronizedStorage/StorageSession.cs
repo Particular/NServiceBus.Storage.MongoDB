@@ -41,17 +41,17 @@ namespace NServiceBus.Storage.MongoDB
 
         public BsonValue RetrieveVersion(Type type) => contextBag.Get<BsonValue>(type.FullName);
 
-        public Task CompleteAsync()
+        Task CompletableSynchronizedStorageSession.CompleteAsync()
         {
             if (ownsMongoSession)
             {
-                return InternalCompleteAsync();
+                return CompleteAsync();
             }
 
             return TaskEx.CompletedTask;
         }
 
-        internal Task InternalCompleteAsync()
+        public Task CompleteAsync()
         {
             if (MongoSession.IsInTransaction)
             {
@@ -61,15 +61,15 @@ namespace NServiceBus.Storage.MongoDB
             return TaskEx.CompletedTask;
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             if (ownsMongoSession)
             {
-                InternalDispose();
+                Dispose();
             }
         }
 
-        internal void InternalDispose()
+        public void Dispose()
         {
             if (MongoSession.IsInTransaction)
             {

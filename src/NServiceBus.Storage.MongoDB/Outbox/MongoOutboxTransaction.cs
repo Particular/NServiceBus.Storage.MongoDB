@@ -17,12 +17,12 @@ namespace NServiceBus.Storage.MongoDB
 
         public Task Commit()
         {
-            return StorageSession.InternalCompleteAsync();
+            return StorageSession.CompleteAsync();
         }
 
         public void Dispose()
         {
-            StorageSession.InternalDispose();
+            StorageSession.Dispose();
         }
     }
 }

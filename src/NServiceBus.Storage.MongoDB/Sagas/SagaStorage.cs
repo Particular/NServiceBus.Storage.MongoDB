@@ -29,15 +29,14 @@ namespace NServiceBus.Storage.MongoDB
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
 
-            var db = client.GetDatabase(databaseName);
-
-            var collectionNames = db.ListCollectionNames().ToList();
+            var database = client.GetDatabase(databaseName);
+            var collectionNames = database.ListCollectionNames().ToList();
 
             foreach (var name in collectionNames)
             {
                 collectionIndexKeys.Add(name, new List<string>());
 
-                var indexes = db.GetCollection<BsonDocument>(name).Indexes.List().ToList();
+                var indexes = database.GetCollection<BsonDocument>(name).Indexes.List().ToList();
 
                 foreach (var index in indexes)
                 {
@@ -46,27 +45,26 @@ namespace NServiceBus.Storage.MongoDB
             }
 
             var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+            var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 
-            var sagaMetaDataCollection = context.Settings.Get<SagaMetadataCollection>();
-
-            foreach (var sagaMetaData in sagaMetaDataCollection)
+            foreach (var sagaMetadata in sagaMetadataCollection)
             {
-                var expectedCollectionName = collectionNamingConvention(sagaMetaData.SagaEntityType);
-
+                var expectedCollectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
                 var collectionExists = collectionIndexKeys.ContainsKey(expectedCollectionName);
 
                 if (!collectionExists)
                 {
-                    db.CreateCollection(expectedCollectionName);
+                    database.CreateCollection(expectedCollectionName);
                 }
 
-                if (sagaMetaData.TryGetCorrelationProperty(out SagaMetadata.CorrelationPropertyMetadata property))
+                if (sagaMetadata.TryGetCorrelationProperty(out var property))
                 {
-                    var propertyElementName = sagaMetaData.SagaEntityType.GetElementName(property.Name);
+                    var propertyElementName = sagaMetadata.SagaEntityType.GetElementName(property.Name);
+
                     if (!collectionExists || !collectionIndexKeys[expectedCollectionName].Contains(propertyElementName))
                     {
                         var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
-                        db.GetCollection<BsonDocument>(expectedCollectionName).Indexes.CreateOne(indexModel);
+                        database.GetCollection<BsonDocument>(expectedCollectionName).Indexes.CreateOne(indexModel);
                     }
                 }
             }

@@ -65,12 +65,19 @@ namespace NServiceBus.Storage.MongoDB
             return GetSagaData<TSagaData>(sagaDataType, propertyElementName, propertyValue, session);
         }
 
-        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
 
-            return storageSession.DeleteOneAsync(sagaDataType, new BsonDocument(idElementName, sagaData.Id));
+            var version = storageSession.RetrieveVersion(sagaDataType);
+
+            var result = await storageSession.DeleteOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version)).ConfigureAwait(false);
+
+            if (result.DeletedCount != 1)
+            {
+                throw new Exception($"Saga can't be completed as it was updated by another process.");
+            }
         }
 
         async Task<TSagaData> GetSagaData<TSagaData>(Type sagaDataType, string elementName, object elementValue, SynchronizedStorageSession session)

@@ -34,9 +34,6 @@ namespace NServiceBus.Storage.MongoDB
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
-            var filterBuilder = Builders<BsonDocument>.Filter;
-            var filter = filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version);
-
             var update = Builders<BsonDocument>.Update
                 .Inc(versionElementName, 1);
 
@@ -50,7 +47,7 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            var result = await storageSession.UpdateOneAsync(sagaDataType, filter, update).ConfigureAwait(false);
+            var result = await storageSession.UpdateOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), update).ConfigureAwait(false);
 
             if (result.ModifiedCount != 1)
             {
@@ -105,5 +102,6 @@ namespace NServiceBus.Storage.MongoDB
 
         const string idElementName = "_id";
         readonly string versionElementName;
+        readonly FilterDefinitionBuilder<BsonDocument> filterBuilder = Builders<BsonDocument>.Filter;
     }
 }

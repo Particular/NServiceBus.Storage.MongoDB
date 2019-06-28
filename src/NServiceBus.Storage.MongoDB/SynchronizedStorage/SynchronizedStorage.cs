@@ -35,8 +35,9 @@ namespace NServiceBus.Storage.MongoDB
                     {
                         if (client.Cluster.Description.Type != ClusterType.ReplicaSet)
                         {
-                            throw new Exception("Transactions are only supported on a ReplicaSet. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
+                            throw new Exception("Transactions are only supported on a replica set. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
                         }
+
                         try
                         {
                             session.StartTransaction();

@@ -62,13 +62,13 @@
 
         public IDeduplicateMessages GatewayStorage { get; }
 
-        public Task Configure()
+        public async Task Configure()
         {
             var database = ClientProvider.Client.GetDatabase(databaseName);
 
-            Storage.MongoDB.SagaStorage.CreateIndexes(database, collectionNamingConvention, SagaMetadataCollection);
+            await database.CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
 
-            return Task.FromResult(0);
+            Storage.MongoDB.SagaStorage.CreateIndexes(database, collectionNamingConvention, SagaMetadataCollection);
         }
 
         public async Task Cleanup()

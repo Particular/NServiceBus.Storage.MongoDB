@@ -74,41 +74,41 @@
             Assert.NotNull(message);
         }
 
-        [Test]
-        public async Task Should_clear_dispatched_messages_after_given_expiry()
-        {
-            configuration.RequiresOutboxSupport();
+        //[Test]
+        //public async Task Should_clear_dispatched_messages_after_given_expiry()
+        //{
+        //    configuration.RequiresOutboxSupport();
 
-            var storage = configuration.OutboxStorage;
-            var ctx = configuration.GetContextBagForOutbox();
+        //    var storage = configuration.OutboxStorage;
+        //    var ctx = configuration.GetContextBagForOutbox();
 
-            var messageId = Guid.NewGuid().ToString();
+        //    var messageId = Guid.NewGuid().ToString();
 
-            var beforeStore = DateTimeOffset.UtcNow.AddTicks(-1);
+        //    var beforeStore = DateTimeOffset.UtcNow.AddTicks(-1);
 
-            var messageToStore = new OutboxMessage(messageId, new[] { new TransportOperation("x", null, null, null) });
-            using (var transaction = await storage.BeginTransaction(ctx))
-            {
-                await storage.Store(messageToStore, transaction, ctx);
+        //    var messageToStore = new OutboxMessage(messageId, new[] { new TransportOperation("x", null, null, null) });
+        //    using (var transaction = await storage.BeginTransaction(ctx))
+        //    {
+        //        await storage.Store(messageToStore, transaction, ctx);
 
-                await transaction.Commit();
-            }
+        //        await transaction.Commit();
+        //    }
 
-            // Account for the low resolution of DateTime.UtcNow.
-            var afterStore = DateTimeOffset.UtcNow.AddTicks(1);
+        //    // Account for the low resolution of DateTime.UtcNow.
+        //    var afterStore = DateTimeOffset.UtcNow.AddTicks(1);
 
-            await storage.SetAsDispatched(messageId, configuration.GetContextBagForOutbox());
+        //    await storage.SetAsDispatched(messageId, configuration.GetContextBagForOutbox());
 
-            await configuration.CleanupMessagesOlderThan(beforeStore);
+        //    await configuration.CleanupMessagesOlderThan(beforeStore);
 
-            var message = await storage.Get(messageId, configuration.GetContextBagForOutbox());
-            Assert.NotNull(message);
+        //    var message = await storage.Get(messageId, configuration.GetContextBagForOutbox());
+        //    Assert.NotNull(message);
 
-            await configuration.CleanupMessagesOlderThan(afterStore);
+        //    await configuration.CleanupMessagesOlderThan(afterStore);
 
-            message = await storage.Get(messageId, configuration.GetContextBagForOutbox());
-            Assert.Null(message);
-        }
+        //    message = await storage.Get(messageId, configuration.GetContextBagForOutbox());
+        //    Assert.Null(message);
+        //}
 
         [Test]
         public async Task Should_not_store_when_transaction_not_commited()

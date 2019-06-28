@@ -20,6 +20,6 @@ namespace NServiceBus
     }
     public class static SynchronizedStorageSessionExtensions
     {
-        public static MongoDB.Driver.IMongoCollection<T> GetCollection<T>(this NServiceBus.Persistence.SynchronizedStorageSession session, string name, MongoDB.Driver.MongoCollectionSettings settings = null) { }
+        public static MongoDB.Driver.IClientSessionHandle GetClientSession(this NServiceBus.Persistence.SynchronizedStorageSession session) { }
     }
 }

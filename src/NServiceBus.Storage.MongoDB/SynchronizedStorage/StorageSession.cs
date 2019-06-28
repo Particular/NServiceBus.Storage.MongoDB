@@ -10,9 +10,11 @@ namespace NServiceBus.Storage.MongoDB
 {
     class StorageSession : CompletableSynchronizedStorageSession
     {
+        public IClientSessionHandle MongoSession { get; }
+
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession)
         {
-            this.mongoSession = mongoSession;
+            MongoSession = mongoSession;
 
             database = mongoSession.Client.GetDatabase(databaseName, new MongoDatabaseSettings
             {
@@ -25,28 +27,15 @@ namespace NServiceBus.Storage.MongoDB
             this.ownsMongoSession = ownsMongoSession;
         }
 
-        public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(mongoSession, document);
+        public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(MongoSession, document);
 
-        public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(mongoSession, document);
+        public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(MongoSession, document);
 
-        public Task<UpdateResult> UpdateOneAsync(Type type, FilterDefinition<BsonDocument> filter, UpdateDefinition<BsonDocument> update) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).UpdateOneAsync(mongoSession, filter, update);
+        public Task<UpdateResult> UpdateOneAsync(Type type, FilterDefinition<BsonDocument> filter, UpdateDefinition<BsonDocument> update) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).UpdateOneAsync(MongoSession, filter, update);
 
-        public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(mongoSession, filter);
+        public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter);
 
-        public IFindFluent<BsonDocument, BsonDocument> Find(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Find(mongoSession, filter);
-
-
-
-
-
-
-
-
-        public IMongoCollection<T> GetCollection<T>(string name, MongoCollectionSettings settings = null) => database.GetCollection<T>(name, settings);
-
-
-
-
+        public IFindFluent<BsonDocument, BsonDocument> Find(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Find(MongoSession, filter);
 
         public void StoreVersion(Type type, BsonValue version) => contextBag.Set(type.FullName, version);
 
@@ -64,9 +53,9 @@ namespace NServiceBus.Storage.MongoDB
 
         internal Task InternalCompleteAsync()
         {
-            if (mongoSession.IsInTransaction)
+            if (MongoSession.IsInTransaction)
             {
-                return mongoSession.CommitTransactionAsync();
+                return MongoSession.CommitTransactionAsync();
             }
 
             return TaskEx.CompletedTask;
@@ -82,11 +71,11 @@ namespace NServiceBus.Storage.MongoDB
 
         internal void InternalDispose()
         {
-            if (mongoSession.IsInTransaction)
+            if (MongoSession.IsInTransaction)
             {
                 try
                 {
-                    mongoSession.AbortTransaction();
+                    MongoSession.AbortTransaction();
                 }
                 catch (Exception ex)
                 {
@@ -94,12 +83,11 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            mongoSession.Dispose();
+            MongoSession.Dispose();
         }
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
 
-        readonly IClientSessionHandle mongoSession;
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;

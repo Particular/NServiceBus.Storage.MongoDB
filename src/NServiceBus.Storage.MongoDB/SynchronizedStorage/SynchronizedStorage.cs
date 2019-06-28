@@ -49,6 +49,10 @@ namespace NServiceBus.Storage.MongoDB
                     }
                 }
             }
+            catch (NotSupportedException ex)
+            {
+                throw new Exception("Sessions are not supported by the MongoDB server. The NServiceBus.Storage.MongoDB persistence requires MongoDB server version 3.6 or greater.", ex);
+            }
             catch (TimeoutException ex)
             {
                 throw new Exception("Unable to connect to the MongoDB server. Check the connection settings, and verify the server is running and accessible.", ex);

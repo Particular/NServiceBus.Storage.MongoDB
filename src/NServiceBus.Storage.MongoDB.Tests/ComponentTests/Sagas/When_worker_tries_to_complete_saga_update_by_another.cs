@@ -48,8 +48,7 @@ namespace NServiceBus.Persistence.ComponentTests
 
             try
             {
-                await persister.Complete(staleRecord, losingSaveSession, losingContext);
-                Assert.That(async () => await losingSaveSession.CompleteAsync(), Throws.InstanceOf<Exception>().And.Message.EqualTo("Saga can't be completed as it was updated by another process."));
+                Assert.That(async () => await persister.Complete(staleRecord, losingSaveSession, losingContext), Throws.InstanceOf<Exception>());
             }
             finally
             {

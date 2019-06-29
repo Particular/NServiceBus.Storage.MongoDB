@@ -2,6 +2,8 @@
 namespace NServiceBus.Persistence.ComponentTests
 {
     using System;
+    using System.Linq;
+    using System.Reflection;
     using Extensibility;
     using Sagas;
 
@@ -17,19 +19,9 @@ namespace NServiceBus.Persistence.ComponentTests
             get{
                 if (sagaMetadataCollection == null)
                 {
+                    var sagaTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => typeof(Saga).IsAssignableFrom(t) || typeof(IFindSagas<>).IsAssignableFrom(t) || typeof(IFinder).IsAssignableFrom(t)).ToArray();
                     sagaMetadataCollection = new SagaMetadataCollection();
-                    sagaMetadataCollection.Initialize(new[]
-                    {
-                        typeof(AnotherSagaWithCorrelatedProperty),
-                        typeof(AnotherSagaWithoutCorrelationProperty),
-                        typeof(AnotherCustomFinder),
-                        typeof(SagaWithComplexType),
-                        typeof(SagaWithCorrelationProperty),
-                        typeof(SagaWithoutCorrelationProperty),
-                        typeof(CustomFinder),
-                        typeof(SimpleSagaEntitySaga),
-                        typeof(TestSaga)
-                    });
+                    sagaMetadataCollection.Initialize(sagaTypes);
                 }
                 return sagaMetadataCollection;
             }

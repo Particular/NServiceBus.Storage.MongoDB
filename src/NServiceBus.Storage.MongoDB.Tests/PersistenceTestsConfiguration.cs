@@ -12,26 +12,37 @@
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
     public partial class PersistenceTestsConfiguration
-    {
-        readonly string databaseName;
-        readonly Func<Type, string> collectionNamingConvention;
+    {                
+        readonly string versionElementName;
 
-        public PersistenceTestsConfiguration()
+        public string DatabaseName { get; }
+        public Func<Type, string> CollectionNamingConvention { get; }
+
+        public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention)
         {
-            databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
-            collectionNamingConvention = t => t.Name.ToLower();
+            DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
 
-            var versionElementName = "_version";
+            this.versionElementName = versionElementName;
+            CollectionNamingConvention = collectionNamingConvention;
+
             var useTransactions = true;
 
-            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, useTransactions, databaseName, collectionNamingConvention);
+            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, useTransactions, DatabaseName, collectionNamingConvention);
             SynchronizedStorageAdapter = new StorageSessionAdapter();
 
             SagaStorage = new SagaPersister(versionElementName);
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
 
-            OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, collectionNamingConvention);
+            OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, collectionNamingConvention);
+        }
+
+        public PersistenceTestsConfiguration() : this("_version", t => t.Name.ToLower())
+        {
+        }
+
+        public PersistenceTestsConfiguration(string versionElementName) : this(versionElementName, t => t.Name.ToLower())
+        {
         }
 
         public bool SupportsDtc { get; } = false;
@@ -64,16 +75,16 @@
 
         public async Task Configure()
         {
-            var database = ClientProvider.Client.GetDatabase(databaseName);
+            var database = ClientProvider.Client.GetDatabase(DatabaseName);
 
-            await database.CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
+            await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-            Storage.MongoDB.SagaStorage.CreateIndexes(database, collectionNamingConvention, SagaMetadataCollection);
+            Storage.MongoDB.SagaStorage.CreateIndexes(database, CollectionNamingConvention, SagaMetadataCollection);
         }
 
         public async Task Cleanup()
         {
-            await ClientProvider.Client.DropDatabaseAsync(databaseName);
+            await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
         }
 
         public Task CleanupMessagesOlderThan(DateTimeOffset beforeStore)

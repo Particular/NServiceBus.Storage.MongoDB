@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using NUnit.Framework;
 
-namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+namespace NServiceBus.Persistence.ComponentTests
 {
-    class When_migrating_NServiceBus_dot_MongoDB : MongoFixture
+    class When_migrating_NServiceBus_dot_MongoDB : SagaMigrationPersisterTests
     {
         readonly Func<Type, string> collectionNamingConvention = t => t.Name;
 
@@ -22,8 +22,7 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
                 SomeUpdatableSagaData = GetHashCode()
             };
 
-            SetVersionElementName(nameof(legacySagaData.DocumentVersion));
-            SetCollectionNamingConvention(collectionNamingConvention);
+            configuration = new PersistenceTestsConfiguration(nameof(legacySagaData.DocumentVersion), collectionNamingConvention);
 
             await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId), d =>
             {
@@ -34,13 +33,26 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
                 return d.ToBsonDocument();
             });
 
-            var retrievedSagaData = await LoadSaga<NServiceBusMongoDBLegacySagaData>(legacySagaData.Id);
+            var retrievedSagaData = await GetById<NServiceBusMongoDBLegacySaga,NServiceBusMongoDBLegacySagaData>(legacySagaData.Id);
 
             Assert.IsNotNull(retrievedSagaData, "Saga was not retrieved");
             Assert.AreEqual(legacySagaData.OriginalMessageId, retrievedSagaData.OriginalMessageId, "OriginalMessageId does not match");
             Assert.AreEqual(legacySagaData.Originator, retrievedSagaData.Originator, "Originator does not match");
             Assert.AreEqual(legacySagaData.SomeCorrelationPropertyId, retrievedSagaData.SomeCorrelationPropertyId, "SomeCorrelationPropertyId does not match");
             Assert.AreEqual(legacySagaData.SomeUpdatableSagaData, retrievedSagaData.SomeUpdatableSagaData, "SomeUpdatableSagaData does not match");
+        }
+
+        class NServiceBusMongoDBLegacySaga : Saga<NServiceBusMongoDBLegacySagaData>, IAmStartedByMessages<MigrationStartMessage>
+        {
+            public Task Handle(MigrationStartMessage message, IMessageHandlerContext context)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<NServiceBusMongoDBLegacySagaData> mapper)
+            {
+                mapper.ConfigureMapping<MigrationStartMessage>(msg => msg.Id).ToSaga(saga => saga.Id);
+            }
         }
 
         class NServiceBusMongoDBLegacySagaData : IContainSagaData

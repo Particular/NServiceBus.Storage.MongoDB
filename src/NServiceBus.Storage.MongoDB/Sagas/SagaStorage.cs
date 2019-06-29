@@ -38,7 +38,7 @@ namespace NServiceBus.Storage.MongoDB
             {
                 var collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
 
-                if (sagaMetadata.TryGetCorrelationProperty(out var property))
+                if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
                 {
                     var propertyElementName = sagaMetadata.SagaEntityType.GetElementName(property.Name);
 

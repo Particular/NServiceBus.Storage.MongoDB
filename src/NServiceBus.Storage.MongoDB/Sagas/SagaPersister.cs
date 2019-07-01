@@ -92,15 +92,6 @@ namespace NServiceBus.Storage.MongoDB
                 document.Remove(versionElementName);
                 storageSession.StoreVersion(sagaDataType, version);
 
-                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
-                {
-                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
-                    {
-                        cm.AutoMap();
-                        cm.SetIgnoreExtraElements(true);
-                    });
-                }
-
                 return BsonSerializer.Deserialize<TSagaData>(document);
             }
 

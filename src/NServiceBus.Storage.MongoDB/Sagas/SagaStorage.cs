@@ -1,5 +1,6 @@
 using System;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NServiceBus.Features;
 using NServiceBus.Sagas;
@@ -27,15 +28,24 @@ namespace NServiceBus.Storage.MongoDB
             var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
             var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 
-            CreateIndexes(database, collectionNamingConvention, sagaMetadataCollection);
+            InitializeSagaDataTypes(database, collectionNamingConvention, sagaMetadataCollection);
 
             context.Container.ConfigureComponent(() => new SagaPersister(versionElementName), DependencyLifecycle.SingleInstance);
         }
 
-        internal static void CreateIndexes(IMongoDatabase database, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
+        internal static void InitializeSagaDataTypes(IMongoDatabase database, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
         {
             foreach (var sagaMetadata in sagaMetadataCollection)
             {
+                if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
+                {
+                    var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
+                    classMap.AutoMap();
+                    classMap.SetIgnoreExtraElements(true);
+
+                    BsonClassMap.RegisterClassMap(classMap);
+                }
+
                 var collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
 
                 if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")

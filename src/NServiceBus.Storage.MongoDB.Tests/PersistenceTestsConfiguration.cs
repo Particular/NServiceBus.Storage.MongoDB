@@ -75,7 +75,7 @@ namespace NServiceBus.Persistence.ComponentTests
 
             await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-            Storage.MongoDB.SagaStorage.CreateIndexes(database, CollectionNamingConvention, SagaMetadataCollection);
+            Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(database, CollectionNamingConvention, SagaMetadataCollection);
         }
 
         public async Task Cleanup()

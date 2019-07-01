@@ -33,21 +33,9 @@ namespace NServiceBus.Storage.MongoDB
             var sagaDataType = sagaData.GetType();
 
             var version = storageSession.RetrieveVersion(sagaDataType);
+            var document = sagaData.ToBsonDocument().SetElement(new BsonElement(versionElementName, version + 1));
 
-            var update = Builders<BsonDocument>.Update
-                .Inc(versionElementName, 1);
-
-            var document = sagaData.ToBsonDocument();
-
-            foreach (var element in document)
-            {
-                if (element.Name != versionElementName && element.Name != idElementName)
-                {
-                    update = update.Set(element.Name, element.Value);
-                }
-            }
-
-            var result = await storageSession.UpdateOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), update).ConfigureAwait(false);
+            var result = await storageSession.ReplaceOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), document).ConfigureAwait(false);
 
             if (result.ModifiedCount != 1)
             {

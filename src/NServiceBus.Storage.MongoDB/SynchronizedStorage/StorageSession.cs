@@ -31,7 +31,7 @@ namespace NServiceBus.Storage.MongoDB
 
         public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(MongoSession, document);
 
-        public Task<UpdateResult> UpdateOneAsync(Type type, FilterDefinition<BsonDocument> filter, UpdateDefinition<BsonDocument> update) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).UpdateOneAsync(MongoSession, filter, update);
+        public Task<ReplaceOneResult> ReplaceOneAsync(Type type, FilterDefinition<BsonDocument> filter, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).ReplaceOneAsync(MongoSession, filter, document);
 
         public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter);
 

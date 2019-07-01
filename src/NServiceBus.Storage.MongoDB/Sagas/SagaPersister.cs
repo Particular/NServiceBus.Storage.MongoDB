@@ -89,7 +89,6 @@ namespace NServiceBus.Storage.MongoDB
             if (document != null)
             {
                 var version = document.GetValue(versionElementName);
-                document.Remove(versionElementName);
                 storageSession.StoreVersion(sagaDataType, version);
 
                 return BsonSerializer.Deserialize<TSagaData>(document);

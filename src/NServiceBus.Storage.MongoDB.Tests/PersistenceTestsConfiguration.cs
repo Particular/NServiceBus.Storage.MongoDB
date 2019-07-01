@@ -1,16 +1,16 @@
-﻿namespace NServiceBus.Persistence.ComponentTests
-{
-    using System;
-    using System.Globalization;
-    using System.Threading.Tasks;
-    using Gateway.Deduplication;
-    using NServiceBus.Storage.MongoDB;
-    using NServiceBus.Storage.MongoDB.Tests;
-    using Outbox;
-    using Sagas;
-    using Timeout.Core;
-    using Unicast.Subscriptions.MessageDrivenSubscriptions;
+﻿using System;
+using System.Globalization;
+using System.Threading.Tasks;
+using NServiceBus.Gateway.Deduplication;
+using NServiceBus.Outbox;
+using NServiceBus.Sagas;
+using NServiceBus.Storage.MongoDB;
+using NServiceBus.Storage.MongoDB.Tests;
+using NServiceBus.Timeout.Core;
+using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
+namespace NServiceBus.Persistence.ComponentTests
+{
     public partial class PersistenceTestsConfiguration
     {
         public string DatabaseName { get; }

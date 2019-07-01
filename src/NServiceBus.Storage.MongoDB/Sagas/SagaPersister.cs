@@ -43,15 +43,11 @@ namespace NServiceBus.Storage.MongoDB
             }
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData => GetSagaData<TSagaData>(typeof(TSagaData), idElementName, sagaId, session);
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
+            GetSagaData<TSagaData>(idElementName, sagaId, session);
 
-        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
-        {
-            var sagaDataType = typeof(TSagaData);
-            var propertyElementName = sagaDataType.GetElementName(propertyName);
-
-            return GetSagaData<TSagaData>(sagaDataType, propertyElementName, propertyValue, session);
-        }
+        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
+            GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session);
 
         public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
@@ -68,16 +64,16 @@ namespace NServiceBus.Storage.MongoDB
             }
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(Type sagaDataType, string elementName, object elementValue, SynchronizedStorageSession session)
+        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, SynchronizedStorageSession session)
         {
             var storageSession = (StorageSession)session;
 
-            var document = await storageSession.Find(sagaDataType, new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
 
             if (document != null)
             {
                 var version = document.GetValue(versionElementName);
-                storageSession.StoreVersion(sagaDataType, version.AsInt32);
+                storageSession.StoreVersion<TSagaData>(version.AsInt32);
 
                 return BsonSerializer.Deserialize<TSagaData>(document);
             }

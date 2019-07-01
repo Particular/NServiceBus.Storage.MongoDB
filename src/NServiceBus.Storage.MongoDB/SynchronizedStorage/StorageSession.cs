@@ -35,9 +35,9 @@ namespace NServiceBus.Storage.MongoDB
 
         public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter);
 
-        public IFindFluent<BsonDocument, BsonDocument> Find(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Find(MongoSession, filter);
+        public IFindFluent<BsonDocument, BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T))).Find(MongoSession, filter);
 
-        public void StoreVersion(Type type, int version) => contextBag.Set(type.FullName, version);
+        public void StoreVersion<T>(int version) => contextBag.Set(typeof(T).FullName, version);
 
         public int RetrieveVersion(Type type) => contextBag.Get<int>(type.FullName);
 

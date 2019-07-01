@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using NServiceBus.Persistence.ComponentTests;
 using NUnit.Framework;
 
-namespace NServiceBus.Persistence.ComponentTests
+namespace NServiceBus.Storage.MongoDB.Tests
 {
     class When_migrating_NServiceBus_dot_Persistence_dot_MongoDb : SagaMigrationPersisterTests
     {

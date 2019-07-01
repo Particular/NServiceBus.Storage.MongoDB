@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace NServiceBus.Persistence.ComponentTests
+namespace NServiceBus.Storage.MongoDB.Tests
 {
     public class PropertyTypesTestSaga : Saga<PropertyTypesTestSagaData>, IAmStartedByMessages<PropertyTypesTestSagaDataStartMessage>
     {

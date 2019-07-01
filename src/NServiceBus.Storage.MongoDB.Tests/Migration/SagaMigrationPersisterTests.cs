@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using NServiceBus.Storage.MongoDB.Tests;
+using NServiceBus.Persistence.ComponentTests;
 
-namespace NServiceBus.Persistence.ComponentTests
+namespace NServiceBus.Storage.MongoDB.Tests
 {
     class SagaMigrationPersisterTests : SagaPersisterTests
     {

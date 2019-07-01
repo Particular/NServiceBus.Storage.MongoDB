@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NServiceBus.Persistence.ComponentTests
+namespace NServiceBus.Storage.MongoDB.Tests
 {
     public static class EqualityExtensions
     {

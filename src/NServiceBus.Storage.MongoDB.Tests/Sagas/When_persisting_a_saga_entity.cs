@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using NServiceBus.Persistence.ComponentTests;
 using NUnit.Framework;
 
-namespace NServiceBus.Persistence.ComponentTests
+namespace NServiceBus.Storage.MongoDB.Tests
 {
     public class When_persisting_a_saga_entity : SagaPersisterTests<PropertyTypesTestSaga, PropertyTypesTestSagaData>
     {

@@ -89,7 +89,7 @@ namespace NServiceBus.Storage.MongoDB
             if (document != null)
             {
                 var version = document.GetValue(versionElementName);
-                storageSession.StoreVersion(sagaDataType, version);
+                storageSession.StoreVersion(sagaDataType, version.AsInt32);
 
                 return BsonSerializer.Deserialize<TSagaData>(document);
             }

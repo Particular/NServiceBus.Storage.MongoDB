@@ -37,9 +37,9 @@ namespace NServiceBus.Storage.MongoDB
 
         public IFindFluent<BsonDocument, BsonDocument> Find(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).Find(MongoSession, filter);
 
-        public void StoreVersion(Type type, BsonValue version) => contextBag.Set(type.FullName, version);
+        public void StoreVersion(Type type, int version) => contextBag.Set(type.FullName, version);
 
-        public BsonValue RetrieveVersion(Type type) => contextBag.Get<BsonValue>(type.FullName);
+        public int RetrieveVersion(Type type) => contextBag.Get<int>(type.FullName);
 
         Task CompletableSynchronizedStorageSession.CompleteAsync()
         {

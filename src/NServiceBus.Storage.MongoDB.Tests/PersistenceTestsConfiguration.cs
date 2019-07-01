@@ -12,17 +12,14 @@
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
     public partial class PersistenceTestsConfiguration
-    {                
-        readonly string versionElementName;
-
+    {
         public string DatabaseName { get; }
+
         public Func<Type, string> CollectionNamingConvention { get; }
 
         public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention)
         {
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
-
-            this.versionElementName = versionElementName;
             CollectionNamingConvention = collectionNamingConvention;
 
             var useTransactions = true;
@@ -30,9 +27,8 @@
             SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, useTransactions, DatabaseName, collectionNamingConvention);
             SynchronizedStorageAdapter = new StorageSessionAdapter();
 
-            SagaStorage = new SagaPersister(versionElementName);
-
             SagaIdGenerator = new DefaultSagaIdGenerator();
+            SagaStorage = new SagaPersister(versionElementName);
 
             OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, collectionNamingConvention);
         }

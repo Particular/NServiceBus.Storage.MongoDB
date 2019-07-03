@@ -77,5 +77,19 @@ namespace NServiceBus
         /// <param name="persistenceExtensions"></param>
         /// <returns></returns>
         public static CompatibilitySettings CommunityPersistenceCompatibility(this PersistenceExtensions<MongoPersistence> persistenceExtensions) => new CompatibilitySettings(persistenceExtensions.GetSettings());
+
+        /// <summary>
+        /// Describes a compatibility configuration.
+        /// </summary>
+        public delegate void CompatibilityConfiguration(PersistenceExtensions<MongoPersistence> configuration);
+
+        /// <summary>
+        /// Enables the compatibility mode with the given configuration.
+        /// </summary>
+        public static PersistenceExtensions<MongoPersistence> CompatibilityMode(this PersistenceExtensions<MongoPersistence> persistenceExtensions, CompatibilityConfiguration compatibilityConfiguration)
+        {
+            compatibilityConfiguration(persistenceExtensions);
+            return persistenceExtensions;
+        }
     }
 }

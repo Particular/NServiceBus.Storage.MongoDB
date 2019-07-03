@@ -22,7 +22,7 @@ namespace NServiceBus.Persistence.ComponentTests
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
             CollectionNamingConvention = collectionNamingConvention;
 
-            var useTransactions = true;
+            const bool useTransactions = true;
 
             SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, useTransactions, DatabaseName, collectionNamingConvention);
             SynchronizedStorageAdapter = new StorageSessionAdapter();

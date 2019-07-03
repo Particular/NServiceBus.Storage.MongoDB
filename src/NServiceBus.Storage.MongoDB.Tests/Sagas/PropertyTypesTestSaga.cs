@@ -1,9 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
+namespace NServiceBus.Storage.MongoDB.Tests
 {
-    public class TestSaga : IContainSagaData
+    public class PropertyTypesTestSaga : Saga<PropertyTypesTestSagaData>, IAmStartedByMessages<PropertyTypesTestSagaDataStartMessage>
+    {
+        public Task Handle(PropertyTypesTestSagaDataStartMessage message, IMessageHandlerContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<PropertyTypesTestSagaData> mapper)
+        {
+            mapper.ConfigureMapping<PropertyTypesTestSagaDataStartMessage>(msg => msg.Id).ToSaga(saga => saga.Id);
+        }
+    }
+
+    public class PropertyTypesTestSagaData : IContainSagaData
     {
         public virtual Guid Id { get; set; }
 
@@ -92,29 +106,8 @@ namespace NServiceBus.Storage.MongoDB.Tests.SagaPersistence
         public virtual Guid Id { get; set; }
     }
 
-    public class SagaWithUniqueProperty : IContainSagaData
+    public class PropertyTypesTestSagaDataStartMessage : ICommand
     {
-        public virtual Guid Id { get; set; }
-
-        public virtual string Originator { get; set; }
-
-        public virtual string OriginalMessageId { get; set; }
-
-        public virtual string UniqueString { get; set; }
-
-        public string NonUniqueString { get; set; }
-    }
-
-    public class SagaWithoutUniqueProperties : IContainSagaData
-    {
-        public virtual Guid Id { get; set; }
-
-        public virtual string Originator { get; set; }
-
-        public virtual string OriginalMessageId { get; set; }
-
-        public virtual string UniqueString { get; set; }
-
-        public string NonUniqueString { get; set; }
+        public Guid Id { get; set; }
     }
 }

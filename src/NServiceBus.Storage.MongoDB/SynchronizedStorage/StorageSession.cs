@@ -10,9 +10,11 @@ namespace NServiceBus.Storage.MongoDB
 {
     class StorageSession : CompletableSynchronizedStorageSession
     {
+        public IClientSessionHandle MongoSession { get; }
+
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession)
         {
-            this.mongoSession = mongoSession;
+            MongoSession = mongoSession;
 
             database = mongoSession.Client.GetDatabase(databaseName, new MongoDatabaseSettings
             {
@@ -25,51 +27,55 @@ namespace NServiceBus.Storage.MongoDB
             this.ownsMongoSession = ownsMongoSession;
         }
 
-        public IMongoCollection<BsonDocument> GetCollection(Type type) => database.GetCollection<BsonDocument>(collectionNamingConvention(type));
+        public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(MongoSession, document);
 
-        public IMongoCollection<T> GetCollection<T>() => database.GetCollection<T>(collectionNamingConvention(typeof(T)));
+        public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(MongoSession, document);
 
-        public IMongoCollection<T> GetCollection<T>(string name, MongoCollectionSettings settings = null) => database.GetCollection<T>(name, settings);
+        public Task<ReplaceOneResult> ReplaceOneAsync(Type type, FilterDefinition<BsonDocument> filter, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).ReplaceOneAsync(MongoSession, filter, document);
 
-        public void StoreVersion(Type type, BsonValue version) => contextBag.Set(type.FullName, version);
+        public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter);
 
-        public BsonValue RetrieveVersion(Type type) => contextBag.Get<BsonValue>(type.FullName);
+        public IFindFluent<BsonDocument, BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T))).Find(MongoSession, filter);
 
-        public Task CompleteAsync()
+        public void StoreVersion<T>(int version) => contextBag.Set(typeof(T).FullName, version);
+
+        public int RetrieveVersion(Type type) => contextBag.Get<int>(type.FullName);
+
+        Task CompletableSynchronizedStorageSession.CompleteAsync()
         {
             if (ownsMongoSession)
             {
-                return InternalCompleteAsync();
+                return CompleteAsync();
             }
 
             return TaskEx.CompletedTask;
         }
 
-        internal Task InternalCompleteAsync()
+        public Task CompleteAsync()
         {
-            if (mongoSession.IsInTransaction)
+            if (MongoSession.IsInTransaction)
             {
-                return mongoSession.CommitTransactionAsync();
+                return MongoSession.CommitTransactionAsync();
             }
 
             return TaskEx.CompletedTask;
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (ownsMongoSession)
+            {
+                Dispose();
+            }
         }
 
         public void Dispose()
         {
-            if (ownsMongoSession)
-            {
-                InternalDispose();
-            }
-        }
-
-        internal void InternalDispose()
-        {
-            if (mongoSession.IsInTransaction)
+            if (MongoSession.IsInTransaction)
             {
                 try
                 {
-                    mongoSession.AbortTransaction();
+                    MongoSession.AbortTransaction();
                 }
                 catch (Exception ex)
                 {
@@ -77,12 +83,11 @@ namespace NServiceBus.Storage.MongoDB
                 }
             }
 
-            mongoSession.Dispose();
+            MongoSession.Dispose();
         }
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
 
-        readonly IClientSessionHandle mongoSession;
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;

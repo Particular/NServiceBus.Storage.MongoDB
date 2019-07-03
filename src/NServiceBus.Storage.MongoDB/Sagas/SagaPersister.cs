@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -21,50 +20,22 @@ namespace NServiceBus.Storage.MongoDB
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
-            var collection = storageSession.GetCollection(sagaDataType);
-
-            if (correlationProperty != null && !createdIndexCache.ContainsKey(sagaDataType.Name))
-            {
-                var propertyElementName = GetElementName(sagaDataType, correlationProperty.Name);
-
-                var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
-
-                await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
-
-                createdIndexCache.GetOrAdd(sagaDataType.Name, true);
-            }
 
             var document = sagaData.ToBsonDocument();
             document.Add(versionElementName, 0);
 
-            await collection.InsertOneAsync(document).ConfigureAwait(false);
+            await storageSession.InsertOneAsync(sagaDataType, document).ConfigureAwait(false);
         }
 
         public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
-            var collection = storageSession.GetCollection(sagaDataType);
 
             var version = storageSession.RetrieveVersion(sagaDataType);
+            var document = sagaData.ToBsonDocument().SetElement(new BsonElement(versionElementName, version + 1));
 
-            var filterBuilder = Builders<BsonDocument>.Filter;
-            var filter = filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version);
-
-            var update = Builders<BsonDocument>.Update
-                .Inc(versionElementName, 1);
-
-            var document = sagaData.ToBsonDocument();
-
-            foreach (var element in document)
-            {
-                if (element.Name != versionElementName && element.Name != idElementName)
-                {
-                    update = update.Set(element.Name, element.Value);
-                }
-            }
-
-            var result = await collection.UpdateOneAsync(filter, update).ConfigureAwait(false);
+            var result = await storageSession.ReplaceOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), document).ConfigureAwait(false);
 
             if (result.ModifiedCount != 1)
             {
@@ -72,46 +43,37 @@ namespace NServiceBus.Storage.MongoDB
             }
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData => GetSagaData<TSagaData>(typeof(TSagaData), idElementName, sagaId, session);
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
+            GetSagaData<TSagaData>(idElementName, sagaId, session);
 
-        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData
-        {
-            var sagaDataType = typeof(TSagaData);
-            var propertyElementName = GetElementName(sagaDataType, propertyName);
+        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
+            GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session);
 
-            return GetSagaData<TSagaData>(sagaDataType, propertyElementName, propertyValue, session);
-        }
-
-        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
-            var collection = storageSession.GetCollection(sagaDataType);
 
-            return collection.DeleteOneAsync(new BsonDocument(idElementName, sagaData.Id));
+            var version = storageSession.RetrieveVersion(sagaDataType);
+
+            var result = await storageSession.DeleteOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version)).ConfigureAwait(false);
+
+            if (result.DeletedCount != 1)
+            {
+                throw new Exception("Saga can't be completed because it was updated by another process.");
+            }
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(Type sagaDataType, string elementName, object elementValue, SynchronizedStorageSession session)
+        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, SynchronizedStorageSession session)
         {
             var storageSession = (StorageSession)session;
-            var collection = storageSession.GetCollection(sagaDataType);
 
-            var document = await collection.Find(new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
 
             if (document != null)
             {
                 var version = document.GetValue(versionElementName);
-                document.Remove(versionElementName);
-                storageSession.StoreVersion(sagaDataType, version);
-
-                if (!BsonClassMap.IsClassMapRegistered(sagaDataType))
-                {
-                    BsonClassMap.RegisterClassMap<TSagaData>(cm =>
-                    {
-                        cm.AutoMap();
-                        cm.SetIgnoreExtraElements(true);
-                    });
-                }
+                storageSession.StoreVersion<TSagaData>(version.AsInt32);
 
                 return BsonSerializer.Deserialize<TSagaData>(document);
             }
@@ -119,23 +81,8 @@ namespace NServiceBus.Storage.MongoDB
             return default;
         }
 
-        string GetElementName(Type type, string property)
-        {
-            var classMap = BsonClassMap.LookupClassMap(type);
-
-            foreach (var memberMap in classMap.AllMemberMaps)
-            {
-                if (memberMap.MemberName == property)
-                {
-                    return memberMap.ElementName;
-                }
-            }
-
-            throw new InvalidOperationException($"Property '{property}' not found in '{type}' class map.");
-        }
-
         const string idElementName = "_id";
         readonly string versionElementName;
-        readonly ConcurrentDictionary<string, bool> createdIndexCache = new ConcurrentDictionary<string, bool>();
+        readonly FilterDefinitionBuilder<BsonDocument> filterBuilder = Builders<BsonDocument>.Filter;
     }
 }

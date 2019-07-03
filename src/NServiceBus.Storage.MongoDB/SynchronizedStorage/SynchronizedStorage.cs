@@ -1,5 +1,6 @@
 ﻿using System;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using NServiceBus.Features;
 
 namespace NServiceBus.Storage.MongoDB
@@ -32,6 +33,11 @@ namespace NServiceBus.Storage.MongoDB
                 {
                     if (useTransactions)
                     {
+                        if (client.Cluster.Description.Type != ClusterType.ReplicaSet)
+                        {
+                            throw new Exception("Transactions are only supported on a replica set. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
+                        }
+
                         try
                         {
                             session.StartTransaction();
@@ -43,6 +49,10 @@ namespace NServiceBus.Storage.MongoDB
                         }
                     }
                 }
+            }
+            catch (NotSupportedException ex)
+            {
+                throw new Exception("Sessions are not supported by the MongoDB server. The NServiceBus.Storage.MongoDB persistence requires MongoDB server version 3.6 or greater.", ex);
             }
             catch (TimeoutException ex)
             {

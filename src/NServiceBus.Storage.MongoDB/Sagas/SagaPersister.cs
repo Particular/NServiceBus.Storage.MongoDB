@@ -60,7 +60,7 @@ namespace NServiceBus.Storage.MongoDB
 
             if (result.DeletedCount != 1)
             {
-                throw new Exception($"Saga can't be completed because it was updated by another process.");
+                throw new Exception("Saga can't be completed because it was updated by another process.");
             }
         }
 

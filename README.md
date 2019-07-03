@@ -85,7 +85,13 @@ Instructions for installing MongoDB can be found on the [MongoDB website](https:
 
 For developers using Docker containers, the following docker command will quickly setup a container configured to use the default port:
 
-`docker run -d -p 27017:27017 --name TestMongoDB mongo:latest`
+`docker run -d -p 27017:27017 --name TestMongoDB mongo:latest --replSet tr0`
+
+Once started, initialize the replication set (required for transaction support) by connecting to the container:
+
+`docker exec -it TestMongoDB mongo`
+
+then use `rs.initiate()` to setup the replication set.
 
 
 

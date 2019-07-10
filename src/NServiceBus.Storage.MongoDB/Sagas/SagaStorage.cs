@@ -24,7 +24,15 @@ namespace NServiceBus.Storage.MongoDB
 
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
-            var database = client.GetDatabase(databaseName);
+
+            var databaseSettings = new MongoDatabaseSettings
+            {
+                ReadConcern = ReadConcern.Majority,
+                ReadPreference = ReadPreference.Primary,
+                WriteConcern = WriteConcern.WMajority
+            };
+
+            var database = client.GetDatabase(databaseName, databaseSettings);
             var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
             var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 

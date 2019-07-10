@@ -22,7 +22,7 @@ namespace NServiceBus.Storage.MongoDB
 
             if (useTransactions)
             {
-                mongoSession.StartTransaction();
+                mongoSession.StartTransaction(new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority));
             }
 
             return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention, true);

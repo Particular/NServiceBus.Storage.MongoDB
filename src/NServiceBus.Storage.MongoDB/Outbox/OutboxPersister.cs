@@ -11,7 +11,15 @@ namespace NServiceBus.Storage.MongoDB
         public OutboxPersister(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention)
         {
             outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, collectionNamingConvention);
-            outboxRecordCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)));
+
+            var collectionSettings = new MongoCollectionSettings
+            {
+                ReadConcern = ReadConcern.Majority,
+                ReadPreference = ReadPreference.Primary,
+                WriteConcern = WriteConcern.WMajority
+            };
+
+            outboxRecordCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
         }
 
         public async Task<OutboxMessage> Get(string messageId, ContextBag context)

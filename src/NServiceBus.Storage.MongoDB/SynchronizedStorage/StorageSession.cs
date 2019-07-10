@@ -18,6 +18,7 @@ namespace NServiceBus.Storage.MongoDB
 
             database = mongoSession.Client.GetDatabase(databaseName, new MongoDatabaseSettings
             {
+                ReadConcern = ReadConcern.Majority,
                 ReadPreference = ReadPreference.Primary,
                 WriteConcern = WriteConcern.WMajority
             });

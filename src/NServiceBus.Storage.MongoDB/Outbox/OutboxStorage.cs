@@ -44,7 +44,14 @@ namespace NServiceBus.Storage.MongoDB
                 timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
             }
 
-            var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)));
+            var collectionSettings = new MongoCollectionSettings
+            {
+                ReadConcern = ReadConcern.Majority,
+                ReadPreference = ReadPreference.Primary,
+                WriteConcern = WriteConcern.WMajority
+            };
+
+            var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
             var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == outboxCleanupIndexName);
             var existingExpiration = outboxCleanupIndex?.GetElement("expireAfterSeconds").Value.ToInt32();
 

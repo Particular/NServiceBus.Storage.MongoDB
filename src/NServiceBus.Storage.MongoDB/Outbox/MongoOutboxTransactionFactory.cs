@@ -19,7 +19,7 @@ namespace NServiceBus.Storage.MongoDB
         {
             var mongoSession = await client.StartSessionAsync().ConfigureAwait(false);
 
-            mongoSession.StartTransaction();
+            mongoSession.StartTransaction(new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority));
 
             return new MongoOutboxTransaction(mongoSession, databaseName, context, collectionNamingConvention);
         }

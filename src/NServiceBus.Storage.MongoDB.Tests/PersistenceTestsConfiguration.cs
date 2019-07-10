@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using MongoDB.Driver;
 using NServiceBus.Gateway.Deduplication;
 using NServiceBus.Outbox;
 using NServiceBus.Sagas;
@@ -69,7 +70,14 @@ namespace NServiceBus.Persistence.ComponentTests
 
         public async Task Configure()
         {
-            var database = ClientProvider.Client.GetDatabase(DatabaseName);
+            var databaseSettings = new MongoDatabaseSettings
+            {
+                ReadConcern = ReadConcern.Majority,
+                ReadPreference = ReadPreference.Primary,
+                WriteConcern = WriteConcern.WMajority
+            };
+
+            var database = ClientProvider.Client.GetDatabase(DatabaseName, databaseSettings);
 
             await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 

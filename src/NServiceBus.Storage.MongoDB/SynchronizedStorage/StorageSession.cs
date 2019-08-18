@@ -8,7 +8,7 @@ using NServiceBus.Persistence;
 
 namespace NServiceBus.Storage.MongoDB
 {
-    class StorageSession : CompletableSynchronizedStorageSession
+    class StorageSession : CompletableSynchronizedStorageSession, IHaveAMongoSession
     {
         public IClientSessionHandle MongoSession { get; }
 

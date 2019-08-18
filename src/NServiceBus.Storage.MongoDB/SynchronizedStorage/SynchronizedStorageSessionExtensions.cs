@@ -19,7 +19,7 @@ namespace NServiceBus
         {
             Guard.AgainstNull(nameof(session), session);
 
-            if (session is StorageSession storageSession)
+            if (session is IHaveAMongoSession storageSession)
             {
                 return storageSession.MongoSession;
             }

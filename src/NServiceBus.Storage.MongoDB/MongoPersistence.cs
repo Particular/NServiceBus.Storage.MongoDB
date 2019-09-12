@@ -1,20 +1,17 @@
-﻿using System;
-using MongoDB.Driver;
-using NServiceBus.Features;
-using NServiceBus.Persistence;
-using NServiceBus.Storage.MongoDB;
-
-namespace NServiceBus
+﻿namespace NServiceBus
 {
+    using System;
+    using Features;
+    using MongoDB.Driver;
+    using Persistence;
+    using Storage.MongoDB;
+    using Storage.MongoDB.Subscriptions;
+
     /// <summary>
-    ///
     /// </summary>
     public class MongoPersistence : PersistenceDefinition
     {
-        static IMongoClient defaultClient;
-
         /// <summary>
-        ///
         /// </summary>
         public MongoPersistence()
         {
@@ -28,6 +25,7 @@ namespace NServiceBus
                     {
                         defaultClient = new MongoClient();
                     }
+
                     return defaultClient;
                 }));
 
@@ -38,6 +36,9 @@ namespace NServiceBus
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
             Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<OutboxStorage>());
+            Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<SubscriptionStorage>());
         }
+
+        static IMongoClient defaultClient;
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Persistence.ComponentTests
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Extensibility;
@@ -31,12 +32,14 @@
             configuration.RequiresSubscriptionSupport();
             var storage = configuration.SubscriptionStorage;
 
-            await storage.Subscribe(new Subscriber("address1", "endpoint1"), new MessageType("message1", "1.0.0"), new ContextBag());
-            await storage.Subscribe(new Subscriber("address1", "endpoint1"), new MessageType("message1", "2.0.0"), new ContextBag());
+            var eventType = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
+            await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
 
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
-                new MessageType("message1", "1.0.0")
+                eventType
             }, configuration.GetContextBagForSubscriptions());
 
             Assert.AreEqual(1, subscribers.Count());
@@ -46,17 +49,19 @@
         }
 
         [Test]
-        public async Task Should_return_all_transport_addresses_of_logical_endpoint()
+        public async Task Should_find_all_transport_addresses_of_logical_endpoint()
         {
             configuration.RequiresSubscriptionSupport();
             var storage = configuration.SubscriptionStorage;
 
-            await storage.Subscribe(new Subscriber("address1", "endpoint1"), new MessageType("message2", "1.0.0"), new ContextBag());
-            await storage.Subscribe(new Subscriber("address2", "endpoint1"), new MessageType("message2", "1.0.0"), new ContextBag());
+            var eventType = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
+            await storage.Subscribe(new Subscriber("address2", "endpoint1"), eventType, new ContextBag());
 
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
-                new MessageType("message2", "1.0.0")
+                eventType
             }, configuration.GetContextBagForSubscriptions());
 
             Assert.AreEqual(2, subscribers.Count());
@@ -64,17 +69,40 @@
         }
 
         [Test]
-        public async Task Should_return_all_queried_message_types()
+        public async Task Should_find_all_logical_endpoints_of_same_transport_address()
         {
             configuration.RequiresSubscriptionSupport();
             var storage = configuration.SubscriptionStorage;
 
-            await storage.Subscribe(new Subscriber("address", "endpoint1"), new MessageType("message3", "1.0.0"), new ContextBag());
-            await storage.Subscribe(new Subscriber("address", "endpoint1"), new MessageType("message4", "1.0.0"), new ContextBag());
+            var eventType = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address1", "endpointA"), eventType, new ContextBag());
+            await storage.Subscribe(new Subscriber("address1", "endpointB"), eventType, new ContextBag());
 
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
-                new MessageType("message3", "1.0.0"), new MessageType("message4", "1.0.0")
+                eventType
+            }, configuration.GetContextBagForSubscriptions());
+
+            Assert.AreEqual(2, subscribers.Count());
+            CollectionAssert.AreEquivalent(new[] { "endpointA", "endpointB" }, subscribers.Select(s => s.Endpoint));
+        }
+
+        [Test]
+        public async Task Should_find_all_queried_message_types()
+        {
+            configuration.RequiresSubscriptionSupport();
+            var storage = configuration.SubscriptionStorage;
+
+            var eventType1 = CreateUniqueMessageType();
+            var eventType2 = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
+            await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType2, new ContextBag());
+
+            var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
+            {
+                eventType1, eventType2
             }, configuration.GetContextBagForSubscriptions());
 
             Assert.AreEqual(2, subscribers.Count());
@@ -82,10 +110,48 @@
         }
 
         [Test]
+        public async Task Should_not_unsubscribe_when_address_does_not_match()
+        {
+            configuration.RequiresSubscriptionSupport();
+            var storage = configuration.SubscriptionStorage;
+
+            var eventType1 = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
+            await storage.Unsubscribe(new Subscriber("another address", "endpoint1"), eventType1, new ContextBag());
+
+            var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
+            {
+                eventType1
+            }, configuration.GetContextBagForSubscriptions());
+
+            Assert.AreEqual("address", subscribers.Single().TransportAddress);
+        }
+
+        [Test]
+        public async Task Should_unsubscribe_when_logical_endpoint_does_not_match()
+        {
+            configuration.RequiresSubscriptionSupport();
+            var storage = configuration.SubscriptionStorage;
+
+            var eventType1 = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
+            await storage.Subscribe(new Subscriber("address", "endpoint2"), eventType1, new ContextBag());
+            await storage.Unsubscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
+
+            var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
+            {
+                eventType1
+            }, configuration.GetContextBagForSubscriptions());
+
+            Assert.AreEqual(0, subscribers.Count());
+        }
+
+        [Test]
         public async Task Should_ignore_message_version_on_subscriptions()
         {
             configuration.RequiresSubscriptionSupport();
-
             var storage = configuration.SubscriptionStorage;
 
             await storage.Subscribe(new Subscriber("subscriberA@server1", "subscriberA"), new MessageType("SomeMessage", "1.0.0"), configuration.GetContextBagForSubscriptions());
@@ -96,6 +162,11 @@
             }, configuration.GetContextBagForSubscriptions());
 
             Assert.AreEqual("subscriberA", subscribers.Single().Endpoint);
+        }
+
+        static MessageType CreateUniqueMessageType()
+        {
+            return new MessageType(Guid.NewGuid().ToString("N"), "1.0.0");
         }
     }
 }

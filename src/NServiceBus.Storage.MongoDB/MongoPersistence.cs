@@ -32,6 +32,8 @@
                 s.SetDefault(SettingsKeys.DatabaseName, s.EndpointName());
 
                 s.SetDefault(SettingsKeys.CollectionNamingConvention, (Func<Type, string>)(type => type.Name.ToLower()));
+
+                s.SetDefault(DefaultDatabaseSettings);
             });
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
@@ -40,5 +42,12 @@
         }
 
         static IMongoClient defaultClient;
+
+        static internal readonly MongoDatabaseSettings DefaultDatabaseSettings = new MongoDatabaseSettings
+        {
+            ReadConcern = ReadConcern.Majority,
+            WriteConcern = WriteConcern.WMajority,
+            ReadPreference = ReadPreference.Primary
+        };
     }
 }

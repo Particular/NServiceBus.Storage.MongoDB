@@ -18,7 +18,8 @@
         {
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
-            var collection = GetSubscriptionCollection(client, databaseName);
+            var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
+            var collection = GetSubscriptionCollection(client, databaseName, databaseSettings);
 
             var subscriptionPersister = new SubscriptionPersister(collection);
             subscriptionPersister.CreateIndexes();
@@ -26,7 +27,7 @@
             context.Container.RegisterSingleton(subscriptionPersister);
         }
 
-        //TODO do we need to set write/read concerns for the collection?
-        internal static IMongoCollection<EventSubscription> GetSubscriptionCollection(IMongoClient client, string databaseName) => client.GetDatabase(databaseName).GetCollection<EventSubscription>(SubscriptionCollectionName);
+        internal static IMongoCollection<EventSubscription> GetSubscriptionCollection(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings) => 
+            client.GetDatabase(databaseName, databaseSettings).GetCollection<EventSubscription>(SubscriptionCollectionName);
     }
 }

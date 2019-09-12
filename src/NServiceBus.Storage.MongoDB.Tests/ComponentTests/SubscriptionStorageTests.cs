@@ -2,7 +2,6 @@
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using ComponentTests;
     using Extensibility;
     using NUnit.Framework;
     using Unicast.Subscriptions;

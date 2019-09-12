@@ -41,7 +41,7 @@
             var filter = Builders<EventSubscription>.Filter.And(
                 Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, messageType.TypeName),
                 Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
-            await subscriptionsCollection.DeleteOneAsync(filter).ConfigureAwait(false);
+            await subscriptionsCollection.DeleteManyAsync(filter).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)

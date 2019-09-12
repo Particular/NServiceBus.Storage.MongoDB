@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Extensibility;
-    using global::MongoDB.Bson;
     using global::MongoDB.Driver;
     using Unicast.Subscriptions;
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
@@ -35,7 +34,6 @@
             {
                 // duplicate key error
             }
-            
         }
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
@@ -50,11 +48,22 @@
         {
             var messageTypeNames = messageTypes.Select(t => t.TypeName).ToArray();
             var filter = Builders<EventSubscription>.Filter.In(s => s.MessageTypeName, messageTypeNames);
+            // This projection allows a covered query:
+            var projection = Builders<EventSubscription>.Projection
+                //.Include(s => s.MessageTypeName)
+                .Include(s => s.TransportAddress)
+                .Include(s => s.Endpoint)
+                .Exclude("_id");
 
-            var options = new FindOptions();
-            var result = await subscriptionsCollection.Find(filter, options).ToListAsync().ConfigureAwait(false);
+            //var options = new FindOptions();
+            //options.Modifiers = new BsonDocument("$explain", true);
+            //var queryStats = await subscriptionsCollection.Find(filter, options).Project(p).ToListAsync().ConfigureAwait(false);
 
-            return result.Select(r => new Subscriber(r.TransportAddress, r.Endpoint));
+            var result = await subscriptionsCollection.Find(filter).Project(projection).ToListAsync().ConfigureAwait(false);
+
+            return result.Select(r => new Subscriber(
+                r[nameof(EventSubscription.TransportAddress)].AsString, 
+                r[nameof(EventSubscription.Endpoint)].AsString));
         }
 
         public void CreateIndexes()
@@ -66,14 +75,5 @@
             var index = new CreateIndexModel<EventSubscription>(indexKeyDefintion, new CreateIndexOptions { Unique = true });
             subscriptionsCollection.Indexes.CreateOne(index);
         }
-    }
-
-    //TODO: should we add a timestamp for debug purpose?
-    class EventSubscription
-    {
-        public ObjectId Id { get; set; }
-        public string MessageTypeName { get; set; }
-        public string TransportAddress { get; set; }
-        public string Endpoint { get; set; }
     }
 }

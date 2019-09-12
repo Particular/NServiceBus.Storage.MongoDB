@@ -12,6 +12,8 @@ using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 namespace NServiceBus.Persistence.ComponentTests
 {
+    using Storage.MongoDB.Subscriptions;
+
     public partial class PersistenceTestsConfiguration
     {
         public string DatabaseName { get; }
@@ -30,6 +32,10 @@ namespace NServiceBus.Persistence.ComponentTests
             SagaStorage = new SagaPersister(versionElementName);
 
             OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, collectionNamingConvention);
+
+            var subscriptionPersister = new SubscriptionPersister(Storage.MongoDB.Subscriptions.SubscriptionStorage.GetSubscriptionCollection(ClientProvider.Client, DatabaseName));
+            subscriptionPersister.CreateIndexes();
+            SubscriptionStorage = subscriptionPersister;
         }
 
         public PersistenceTestsConfiguration() : this("_version", t => t.Name.ToLower())
@@ -46,7 +52,7 @@ namespace NServiceBus.Persistence.ComponentTests
 
         public bool SupportsFinders { get; } = true;
 
-        public bool SupportsSubscriptions { get; } = false;
+        public bool SupportsSubscriptions { get; } = true;
 
         public bool SupportsTimeouts { get; } = false;
 

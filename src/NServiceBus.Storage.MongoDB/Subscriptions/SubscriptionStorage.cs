@@ -18,16 +18,15 @@
         {
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
-            var collection = client.GetDatabase(databaseName).GetCollection<EventSubscription>(SubscriptionCollectionName);
+            var collection = GetSubscriptionCollection(client, databaseName);
 
-            var indexKeyDefintion = Builders<EventSubscription>.IndexKeys
-                .Ascending(x => x.MessageTypeName)
-                .Ascending(x => x.TransportAddress)
-                .Ascending(x => x.Endpoint); // allow queries to return results directly from the index
-            var index = new CreateIndexModel<EventSubscription>(indexKeyDefintion, new CreateIndexOptions {Unique = true});
-            collection.Indexes.CreateOne(index);
+            var subscriptionPersister = new SubscriptionPersister(collection);
+            subscriptionPersister.CreateIndexes();
 
-            context.Container.RegisterSingleton(new SubscriptionPersister(collection));
+            context.Container.RegisterSingleton(subscriptionPersister);
         }
+
+        //TODO do we need to set write/read concerns for the collection?
+        internal static IMongoCollection<EventSubscription> GetSubscriptionCollection(IMongoClient client, string databaseName) => client.GetDatabase(databaseName).GetCollection<EventSubscription>(SubscriptionCollectionName);
     }
 }

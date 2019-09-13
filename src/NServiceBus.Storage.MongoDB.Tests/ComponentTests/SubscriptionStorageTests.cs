@@ -69,7 +69,7 @@
         }
 
         [Test]
-        public async Task Should_find_all_logical_endpoints_of_same_transport_address()
+        public async Task Should_update_endpoint_name_for_transport_address()
         {
             configuration.RequiresSubscriptionSupport();
             var storage = configuration.SubscriptionStorage;
@@ -84,8 +84,8 @@
                 eventType
             }, configuration.GetContextBagForSubscriptions());
 
-            Assert.AreEqual(2, subscribers.Count());
-            CollectionAssert.AreEquivalent(new[] { "endpointA", "endpointB" }, subscribers.Select(s => s.Endpoint));
+            Assert.AreEqual(1, subscribers.Count());
+            Assert.AreEqual("endpointB", subscribers.Single().Endpoint);
         }
 
         [Test]
@@ -146,6 +146,71 @@
             }, configuration.GetContextBagForSubscriptions());
 
             Assert.AreEqual(0, subscribers.Count());
+        }
+
+        [Test]
+        public async Task Should_handle_legacy_subscription_message()
+        {
+            configuration.RequiresSubscriptionSupport();
+            var storage = configuration.SubscriptionStorage;
+
+            var eventType = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
+
+            var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
+            {
+                eventType
+            }, configuration.GetContextBagForSubscriptions());
+
+            Assert.AreEqual(1, subscribers.Count());
+            var subscriber = subscribers.Single();
+            Assert.AreEqual("address", subscriber.TransportAddress);
+            Assert.IsNull(subscriber.Endpoint);
+        }
+
+        [Test]
+        public async Task Should_add_endpoint_on_new_subscription()
+        {
+            configuration.RequiresSubscriptionSupport();
+            var storage = configuration.SubscriptionStorage;
+
+            var eventType = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
+            await storage.Subscribe(new Subscriber("address", "endpoint"), eventType, new ContextBag());
+
+            var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
+            {
+                eventType
+            }, configuration.GetContextBagForSubscriptions());
+
+            Assert.AreEqual(1, subscribers.Count());
+            var subscriber = subscribers.Single();
+            Assert.AreEqual("address", subscriber.TransportAddress);
+            Assert.AreEqual("endpoint", subscriber.Endpoint);
+        }
+
+        [Test]
+        public async Task Should_not_remove_endpoint_on_legacy_subscriptions()
+        {
+            configuration.RequiresSubscriptionSupport();
+            var storage = configuration.SubscriptionStorage;
+
+            var eventType = CreateUniqueMessageType();
+
+            await storage.Subscribe(new Subscriber("address", "endpoint"), eventType, new ContextBag());
+            await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
+
+            var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
+            {
+                eventType
+            }, configuration.GetContextBagForSubscriptions());
+
+            Assert.AreEqual(1, subscribers.Count());
+            var subscriber = subscribers.Single();
+            Assert.AreEqual("address", subscriber.TransportAddress);
+            Assert.AreEqual("endpoint", subscriber.Endpoint);
         }
 
         [Test]

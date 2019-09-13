@@ -10,6 +10,7 @@
 
     class SubscriptionPersister : ISubscriptionStorage
     {
+        const int DuplicateKeyErrorCode = 11000;
         IMongoCollection<EventSubscription> subscriptionsCollection;
 
         public SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCollection)
@@ -24,15 +25,28 @@
             subscription.TransportAddress = subscriber.TransportAddress;
             subscription.Endpoint = subscriber.Endpoint;
 
-            //TODO catch exception?
-            //TODO use update instead of insert with upsert:true
-            try
+            if (subscriber.Endpoint != null)
             {
-                await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
+                var filter = Builders<EventSubscription>.Filter.And(
+                    Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, messageType.TypeName),
+                    Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
+                var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscriber.Endpoint);
+                var options = new UpdateOptions { IsUpsert = true };
+
+                await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
             }
-            catch (MongoWriteException e) when(e.WriteError?.Code == 11000)
+            else
             {
-                // duplicate key error
+                // support for older versions of NServiceBus which do not provide a logical endpoint name
+                try
+                {
+                    await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
+                }
+                catch (MongoWriteException e) when (e.WriteError?.Code == DuplicateKeyErrorCode)
+                {
+                    // duplicate key error which means a document already exists
+                    // existing subscriptions should not be stripped of their logical endpoint name
+                }
             }
         }
 
@@ -63,17 +77,20 @@
 
             return result.Select(r => new Subscriber(
                 r[nameof(EventSubscription.TransportAddress)].AsString, 
-                r[nameof(EventSubscription.Endpoint)].AsString));
+                r[nameof(EventSubscription.Endpoint)].IsBsonNull ? null : r[nameof(EventSubscription.Endpoint)].AsString));
         }
 
         public void CreateIndexes()
         {
-            var indexKeyDefintion = Builders<EventSubscription>.IndexKeys
+            var uniqueIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
+                .Ascending(x => x.MessageTypeName)
+                .Ascending(x => x.TransportAddress), 
+                new CreateIndexOptions() { Unique = true });
+            var searchIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
                 .Ascending(x => x.MessageTypeName)
                 .Ascending(x => x.TransportAddress)
-                .Ascending(x => x.Endpoint); // allow queries to return results directly from the index
-            var index = new CreateIndexModel<EventSubscription>(indexKeyDefintion, new CreateIndexOptions { Unique = true });
-            subscriptionsCollection.Indexes.CreateOne(index);
+                .Ascending(x => x.Endpoint));
+            subscriptionsCollection.Indexes.CreateMany(new []{ uniqueIndex, searchIndex });
         }
     }
 }

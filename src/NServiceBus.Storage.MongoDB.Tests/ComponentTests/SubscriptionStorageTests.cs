@@ -12,12 +12,14 @@
     class SubscriptionStorageTests
     {
         PersistenceTestsConfiguration configuration;
+        ISubscriptionStorage storage;
 
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
             configuration = new PersistenceTestsConfiguration();
             await configuration.Configure();
+            storage = configuration.SubscriptionStorage;
         }
 
         [OneTimeTearDown]
@@ -26,12 +28,15 @@
             await configuration.Cleanup();
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            configuration.RequiresSubscriptionSupport();
+        }
+
         [Test]
         public async Task Should_not_have_duplicate_subscriptions()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
@@ -51,9 +56,6 @@
         [Test]
         public async Task Should_find_all_transport_addresses_of_logical_endpoint()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
@@ -71,9 +73,6 @@
         [Test]
         public async Task Should_update_endpoint_name_for_transport_address()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address1", "endpointA"), eventType, new ContextBag());
@@ -91,9 +90,6 @@
         [Test]
         public async Task Should_find_all_queried_message_types()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType1 = CreateUniqueMessageType();
             var eventType2 = CreateUniqueMessageType();
 
@@ -112,9 +108,6 @@
         [Test]
         public async Task Should_not_unsubscribe_when_address_does_not_match()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType1 = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
@@ -131,9 +124,6 @@
         [Test]
         public async Task Should_unsubscribe_when_logical_endpoint_does_not_match()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType1 = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
@@ -151,9 +141,6 @@
         [Test]
         public async Task Should_handle_legacy_subscription_message()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
@@ -172,9 +159,6 @@
         [Test]
         public async Task Should_add_endpoint_on_new_subscription()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
@@ -194,9 +178,6 @@
         [Test]
         public async Task Should_not_remove_endpoint_on_legacy_subscriptions()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             var eventType = CreateUniqueMessageType();
 
             await storage.Subscribe(new Subscriber("address", "endpoint"), eventType, new ContextBag());
@@ -216,9 +197,6 @@
         [Test]
         public async Task Should_ignore_message_version_on_subscriptions()
         {
-            configuration.RequiresSubscriptionSupport();
-            var storage = configuration.SubscriptionStorage;
-
             await storage.Subscribe(new Subscriber("subscriberA@server1", "subscriberA"), new MessageType("SomeMessage", "1.0.0"), configuration.GetContextBagForSubscriptions());
 
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]

@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
+    using Logging;
     using Unicast.Subscriptions;
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
@@ -17,10 +18,12 @@
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
-            var subscription = new EventSubscription();
-            subscription.MessageTypeName = messageType.TypeName;
-            subscription.TransportAddress = subscriber.TransportAddress;
-            subscription.Endpoint = subscriber.Endpoint;
+            var subscription = new EventSubscription
+            {
+                MessageTypeName = messageType.TypeName,
+                TransportAddress = subscriber.TransportAddress,
+                Endpoint = subscriber.Endpoint
+            };
 
             if (subscriber.Endpoint != null)
             {
@@ -30,7 +33,14 @@
                 var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscriber.Endpoint);
                 var options = new UpdateOptions {IsUpsert = true};
 
-                await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
+                var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
+                if (result.ModifiedCount > 0)
+                {
+                    Log.Debug($"Updated existing subscription of '{subscriber.TransportAddress}' on '{messageType.TypeName}'");
+                } else if (result.UpsertedId != null)
+                {
+                    Log.Debug($"Created new subscription for {subscriber.TransportAddress} on '{messageType.TypeName}'");
+                }
             }
             else
             {
@@ -38,11 +48,13 @@
                 try
                 {
                     await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
+                    Log.Debug($"Created legacy subscription for '{subscriber.TransportAddress}' on '{messageType.TypeName}'");
                 }
                 catch (MongoWriteException e) when (e.WriteError?.Code == DuplicateKeyErrorCode)
                 {
                     // duplicate key error which means a document already exists
                     // existing subscriptions should not be stripped of their logical endpoint name
+                    Log.Debug($"Skipping legacy subscription for '{subscriber.TransportAddress}' on '{messageType.TypeName}' because a newer subscription already exists");
                 }
             }
         }
@@ -52,7 +64,9 @@
             var filter = Builders<EventSubscription>.Filter.And(
                 Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, messageType.TypeName),
                 Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
-            await subscriptionsCollection.DeleteManyAsync(filter).ConfigureAwait(false);
+            var result = await subscriptionsCollection.DeleteManyAsync(filter).ConfigureAwait(false);
+
+            Log.Debug($"Deleted {result.DeletedCount} subscriptions for address '{subscriber.TransportAddress}' on message type '{messageType.TypeName}'");
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
@@ -91,6 +105,7 @@
         }
 
         IMongoCollection<EventSubscription> subscriptionsCollection;
+        static readonly ILog Log = LogManager.GetLogger<SubscriptionPersister>();
         const int DuplicateKeyErrorCode = 11000;
     }
 }

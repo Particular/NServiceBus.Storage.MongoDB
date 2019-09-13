@@ -10,9 +10,6 @@
 
     class SubscriptionPersister : ISubscriptionStorage
     {
-        const int DuplicateKeyErrorCode = 11000;
-        IMongoCollection<EventSubscription> subscriptionsCollection;
-
         public SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCollection)
         {
             this.subscriptionsCollection = subscriptionsCollection;
@@ -31,7 +28,7 @@
                     Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, messageType.TypeName),
                     Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
                 var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscriber.Endpoint);
-                var options = new UpdateOptions { IsUpsert = true };
+                var options = new UpdateOptions {IsUpsert = true};
 
                 await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
             }
@@ -64,7 +61,6 @@
             var filter = Builders<EventSubscription>.Filter.In(s => s.MessageTypeName, messageTypeNames);
             // This projection allows a covered query:
             var projection = Builders<EventSubscription>.Projection
-                //.Include(s => s.MessageTypeName)
                 .Include(s => s.TransportAddress)
                 .Include(s => s.Endpoint)
                 .Exclude("_id");
@@ -76,21 +72,25 @@
             var result = await subscriptionsCollection.Find(filter).Project(projection).ToListAsync().ConfigureAwait(false);
 
             return result.Select(r => new Subscriber(
-                r[nameof(EventSubscription.TransportAddress)].AsString, 
+                r[nameof(EventSubscription.TransportAddress)].AsString,
                 r[nameof(EventSubscription.Endpoint)].IsBsonNull ? null : r[nameof(EventSubscription.Endpoint)].AsString));
         }
 
         public void CreateIndexes()
         {
             var uniqueIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
-                .Ascending(x => x.MessageTypeName)
-                .Ascending(x => x.TransportAddress), 
-                new CreateIndexOptions() { Unique = true });
+                    .Ascending(x => x.MessageTypeName)
+                    .Ascending(x => x.TransportAddress),
+                new CreateIndexOptions
+                    {Unique = true});
             var searchIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
                 .Ascending(x => x.MessageTypeName)
                 .Ascending(x => x.TransportAddress)
                 .Ascending(x => x.Endpoint));
-            subscriptionsCollection.Indexes.CreateMany(new []{ uniqueIndex, searchIndex });
+            subscriptionsCollection.Indexes.CreateMany(new[] {uniqueIndex, searchIndex});
         }
+
+        IMongoCollection<EventSubscription> subscriptionsCollection;
+        const int DuplicateKeyErrorCode = 11000;
     }
 }

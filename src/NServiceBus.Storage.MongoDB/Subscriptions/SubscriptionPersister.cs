@@ -44,7 +44,7 @@
             }
             else
             {
-                // support for older versions of NServiceBus which do not provide a logical endpoint name
+                // support for older versions of NServiceBus which do not provide a logical endpoint name. We do not want to replace a non null value with null.
                 try
                 {
                     await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);

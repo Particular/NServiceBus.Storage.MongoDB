@@ -36,10 +36,10 @@
                 var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
                 if (result.ModifiedCount > 0)
                 {
-                    Log.Debug($"Updated existing subscription of '{subscriber.TransportAddress}' on '{messageType.TypeName}'");
+                    Log.DebugFormat("Updated existing subscription of '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
                 } else if (result.UpsertedId != null)
                 {
-                    Log.Debug($"Created new subscription for {subscriber.TransportAddress} on '{messageType.TypeName}'");
+                    Log.DebugFormat("Created new subscription for '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
                 }
             }
             else
@@ -48,13 +48,13 @@
                 try
                 {
                     await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
-                    Log.Debug($"Created legacy subscription for '{subscriber.TransportAddress}' on '{messageType.TypeName}'");
+                    Log.DebugFormat("Created legacy subscription for '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
                 }
                 catch (MongoWriteException e) when (e.WriteError?.Code == DuplicateKeyErrorCode)
                 {
                     // duplicate key error which means a document already exists
                     // existing subscriptions should not be stripped of their logical endpoint name
-                    Log.Debug($"Skipping legacy subscription for '{subscriber.TransportAddress}' on '{messageType.TypeName}' because a newer subscription already exists");
+                    Log.DebugFormat("Skipping legacy subscription for '{0}' on '{1}' because a newer subscription already exists", subscriber.TransportAddress, messageType.TypeName);
                 }
             }
         }
@@ -66,7 +66,7 @@
                 Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
             var result = await subscriptionsCollection.DeleteManyAsync(filter).ConfigureAwait(false);
 
-            Log.Debug($"Deleted {result.DeletedCount} subscriptions for address '{subscriber.TransportAddress}' on message type '{messageType.TypeName}'");
+            Log.DebugFormat("Deleted {0} subscriptions for address '{1}' on message type '{2}'", result.DeletedCount, subscriber.TransportAddress, messageType.TypeName);
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)

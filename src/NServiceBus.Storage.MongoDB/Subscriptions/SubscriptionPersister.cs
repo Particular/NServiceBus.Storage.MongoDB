@@ -36,6 +36,7 @@
                 var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
                 if (result.ModifiedCount > 0)
                 {
+                    // ModifiedCount is also 0 when the update values match exactly the existing document.
                     Log.DebugFormat("Updated existing subscription of '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
                 } else if (result.UpsertedId != null)
                 {

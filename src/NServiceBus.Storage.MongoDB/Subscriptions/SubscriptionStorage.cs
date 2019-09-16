@@ -7,7 +7,7 @@
 
     class SubscriptionStorage : Feature
     {
-        const string SubscriptionCollectionName = "EventSubscriptions";
+        const string SubscriptionCollectionName = "eventsubscriptions";
 
         public SubscriptionStorage()
         {

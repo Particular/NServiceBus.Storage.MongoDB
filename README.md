@@ -87,7 +87,7 @@ For developers using Docker containers, the following docker command will quickl
 
 `docker run -d -p 27017:27017 --name TestMongoDB mongo:latest --replSet tr0`
 
-Once started, initialize the replication set (required for transaction support) by connecting to the database using a mongo shell. You can connect directly from your local machine using `mongo.exe` or use the following docker container to start a mongo shell inside the container:
+Once started, initialize the replication set (required for transaction support) by connecting to the database using a mongo shell. You can connect directly from your local machine using `mongo.exe` or use the following docker command to start a mongo shell inside the container:
 
 `docker exec -it TestMongoDB mongo`
 

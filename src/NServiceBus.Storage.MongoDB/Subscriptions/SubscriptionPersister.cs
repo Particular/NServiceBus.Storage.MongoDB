@@ -31,21 +31,22 @@
                     Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, messageType.TypeName),
                     Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
                 var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscriber.Endpoint);
-                var options = new UpdateOptions {IsUpsert = true};
+                var options = new UpdateOptions { IsUpsert = true };
 
                 var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
                 if (result.ModifiedCount > 0)
                 {
                     // ModifiedCount is also 0 when the update values match exactly the existing document.
                     Log.DebugFormat("Updated existing subscription of '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
-                } else if (result.UpsertedId != null)
+                }
+                else if (result.UpsertedId != null)
                 {
                     Log.DebugFormat("Created new subscription for '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
                 }
             }
             else
             {
-                // support for older versions of NServiceBus which do not provide a logical endpoint name. We do not want to replace a non null value with null.
+                // support for older versions of NServiceBus which do not provide a logical endpoint name. We do not want to replace a non-null value with null.
                 try
                 {
                     await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
@@ -108,12 +109,12 @@
                     .Ascending(x => x.MessageTypeName)
                     .Ascending(x => x.TransportAddress),
                 new CreateIndexOptions
-                    {Unique = true});
+                { Unique = true });
             var searchIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
                 .Ascending(x => x.MessageTypeName)
                 .Ascending(x => x.TransportAddress)
                 .Ascending(x => x.Endpoint));
-            subscriptionsCollection.Indexes.CreateMany(new[] {uniqueIndex, searchIndex});
+            subscriptionsCollection.Indexes.CreateMany(new[] { uniqueIndex, searchIndex });
         }
 
         IMongoCollection<EventSubscription> subscriptionsCollection;

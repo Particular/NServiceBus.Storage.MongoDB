@@ -27,7 +27,7 @@
             context.Container.RegisterSingleton(subscriptionPersister);
         }
 
-        internal static IMongoCollection<EventSubscription> GetSubscriptionCollection(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings) => 
+        internal static IMongoCollection<EventSubscription> GetSubscriptionCollection(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings) =>
             client.GetDatabase(databaseName, databaseSettings).GetCollection<EventSubscription>(SubscriptionCollectionName);
     }
 }

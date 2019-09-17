@@ -45,7 +45,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(1, subscribers.Count());
             var subscription = subscribers.Single();
@@ -64,7 +64,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(2, subscribers.Count());
             CollectionAssert.AreEquivalent(new[] { "address1", "address2" }, subscribers.Select(s => s.TransportAddress));
@@ -81,7 +81,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(1, subscribers.Count());
             Assert.AreEqual("endpointB", subscribers.Single().Endpoint);
@@ -99,7 +99,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType1, eventType2
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(2, subscribers.Count());
             CollectionAssert.AreEquivalent(new[] { "address", "address" }, subscribers.Select(s => s.TransportAddress));
@@ -116,7 +116,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType1
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual("address", subscribers.Single().TransportAddress);
         }
@@ -133,7 +133,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType1
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(0, subscribers.Count());
         }
@@ -148,7 +148,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(1, subscribers.Count());
             var subscriber = subscribers.Single();
@@ -167,7 +167,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(1, subscribers.Count());
             var subscriber = subscribers.Single();
@@ -186,7 +186,7 @@
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 eventType
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual(1, subscribers.Count());
             var subscriber = subscribers.Single();
@@ -197,12 +197,12 @@
         [Test]
         public async Task Should_ignore_message_version_on_subscriptions()
         {
-            await storage.Subscribe(new Subscriber("subscriberA@server1", "subscriberA"), new MessageType("SomeMessage", "1.0.0"), configuration.GetContextBagForSubscriptions());
+            await storage.Subscribe(new Subscriber("subscriberA@server1", "subscriberA"), new MessageType("SomeMessage", "1.0.0"), new ContextBag());
 
             var subscribers = await storage.GetSubscriberAddressesForMessage(new[]
             {
                 new MessageType("SomeMessage", "2.0.0")
-            }, configuration.GetContextBagForSubscriptions());
+            }, new ContextBag());
 
             Assert.AreEqual("subscriberA", subscribers.Single().Endpoint);
         }

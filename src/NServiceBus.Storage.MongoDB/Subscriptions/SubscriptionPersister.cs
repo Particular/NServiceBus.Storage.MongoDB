@@ -16,7 +16,7 @@
             this.subscriptionsCollection = subscriptionsCollection;
         }
 
-        public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var subscription = new EventSubscription
             {
@@ -25,40 +25,13 @@
                 Endpoint = subscriber.Endpoint
             };
 
-            if (subscriber.Endpoint != null)
-            {
-                var filter = Builders<EventSubscription>.Filter.And(
-                    Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, messageType.TypeName),
-                    Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
-                var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscriber.Endpoint);
-                var options = new UpdateOptions { IsUpsert = true };
-
-                var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
-                if (result.ModifiedCount > 0)
-                {
-                    // ModifiedCount is also 0 when the update values match exactly the existing document.
-                    Log.DebugFormat("Updated existing subscription of '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
-                }
-                else if (result.UpsertedId != null)
-                {
-                    Log.DebugFormat("Created new subscription for '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
-                }
-            }
-            else
+            if (IsLegacySubscription(subscription))
             {
                 // support for older versions of NServiceBus which do not provide a logical endpoint name. We do not want to replace a non-null value with null.
-                try
-                {
-                    await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
-                    Log.DebugFormat("Created legacy subscription for '{0}' on '{1}'", subscriber.TransportAddress, messageType.TypeName);
-                }
-                catch (MongoWriteException e) when (e.WriteError?.Code == DuplicateKeyErrorCode)
-                {
-                    // duplicate key error which means a document already exists
-                    // existing subscriptions should not be stripped of their logical endpoint name
-                    Log.DebugFormat("Skipping legacy subscription for '{0}' on '{1}' because a newer subscription already exists", subscriber.TransportAddress, messageType.TypeName);
-                }
+                return AddLegacySubscription(subscription);
             }
+
+            return AddOrUpdateSubscription(subscription);
         }
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
@@ -103,6 +76,52 @@
                 r[nameof(EventSubscription.Endpoint)].IsBsonNull ? null : r[nameof(EventSubscription.Endpoint)].AsString));
         }
 
+        static bool IsLegacySubscription(EventSubscription subscription) => subscription.Endpoint == null;
+
+        async Task AddLegacySubscription(EventSubscription subscription)
+        {
+            try
+            {
+                await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
+                Log.DebugFormat("Created legacy subscription for '{0}' on '{1}'", subscription.TransportAddress, subscription.MessageTypeName);
+            }
+            catch (MongoWriteException e) when (e.WriteError?.Code == DuplicateKeyErrorCode)
+            {
+                // duplicate key error which means a document already exists
+                // existing subscriptions should not be stripped of their logical endpoint name
+                Log.DebugFormat("Skipping legacy subscription for '{0}' on '{1}' because a newer subscription already exists", subscription.TransportAddress, subscription.MessageTypeName);
+            }
+        }
+
+        async Task AddOrUpdateSubscription(EventSubscription subscription)
+        {
+            try
+            {
+                var filter = Builders<EventSubscription>.Filter.And(
+                    Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, subscription.MessageTypeName),
+                    Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscription.TransportAddress));
+                var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscription.Endpoint);
+                var options = new UpdateOptions {IsUpsert = true};
+
+                var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
+                if (result.ModifiedCount > 0)
+                {
+                    // ModifiedCount is also 0 when the update values match exactly the existing document.
+                    Log.DebugFormat("Updated existing subscription of '{0}' on '{1}'", subscription.TransportAddress, subscription.MessageTypeName);
+                }
+                else if (result.UpsertedId != null)
+                {
+                    Log.DebugFormat("Created new subscription for '{0}' on '{1}'", subscription.TransportAddress, subscription.MessageTypeName);
+                }
+            }
+            catch (MongoWriteException e) when (e.WriteError?.Code == DuplicateKeyErrorCode)
+            {
+                // This is thrown when there is a race condition and the same subscription has been added already.
+                // As upserts create new documents, those operations aren't atomic in regards to concurrent upserts
+                // and duplicate documents will only be prevented by the unique key constraint.
+            }
+        }
+
         public void CreateIndexes()
         {
             var uniqueIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
@@ -118,7 +137,7 @@
         }
 
         IMongoCollection<EventSubscription> subscriptionsCollection;
-        static readonly ILog Log = LogManager.GetLogger<SubscriptionPersister>();
         const int DuplicateKeyErrorCode = 11000;
+        static readonly ILog Log = LogManager.GetLogger<SubscriptionPersister>();
     }
 }

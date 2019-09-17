@@ -4,6 +4,7 @@
     using Features;
     using global::MongoDB.Driver;
     using MongoDB;
+    using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
     class SubscriptionStorage : Feature
     {
@@ -24,7 +25,7 @@
             var subscriptionPersister = new SubscriptionPersister(collection);
             subscriptionPersister.CreateIndexes();
 
-            context.Container.RegisterSingleton(subscriptionPersister);
+            context.Container.RegisterSingleton<ISubscriptionStorage>(subscriptionPersister);
         }
 
         internal static IMongoCollection<EventSubscription> GetSubscriptionCollection(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings) =>

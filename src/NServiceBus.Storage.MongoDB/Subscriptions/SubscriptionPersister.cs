@@ -72,7 +72,7 @@
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var messageTypeNames = messageTypes.Select(t => t.TypeName).ToArray();
+            var messageTypeNames = messageTypes.Select(t => t.TypeName);
             var filter = Builders<EventSubscription>.Filter.In(s => s.MessageTypeName, messageTypeNames);
             // This projection allows a covered query:
             var projection = Builders<EventSubscription>.Projection
@@ -80,11 +80,22 @@
                 .Include(s => s.Endpoint)
                 .Exclude("_id");
 
+            // == Following is used to view index usage for the query ==
             //var options = new FindOptions();
-            //options.Modifiers = new BsonDocument("$explain", true);
-            //var queryStats = await subscriptionsCollection.Find(filter, options).Project(p).ToListAsync().ConfigureAwait(false);
+            //options.Modifiers = new global::MongoDB.Bson.BsonDocument("$explain", true);
+            //var queryStats = await subscriptionsCollection
+            //    .WithReadConcern(ReadConcern.Default)
+            //    .Find(filter, options)
+            //    .Project(projection)
+            //    .ToListAsync()
+            //    .ConfigureAwait(false);
+            // =========================================================
 
-            var result = await subscriptionsCollection.Find(filter).Project(projection).ToListAsync().ConfigureAwait(false);
+            var result = await subscriptionsCollection
+                .Find(filter)
+                .Project(projection)
+                .ToListAsync()
+                .ConfigureAwait(false);
 
             return result.Select(r => new Subscriber(
                 r[nameof(EventSubscription.TransportAddress)].AsString,

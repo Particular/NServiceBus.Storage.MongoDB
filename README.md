@@ -91,7 +91,7 @@ Once started, initialize the replication set (required for transaction support) 
 
 `docker exec -it TestMongoDB mongo`
 
-then use `rs.initiate()` to setup the replication set.
+then use `rs.initiate()` in the `mongo.exe` shell to setup the replication set.
 
 
 

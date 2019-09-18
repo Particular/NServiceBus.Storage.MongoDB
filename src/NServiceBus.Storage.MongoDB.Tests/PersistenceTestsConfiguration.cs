@@ -1,25 +1,20 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using MongoDB.Driver;
 using NServiceBus.Gateway.Deduplication;
+using MongoDB.Driver;
 using NServiceBus.Outbox;
 using NServiceBus.Sagas;
 using NServiceBus.Storage.MongoDB;
+using NServiceBus.Storage.MongoDB.Subscriptions;
 using NServiceBus.Storage.MongoDB.Tests;
 using NServiceBus.Timeout.Core;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 namespace NServiceBus.Persistence.ComponentTests
 {
-    using Storage.MongoDB.Subscriptions;
-
     public partial class PersistenceTestsConfiguration
     {
-        public string DatabaseName { get; }
-
-        public Func<Type, string> CollectionNamingConvention { get; }
-
         public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention)
         {
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
@@ -45,6 +40,10 @@ namespace NServiceBus.Persistence.ComponentTests
         public PersistenceTestsConfiguration(string versionElementName) : this(versionElementName, t => t.Name.ToLower())
         {
         }
+
+        public string DatabaseName { get; }
+
+        public Func<Type, string> CollectionNamingConvention { get; }
 
         public bool SupportsDtc { get; } = false;
 

@@ -43,7 +43,7 @@
 
         static IMongoClient defaultClient;
 
-        static internal readonly MongoDatabaseSettings DefaultDatabaseSettings = new MongoDatabaseSettings
+        internal static MongoDatabaseSettings DefaultDatabaseSettings { get; } = new MongoDatabaseSettings
         {
             ReadConcern = ReadConcern.Majority,
             WriteConcern = WriteConcern.WMajority,

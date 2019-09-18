@@ -7,7 +7,7 @@ using NServiceBus.Logging;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
-namespace NServiceBus.Storage.MongoDB.Subscriptions
+namespace NServiceBus.Storage.MongoDB
 {
     class SubscriptionPersister : ISubscriptionStorage
     {

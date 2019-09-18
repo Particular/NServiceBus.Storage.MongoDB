@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using NServiceBus.Gateway.Deduplication;
 using MongoDB.Driver;
+using NServiceBus.Gateway.Deduplication;
 using NServiceBus.Outbox;
 using NServiceBus.Sagas;
 using NServiceBus.Storage.MongoDB;
-using NServiceBus.Storage.MongoDB.Subscriptions;
 using NServiceBus.Storage.MongoDB.Tests;
 using NServiceBus.Timeout.Core;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
@@ -28,7 +27,7 @@ namespace NServiceBus.Persistence.ComponentTests
 
             OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, collectionNamingConvention);
 
-            var subscriptionPersister = new SubscriptionPersister(Storage.MongoDB.Subscriptions.SubscriptionStorage.GetSubscriptionCollection(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings));
+            var subscriptionPersister = new SubscriptionPersister(Storage.MongoDB.SubscriptionStorage.GetSubscriptionCollection(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings));
             subscriptionPersister.CreateIndexes();
             SubscriptionStorage = subscriptionPersister;
         }

@@ -3,7 +3,7 @@ using MongoDB.Driver;
 using NServiceBus.Features;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
-namespace NServiceBus.Storage.MongoDB.Subscriptions
+namespace NServiceBus.Storage.MongoDB
 {
     class SubscriptionStorage : Feature
     {

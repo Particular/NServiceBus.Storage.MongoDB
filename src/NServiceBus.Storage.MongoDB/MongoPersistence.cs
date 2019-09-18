@@ -3,7 +3,6 @@ using MongoDB.Driver;
 using NServiceBus.Features;
 using NServiceBus.Persistence;
 using NServiceBus.Storage.MongoDB;
-using NServiceBus.Storage.MongoDB.Subscriptions;
 
 namespace NServiceBus
 {

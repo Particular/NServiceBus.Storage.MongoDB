@@ -1,12 +1,12 @@
-﻿namespace NServiceBus
-{
-    using System;
-    using Features;
-    using MongoDB.Driver;
-    using Persistence;
-    using Storage.MongoDB;
-    using Storage.MongoDB.Subscriptions;
+﻿using System;
+using MongoDB.Driver;
+using NServiceBus.Features;
+using NServiceBus.Persistence;
+using NServiceBus.Storage.MongoDB;
+using NServiceBus.Storage.MongoDB.Subscriptions;
 
+namespace NServiceBus
+{
     /// <summary>
     /// </summary>
     public class MongoPersistence : PersistenceDefinition

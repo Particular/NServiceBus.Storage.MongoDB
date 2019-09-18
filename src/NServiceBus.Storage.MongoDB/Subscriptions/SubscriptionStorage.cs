@@ -1,6 +1,6 @@
 ﻿using System;
-using NServiceBus.Features;
 using MongoDB.Driver;
+using NServiceBus.Features;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 namespace NServiceBus.Storage.MongoDB.Subscriptions

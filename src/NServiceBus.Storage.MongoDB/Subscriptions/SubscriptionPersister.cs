@@ -1,14 +1,14 @@
-﻿namespace NServiceBus.Storage.MongoDB.Subscriptions
-{
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Extensibility;
-    using global::MongoDB.Driver;
-    using Logging;
-    using Unicast.Subscriptions;
-    using Unicast.Subscriptions.MessageDrivenSubscriptions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using NServiceBus.Extensibility;
+using MongoDB.Driver;
+using NServiceBus.Logging;
+using NServiceBus.Unicast.Subscriptions;
+using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
+namespace NServiceBus.Storage.MongoDB.Subscriptions
+{
     class SubscriptionPersister : ISubscriptionStorage
     {
         public SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCollection)

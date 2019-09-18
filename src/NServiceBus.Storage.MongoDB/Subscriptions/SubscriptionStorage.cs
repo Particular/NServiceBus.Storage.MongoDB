@@ -1,11 +1,10 @@
-﻿namespace NServiceBus.Storage.MongoDB.Subscriptions
-{
-    using System;
-    using Features;
-    using global::MongoDB.Driver;
-    using MongoDB;
-    using Unicast.Subscriptions.MessageDrivenSubscriptions;
+﻿using System;
+using NServiceBus.Features;
+using MongoDB.Driver;
+using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
+namespace NServiceBus.Storage.MongoDB.Subscriptions
+{
     class SubscriptionStorage : Feature
     {
         const string SubscriptionCollectionName = "eventsubscriptions";

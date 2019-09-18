@@ -46,7 +46,11 @@ namespace NServiceBus.Storage.MongoDB.Subscriptions
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
-            var messageTypeNames = messageTypes.Select(t => t.TypeName);
+            var messageTypeNames = new List<string>();
+            foreach (var messageType in messageTypes)
+            {
+                messageTypeNames.Add(messageType.TypeName);
+            }
             var filter = filterBuilder.In(s => s.MessageTypeName, messageTypeNames);
             // This projection allows a covered query:
             var projection = Builders<EventSubscription>.Projection

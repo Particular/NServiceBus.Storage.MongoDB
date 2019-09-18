@@ -36,9 +36,9 @@ namespace NServiceBus.Storage.MongoDB.Subscriptions
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
-            var filter = Builders<EventSubscription>.Filter.And(
-                Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, messageType.TypeName),
-                Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscriber.TransportAddress));
+            var filter = filterBuilder.And(
+                filterBuilder.Eq(s => s.MessageTypeName, messageType.TypeName),
+                filterBuilder.Eq(s => s.TransportAddress, subscriber.TransportAddress));
             var result = await subscriptionsCollection.DeleteManyAsync(filter).ConfigureAwait(false);
 
             Log.DebugFormat("Deleted {0} subscriptions for address '{1}' on message type '{2}'", result.DeletedCount, subscriber.TransportAddress, messageType.TypeName);
@@ -47,7 +47,7 @@ namespace NServiceBus.Storage.MongoDB.Subscriptions
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             var messageTypeNames = messageTypes.Select(t => t.TypeName);
-            var filter = Builders<EventSubscription>.Filter.In(s => s.MessageTypeName, messageTypeNames);
+            var filter = filterBuilder.In(s => s.MessageTypeName, messageTypeNames);
             // This projection allows a covered query:
             var projection = Builders<EventSubscription>.Projection
                 .Include(s => s.TransportAddress)
@@ -97,9 +97,9 @@ namespace NServiceBus.Storage.MongoDB.Subscriptions
         {
             try
             {
-                var filter = Builders<EventSubscription>.Filter.And(
-                    Builders<EventSubscription>.Filter.Eq(s => s.MessageTypeName, subscription.MessageTypeName),
-                    Builders<EventSubscription>.Filter.Eq(s => s.TransportAddress, subscription.TransportAddress));
+                var filter = filterBuilder.And(
+                    filterBuilder.Eq(s => s.MessageTypeName, subscription.MessageTypeName),
+                    filterBuilder.Eq(s => s.TransportAddress, subscription.TransportAddress));
                 var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscription.Endpoint);
                 var options = new UpdateOptions {IsUpsert = true};
 
@@ -139,5 +139,6 @@ namespace NServiceBus.Storage.MongoDB.Subscriptions
         IMongoCollection<EventSubscription> subscriptionsCollection;
         const int DuplicateKeyErrorCode = 11000;
         static readonly ILog Log = LogManager.GetLogger<SubscriptionPersister>();
+        static readonly FilterDefinitionBuilder<EventSubscription> filterBuilder = Builders<EventSubscription>.Filter;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using NServiceBus.Extensibility;
@@ -69,15 +68,21 @@ namespace NServiceBus.Storage.MongoDB
             //    .ConfigureAwait(false);
             // =========================================================
 
-            var result = await subscriptionsCollection
+            var subscriptions = await subscriptionsCollection
                 .Find(filter)
                 .Project(projection)
                 .ToListAsync()
                 .ConfigureAwait(false);
 
-            return result.Select(r => new Subscriber(
-                r[nameof(EventSubscription.TransportAddress)].AsString,
-                r[nameof(EventSubscription.Endpoint)].IsBsonNull ? null : r[nameof(EventSubscription.Endpoint)].AsString));
+            var result = new List<Subscriber>(subscriptions.Count);
+            foreach (var subscription in subscriptions)
+            {
+                result.Add(new Subscriber(
+                    subscription[nameof(EventSubscription.TransportAddress)].AsString,
+                    subscription[nameof(EventSubscription.Endpoint)].IsBsonNull ? null : subscription[nameof(EventSubscription.Endpoint)].AsString));
+            }
+
+            return result;
         }
 
         static bool IsLegacySubscription(EventSubscription subscription) => subscription.Endpoint == null;

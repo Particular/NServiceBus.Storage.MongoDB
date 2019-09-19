@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using NServiceBus.Persistence.ComponentTests;
-using NUnit.Framework;
-
-namespace NServiceBus.Storage.MongoDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
+    using System;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+    using Persistence.ComponentTests;
+
     class When_migrating_NServiceBus_dot_Persistence_dot_MongoDb : SagaMigrationPersisterTests
     {
         [Test]
@@ -24,7 +24,7 @@ namespace NServiceBus.Storage.MongoDB.Tests
 
             await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId));
 
-            var retrievedSagaData = await GetById<NServiceBusPersistenceMongoDBLegacySaga,NServiceBusPersistenceMongoDBLegacySagaData>(legacySagaData.Id);
+            var retrievedSagaData = await GetById<NServiceBusPersistenceMongoDBLegacySaga, NServiceBusPersistenceMongoDBLegacySagaData>(legacySagaData.Id);
 
             Assert.IsNotNull(retrievedSagaData, "Saga was not retrieved");
             Assert.AreEqual(legacySagaData.OriginalMessageId, retrievedSagaData.OriginalMessageId, "OriginalMessageId does not match");
@@ -48,33 +48,33 @@ namespace NServiceBus.Storage.MongoDB.Tests
 
         class NServiceBusPersistenceMongoDBLegacySagaData : IContainSagaData
         {
+            public Guid SomeCorrelationPropertyId { get; set; }
+
+            public int SomeUpdatableSagaData { get; set; }
             public Guid Id { get; set; }
 
             public string OriginalMessageId { get; set; }
 
             public string Originator { get; set; }
-
-            public Guid SomeCorrelationPropertyId { get; set; }
-
-            public int SomeUpdatableSagaData { get; set; }
         }
     }
 }
 
 namespace NServiceBus.Persistence.MongoDB
 {
+    using System;
+
     class NServiceBusPersistenceMongoDBLegacySagaData : IContainSagaData
     {
-        public Guid Id { get; set; }
-
-        public string OriginalMessageId { get; set; }
-
-        public string Originator { get; set; }
-
         public int Version { get; set; }
 
         public Guid SomeCorrelationPropertyId { get; set; }
 
         public int SomeUpdatableSagaData { get; set; }
+        public Guid Id { get; set; }
+
+        public string OriginalMessageId { get; set; }
+
+        public string Originator { get; set; }
     }
 }

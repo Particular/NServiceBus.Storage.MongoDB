@@ -9,8 +9,6 @@
     [TestFixture]
     public class TimeoutStorageTests
     {
-        PersistenceTestsConfiguration configuration;
-
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
@@ -180,5 +178,7 @@
 
             Assert.That(result.NextTimeToQuery, Is.EqualTo(now.AddMinutes(1)).Within(100).Milliseconds);
         }
+
+        PersistenceTestsConfiguration configuration;
     }
 }

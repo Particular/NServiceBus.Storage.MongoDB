@@ -1,4 +1,5 @@
 ﻿// ReSharper disable UnusedMemberInSuper.Global
+
 namespace NServiceBus.Persistence.ComponentTests
 {
     using System;

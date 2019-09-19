@@ -1,4 +1,5 @@
 ﻿// ReSharper disable AccessToDisposedClosure
+
 namespace NServiceBus.Persistence.ComponentTests
 {
     using System;
@@ -7,13 +8,13 @@ namespace NServiceBus.Persistence.ComponentTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class When_worker_tries_to_complete_saga_update_by_another : SagaPersisterTests<TestSaga,TestSagaData>
+    public class When_worker_tries_to_complete_saga_update_by_another : SagaPersisterTests<TestSaga, TestSagaData>
     {
         [Test]
         public async Task Should_fail()
         {
             var correlationPropertyData = Guid.NewGuid().ToString();
-            var saga = new TestSagaData { SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow };
+            var saga = new TestSagaData {SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow};
 
             await SaveSaga(saga);
 

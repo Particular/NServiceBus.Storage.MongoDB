@@ -11,7 +11,7 @@ namespace NServiceBus.Persistence.ComponentTests
         public async Task Get_returns_different_instance_of_saga_data()
         {
             var correlationPropertyData = Guid.NewGuid().ToString();
-            var saga = new TestSagaData { SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow };
+            var saga = new TestSagaData {SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow};
 
             await SaveSaga(saga);
 

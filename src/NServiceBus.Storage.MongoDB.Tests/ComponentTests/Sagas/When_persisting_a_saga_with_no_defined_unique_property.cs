@@ -13,7 +13,7 @@
             configuration.RequiresFindersSupport();
 
             var propertyData = Guid.NewGuid().ToString();
-            var sagaData = new SagaWithoutCorrelationPropertyData { FoundByFinderProperty = propertyData, DateTimeProperty = DateTime.UtcNow };
+            var sagaData = new SagaWithoutCorrelationPropertyData {FoundByFinderProperty = propertyData, DateTimeProperty = DateTime.UtcNow};
 
             var finder = typeof(CustomFinder);
 

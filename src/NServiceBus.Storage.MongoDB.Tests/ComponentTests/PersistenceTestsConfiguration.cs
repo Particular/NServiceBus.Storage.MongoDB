@@ -1,4 +1,5 @@
 ﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace NServiceBus.Persistence.ComponentTests
 {
     using System;
@@ -15,19 +16,20 @@ namespace NServiceBus.Persistence.ComponentTests
 
         public SagaMetadataCollection SagaMetadataCollection
         {
-            get{
+            get
+            {
                 if (sagaMetadataCollection == null)
                 {
                     var sagaTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => typeof(Saga).IsAssignableFrom(t) || typeof(IFindSagas<>).IsAssignableFrom(t) || typeof(IFinder).IsAssignableFrom(t)).ToArray();
                     sagaMetadataCollection = new SagaMetadataCollection();
                     sagaMetadataCollection.Initialize(sagaTypes);
                 }
+
                 return sagaMetadataCollection;
             }
             set { sagaMetadataCollection = value; }
         }
 
         SagaMetadataCollection sagaMetadataCollection;
-
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace NServiceBus.Storage.MongoDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+
     public class PropertyTypesTestSaga : Saga<PropertyTypesTestSagaData>, IAmStartedByMessages<PropertyTypesTestSagaDataStartMessage>
     {
         public Task Handle(PropertyTypesTestSagaDataStartMessage message, IMessageHandlerContext context)
@@ -19,12 +19,6 @@ namespace NServiceBus.Storage.MongoDB.Tests
 
     public class PropertyTypesTestSagaData : IContainSagaData
     {
-        public virtual Guid Id { get; set; }
-
-        public virtual string Originator { get; set; }
-
-        public virtual string OriginalMessageId { get; set; }
-
         public virtual RelatedClass RelatedClass { get; set; }
 
         public virtual IList<OrderLine> OrderLines { get; set; }
@@ -36,6 +30,11 @@ namespace NServiceBus.Storage.MongoDB.Tests
         public virtual TestComponent TestComponent { get; set; }
 
         public virtual PolymorphicPropertyBase PolymorphicRelatedProperty { get; set; }
+        public virtual Guid Id { get; set; }
+
+        public virtual string Originator { get; set; }
+
+        public virtual string OriginalMessageId { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -70,7 +69,8 @@ namespace NServiceBus.Storage.MongoDB.Tests
 
     public enum StatusEnum
     {
-        SomeStatus, AnotherStatus
+        SomeStatus,
+        AnotherStatus
     }
 
     public class TestComponent

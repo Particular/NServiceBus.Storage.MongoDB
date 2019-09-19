@@ -18,7 +18,7 @@
             };
             var saga2 = new AnotherSagaWithCorrelatedPropertyData
             {
-                CorrelatedProperty = correlationPropertyData,
+                CorrelatedProperty = correlationPropertyData
             };
 
             var persister = configuration.SagaStorage;

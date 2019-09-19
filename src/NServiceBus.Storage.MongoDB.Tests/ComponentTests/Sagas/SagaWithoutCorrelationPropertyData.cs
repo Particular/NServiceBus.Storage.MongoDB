@@ -5,7 +5,7 @@
     using Extensibility;
     using Sagas;
 
-    public class SagaWithoutCorrelationProperty : Saga<SagaWithoutCorrelationPropertyData>, 
+    public class SagaWithoutCorrelationProperty : Saga<SagaWithoutCorrelationPropertyData>,
         IAmStartedByMessages<SagaWithoutCorrelationPropertyStartingMessage>
     {
         public Task Handle(SagaWithoutCorrelationPropertyStartingMessage message, IMessageHandlerContext context)

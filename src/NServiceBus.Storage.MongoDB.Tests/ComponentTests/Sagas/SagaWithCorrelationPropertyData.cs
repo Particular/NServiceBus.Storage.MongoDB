@@ -15,6 +15,7 @@ namespace NServiceBus.Persistence.ComponentTests
             mapper.ConfigureMapping<SagaCorrelationPropertyStartingMessage>(m => m.CorrelatedProperty).ToSaga(s => s.CorrelatedProperty);
         }
     }
+
     public class SagaWithCorrelationPropertyData : ContainSagaData
     {
         public string CorrelatedProperty { get; set; }

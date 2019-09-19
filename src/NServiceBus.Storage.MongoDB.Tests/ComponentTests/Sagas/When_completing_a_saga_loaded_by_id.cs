@@ -12,7 +12,7 @@
         {
             var correlationPropertyData = Guid.NewGuid().ToString();
 
-            var saga = new TestSagaData { SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow };
+            var saga = new TestSagaData {SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow};
 
             await SaveSaga(saga);
 

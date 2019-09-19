@@ -22,12 +22,12 @@
             var finder = typeof(CustomFinder);
 
             await SaveSaga(sagaData, finder);
-            
+
             var updateValue = Guid.NewGuid().ToString();
             await GetByIdAndUpdate(sagaData.Id, saga => { saga.FoundByFinderProperty = updateValue; }, finder);
 
             var result = await GetById(sagaData.Id, finder);
-            
+
             Assert.That(result, Is.Not.Null);
             Assert.That(result.FoundByFinderProperty, Is.EqualTo(updateValue));
         }

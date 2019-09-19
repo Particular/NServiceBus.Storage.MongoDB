@@ -9,8 +9,6 @@
     [TestFixture]
     class OutboxStorageTests
     {
-        PersistenceTestsConfiguration configuration;
-
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
@@ -34,7 +32,7 @@
 
             var messageId = Guid.NewGuid().ToString();
 
-            var messageToStore = new OutboxMessage(messageId, new[] { new TransportOperation("x", null, null, null) });
+            var messageToStore = new OutboxMessage(messageId, new[] {new TransportOperation("x", null, null, null)});
             using (var transaction = await storage.BeginTransaction(ctx))
             {
                 await storage.Store(messageToStore, transaction, ctx);
@@ -59,7 +57,7 @@
 
             var messageId = Guid.NewGuid().ToString();
 
-            var messageToStore = new OutboxMessage(messageId, new[] { new TransportOperation("x", null, null, null) });
+            var messageToStore = new OutboxMessage(messageId, new[] {new TransportOperation("x", null, null, null)});
 
             using (var transaction = await storage.BeginTransaction(ctx))
             {
@@ -122,7 +120,7 @@
 
             using (var transaction = await storage.BeginTransaction(ctx))
             {
-                var messageToStore = new OutboxMessage(messageId, new[] { new TransportOperation("x", null, null, null) });
+                var messageToStore = new OutboxMessage(messageId, new[] {new TransportOperation("x", null, null, null)});
                 await storage.Store(messageToStore, transaction, ctx);
 
                 // do not commit
@@ -144,7 +142,7 @@
 
             using (var transaction = await storage.BeginTransaction(ctx))
             {
-                var messageToStore = new OutboxMessage(messageId, new[] { new TransportOperation("x", null, null, null) });
+                var messageToStore = new OutboxMessage(messageId, new[] {new TransportOperation("x", null, null, null)});
                 await storage.Store(messageToStore, transaction, ctx);
 
                 await transaction.Commit();
@@ -154,5 +152,6 @@
             Assert.NotNull(message);
         }
 
+        PersistenceTestsConfiguration configuration;
     }
 }

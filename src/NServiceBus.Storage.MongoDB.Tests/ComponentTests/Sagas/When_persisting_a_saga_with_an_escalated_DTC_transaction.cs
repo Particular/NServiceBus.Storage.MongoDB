@@ -21,7 +21,7 @@ namespace NServiceBus.Persistence.ComponentTests
             Guid generatedSagaId;
             using (var session = await configuration.SynchronizedStorage.OpenSession(savingContextBag))
             {
-                var sagaData = new TestSagaData { SomeId = correlationPropertData };
+                var sagaData = new TestSagaData {SomeId = correlationPropertData};
                 SetActiveSagaInstanceForSave(savingContextBag, new TestSaga(), sagaData);
                 generatedSagaId = sagaData.Id;
 
@@ -45,11 +45,11 @@ namespace NServiceBus.Persistence.ComponentTests
                         var enlistedContextBag = configuration.GetContextBagForSagaStorage();
                         var enlistedSession = await storageAdapter.TryAdapt(transportTransaction, enlistedContextBag);
 
-                        SetActiveSagaInstanceForGet<TestSaga,TestSagaData>(unenlistedContextBag, new TestSagaData { Id = generatedSagaId, SomeId = correlationPropertData });
+                        SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(unenlistedContextBag, new TestSagaData {Id = generatedSagaId, SomeId = correlationPropertData});
                         var unenlistedRecord = await persister.Get<TestSagaData>(generatedSagaId, unenlistedSession, unenlistedContextBag);
                         SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(unenlistedContextBag, unenlistedRecord);
 
-                        SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(enlistedContextBag, new TestSagaData { Id = generatedSagaId, SomeId = correlationPropertData });
+                        SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(enlistedContextBag, new TestSagaData {Id = generatedSagaId, SomeId = correlationPropertData});
                         var enlistedRecord = await persister.Get<TestSagaData>("Id", generatedSagaId, enlistedSession, enlistedContextBag);
                         SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(enlistedContextBag, enlistedRecord);
 
@@ -66,8 +66,6 @@ namespace NServiceBus.Persistence.ComponentTests
 
         class EnlistmentWhichEnforcesDtcEscalation : IEnlistmentNotification
         {
-            public static readonly Guid Id = Guid.NewGuid();
-
             public void Prepare(PreparingEnlistment preparingEnlistment)
             {
                 preparingEnlistment.Prepared();
@@ -87,6 +85,8 @@ namespace NServiceBus.Persistence.ComponentTests
             {
                 enlistment.Done();
             }
+
+            public static readonly Guid Id = Guid.NewGuid();
         }
     }
 }

@@ -1,17 +1,17 @@
-﻿using System;
-using System.Globalization;
-using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Gateway.Deduplication;
-using NServiceBus.Outbox;
-using NServiceBus.Sagas;
-using NServiceBus.Storage.MongoDB;
-using NServiceBus.Storage.MongoDB.Tests;
-using NServiceBus.Timeout.Core;
-using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-
-namespace NServiceBus.Persistence.ComponentTests
+﻿namespace NServiceBus.Persistence.ComponentTests
 {
+    using System;
+    using System.Globalization;
+    using System.Threading.Tasks;
+    using Gateway.Deduplication;
+    using global::MongoDB.Driver;
+    using Outbox;
+    using Sagas;
+    using Storage.MongoDB;
+    using Storage.MongoDB.Tests;
+    using Timeout.Core;
+    using Unicast.Subscriptions.MessageDrivenSubscriptions;
+
     public partial class PersistenceTestsConfiguration
     {
         public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention)

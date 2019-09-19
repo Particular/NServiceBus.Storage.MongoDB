@@ -27,7 +27,8 @@ namespace NServiceBus.Persistence.ComponentTests
 
             OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, collectionNamingConvention);
 
-            var subscriptionPersister = new SubscriptionPersister(Storage.MongoDB.SubscriptionStorage.GetSubscriptionCollection(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings));
+            var subscriptionCollection = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings).GetCollection<EventSubscription>("eventsubscriptions");
+            var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);
             subscriptionPersister.CreateIndexes();
             SubscriptionStorage = subscriptionPersister;
         }

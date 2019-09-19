@@ -6,6 +6,7 @@
     using Storage.MongoDB;
 
     /// <summary>
+    /// Provides settings to configure compatibility with community MongoDB persistence packages.
     /// </summary>
     public class CompatibilitySettings : ExposeSettings
     {

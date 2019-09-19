@@ -6,6 +6,7 @@
     using Storage.MongoDB;
 
     /// <summary>
+    /// Extension methods to configure the MongoDB persistence.
     /// </summary>
     public static class MongoSettingsExtensions
     {

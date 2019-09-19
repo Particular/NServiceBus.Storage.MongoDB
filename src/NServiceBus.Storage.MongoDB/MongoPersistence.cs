@@ -7,14 +7,10 @@ using NServiceBus.Storage.MongoDB;
 namespace NServiceBus
 {
     /// <summary>
-    ///
     /// </summary>
     public class MongoPersistence : PersistenceDefinition
     {
-        static IMongoClient defaultClient;
-
         /// <summary>
-        ///
         /// </summary>
         public MongoPersistence()
         {
@@ -28,16 +24,29 @@ namespace NServiceBus
                     {
                         defaultClient = new MongoClient();
                     }
+
                     return defaultClient;
                 }));
 
                 s.SetDefault(SettingsKeys.DatabaseName, s.EndpointName());
 
                 s.SetDefault(SettingsKeys.CollectionNamingConvention, (Func<Type, string>)(type => type.Name.ToLower()));
+
+                s.SetDefault(DefaultDatabaseSettings);
             });
 
             Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
             Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<OutboxStorage>());
+            Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<SubscriptionStorage>());
         }
+
+        static IMongoClient defaultClient;
+
+        internal static MongoDatabaseSettings DefaultDatabaseSettings { get; } = new MongoDatabaseSettings
+        {
+            ReadConcern = ReadConcern.Majority,
+            WriteConcern = WriteConcern.WMajority,
+            ReadPreference = ReadPreference.Primary
+        };
     }
 }

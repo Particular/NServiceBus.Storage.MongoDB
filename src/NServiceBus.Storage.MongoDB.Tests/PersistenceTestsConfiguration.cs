@@ -14,10 +14,6 @@ namespace NServiceBus.Persistence.ComponentTests
 {
     public partial class PersistenceTestsConfiguration
     {
-        public string DatabaseName { get; }
-
-        public Func<Type, string> CollectionNamingConvention { get; }
-
         public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention)
         {
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
@@ -30,6 +26,11 @@ namespace NServiceBus.Persistence.ComponentTests
             SagaStorage = new SagaPersister(versionElementName);
 
             OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, collectionNamingConvention);
+
+            var subscriptionCollection = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings).GetCollection<EventSubscription>("eventsubscriptions");
+            var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);
+            subscriptionPersister.CreateIndexes();
+            SubscriptionStorage = subscriptionPersister;
         }
 
         public PersistenceTestsConfiguration() : this("_version", t => t.Name.ToLower())
@@ -40,13 +41,17 @@ namespace NServiceBus.Persistence.ComponentTests
         {
         }
 
+        public string DatabaseName { get; }
+
+        public Func<Type, string> CollectionNamingConvention { get; }
+
         public bool SupportsDtc { get; } = false;
 
         public bool SupportsOutbox { get; } = true;
 
         public bool SupportsFinders { get; } = true;
 
-        public bool SupportsSubscriptions { get; } = false;
+        public bool SupportsSubscriptions { get; } = true;
 
         public bool SupportsTimeouts { get; } = false;
 

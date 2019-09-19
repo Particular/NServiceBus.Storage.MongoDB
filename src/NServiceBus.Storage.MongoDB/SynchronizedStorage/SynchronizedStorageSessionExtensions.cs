@@ -6,6 +6,7 @@
     using Storage.MongoDB;
 
     /// <summary>
+    /// MongoDB persistence specific extension methods for the <see cref="SynchronizedStorageSession"/>.
     /// </summary>
     public static class SynchronizedStorageSessionExtensions
     {

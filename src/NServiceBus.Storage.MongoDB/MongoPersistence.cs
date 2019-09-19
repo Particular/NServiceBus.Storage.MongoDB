@@ -7,10 +7,12 @@
     using Storage.MongoDB;
 
     /// <summary>
+    /// Used to configure NServiceBus to use MongoDB persistence.
     /// </summary>
     public class MongoPersistence : PersistenceDefinition
     {
         /// <summary>
+        /// Creates a new instance of the persistence definition.
         /// </summary>
         public MongoPersistence()
         {

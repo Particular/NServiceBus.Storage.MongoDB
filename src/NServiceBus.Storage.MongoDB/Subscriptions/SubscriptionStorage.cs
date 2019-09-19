@@ -1,10 +1,10 @@
-﻿using System;
-using MongoDB.Driver;
-using NServiceBus.Features;
-using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using Features;
+    using global::MongoDB.Driver;
+    using Unicast.Subscriptions.MessageDrivenSubscriptions;
+
     class SubscriptionStorage : Feature
     {
         public SubscriptionStorage()

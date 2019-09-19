@@ -1,16 +1,17 @@
-﻿using System;
-using NServiceBus.Configuration.AdvancedExtensibility;
-using NServiceBus.Settings;
-using NServiceBus.Storage.MongoDB;
-
-namespace NServiceBus
+﻿namespace NServiceBus
 {
+    using System;
+    using Configuration.AdvancedExtensibility;
+    using Settings;
+    using Storage.MongoDB;
+
     /// <summary>
-    ///
     /// </summary>
     public class CompatibilitySettings : ExposeSettings
     {
-        internal CompatibilitySettings(SettingsHolder settingsHolder) : base(settingsHolder) { }
+        internal CompatibilitySettings(SettingsHolder settingsHolder) : base(settingsHolder)
+        {
+        }
 
         /// <summary>
         /// The version element name with MongoDB conventions applied

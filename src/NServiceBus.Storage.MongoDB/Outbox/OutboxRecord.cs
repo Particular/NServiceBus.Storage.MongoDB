@@ -1,8 +1,8 @@
-﻿using System;
-using NServiceBus.Outbox;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using Outbox;
+
     class OutboxRecord
     {
         public string Id { get; set; }

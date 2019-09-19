@@ -1,10 +1,10 @@
-﻿using System;
-using MongoDB.Driver;
-using MongoDB.Driver.Core.Clusters;
-using NServiceBus.Features;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using Features;
+    using global::MongoDB.Driver;
+    using global::MongoDB.Driver.Core.Clusters;
+
     class SynchronizedStorage : Feature
     {
         protected override void Setup(FeatureConfigurationContext context)

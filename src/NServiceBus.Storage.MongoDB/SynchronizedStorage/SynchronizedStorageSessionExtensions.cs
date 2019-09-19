@@ -1,17 +1,15 @@
-﻿using System;
-using MongoDB.Driver;
-using NServiceBus.Persistence;
-using NServiceBus.Storage.MongoDB;
-
-namespace NServiceBus
+﻿namespace NServiceBus
 {
+    using System;
+    using MongoDB.Driver;
+    using Persistence;
+    using Storage.MongoDB;
+
     /// <summary>
-    ///
     /// </summary>
     public static class SynchronizedStorageSessionExtensions
     {
         /// <summary>
-        ///
         /// </summary>
         /// <param name="session"></param>
         /// <returns></returns>

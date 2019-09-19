@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Persistence;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using System.Threading.Tasks;
+    using Extensibility;
+    using global::MongoDB.Driver;
+    using Persistence;
+
     class StorageSessionFactory : ISynchronizedStorage
     {
         public StorageSessionFactory(IMongoClient client, bool useTransactions, string databaseName, Func<Type, string> collectionNamingConvention)

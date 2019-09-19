@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Outbox;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using System.Threading.Tasks;
+    using Extensibility;
+    using global::MongoDB.Driver;
+    using Outbox;
+
     class MongoOutboxTransactionFactory
     {
         public MongoOutboxTransactionFactory(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention)

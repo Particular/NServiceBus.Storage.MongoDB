@@ -5,7 +5,7 @@ namespace NServiceBus.Persistence.ComponentTests
     using Extensibility;
     using Sagas;
 
-    class AnotherSagaWithoutCorrelationProperty : Saga<AnotherSagaWithoutCorrelationPropertyData>, 
+    class AnotherSagaWithoutCorrelationProperty : Saga<AnotherSagaWithoutCorrelationPropertyData>,
         IAmStartedByMessages<AnotherSagaWithoutCorrelationPropertyStartingMessage>
     {
         public Task Handle(AnotherSagaWithoutCorrelationPropertyStartingMessage message, IMessageHandlerContext context)

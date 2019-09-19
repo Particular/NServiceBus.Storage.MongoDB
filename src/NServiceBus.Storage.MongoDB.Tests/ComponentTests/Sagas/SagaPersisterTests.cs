@@ -21,8 +21,6 @@
 
     public class SagaPersisterTests
     {
-        protected PersistenceTestsConfiguration configuration;
-
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
@@ -66,6 +64,7 @@
                 await persister.Complete(sagaData, completeSession, context);
                 await completeSession.CompleteAsync();
             }
+
             return sagaData;
         }
 
@@ -87,6 +86,7 @@
                 await persister.Update(sagaData, completeSession, context);
                 await completeSession.CompleteAsync();
             }
+
             return sagaData;
         }
 
@@ -109,12 +109,13 @@
                 await persister.Update(sagaData, completeSession, context);
                 await completeSession.CompleteAsync();
             }
+
             return sagaData;
         }
 
         protected async Task<TSagaData> GetByCorrelationPropertyAndComplete<TSaga, TSagaData>(string correlatedPropertyName, object correlationPropertyData)
-           where TSaga : Saga<TSagaData>, new()
-           where TSagaData : class, IContainSagaData, new()
+            where TSaga : Saga<TSagaData>, new()
+            where TSagaData : class, IContainSagaData, new()
         {
             var context = configuration.GetContextBagForSagaStorage();
             TSagaData sagaData;
@@ -129,12 +130,13 @@
                 await persister.Complete(sagaData, completeSession, context);
                 await completeSession.CompleteAsync();
             }
+
             return sagaData;
         }
 
         protected async Task<TSagaData> GetByCorrelationProperty<TSaga, TSagaData>(string correlatedPropertyName, object correlationPropertyData)
-           where TSaga : Saga<TSagaData>, new()
-           where TSagaData : class, IContainSagaData, new()
+            where TSaga : Saga<TSagaData>, new()
+            where TSagaData : class, IContainSagaData, new()
         {
             var context = configuration.GetContextBagForSagaStorage();
             TSagaData sagaData;
@@ -148,6 +150,7 @@
 
                 await completeSession.CompleteAsync();
             }
+
             return sagaData;
         }
 
@@ -164,6 +167,7 @@
 
                 await readSession.CompleteAsync();
             }
+
             return sagaData;
         }
 
@@ -187,6 +191,7 @@
             {
                 sagaData.Id = configuration.SagaIdGenerator.Generate(new SagaIdGeneratorContext(correlationProperty, sagaMetadata, context));
             }
+
             sagaInstance.AttachNewEntity(sagaData);
             context.Set(sagaInstance);
 
@@ -194,7 +199,7 @@
         }
 
         protected void SetActiveSagaInstanceForGet<TSaga, TSagaData>(ContextBag context, TSagaData sagaData, params Type[] availableTypes)
-            where TSaga : Saga<TSagaData>, new ()
+            where TSaga : Saga<TSagaData>, new()
             where TSagaData : class, IContainSagaData, new()
         {
             var sagaMetadata = configuration.SagaMetadataCollection.FindByEntity(typeof(TSagaData));
@@ -203,5 +208,7 @@
             sagaInstance.AttachNewEntity(sagaData);
             context.Set(sagaInstance);
         }
+
+        protected PersistenceTestsConfiguration configuration;
     }
 }

@@ -1,15 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using MongoDB.Bson;
-using NServiceBus.Persistence.ComponentTests;
-using NUnit.Framework;
-
-namespace NServiceBus.Storage.MongoDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
+    using System;
+    using System.Threading.Tasks;
+    using global::MongoDB.Bson;
+    using NUnit.Framework;
+    using Persistence.ComponentTests;
+
     class When_migrating_NServiceBus_dot_MongoDB : SagaMigrationPersisterTests
     {
-        readonly Func<Type, string> collectionNamingConvention = t => t.Name;
-
         [Test]
         public async Task Persister_works_with_existing_sagas()
         {
@@ -34,7 +32,7 @@ namespace NServiceBus.Storage.MongoDB.Tests
                 return d.ToBsonDocument();
             });
 
-            var retrievedSagaData = await GetById<NServiceBusMongoDBLegacySaga,NServiceBusMongoDBLegacySagaData>(legacySagaData.Id);
+            var retrievedSagaData = await GetById<NServiceBusMongoDBLegacySaga, NServiceBusMongoDBLegacySagaData>(legacySagaData.Id);
 
             Assert.IsNotNull(retrievedSagaData, "Saga was not retrieved");
             Assert.AreEqual(legacySagaData.OriginalMessageId, retrievedSagaData.OriginalMessageId, "OriginalMessageId does not match");
@@ -42,6 +40,8 @@ namespace NServiceBus.Storage.MongoDB.Tests
             Assert.AreEqual(legacySagaData.SomeCorrelationPropertyId, retrievedSagaData.SomeCorrelationPropertyId, "SomeCorrelationPropertyId does not match");
             Assert.AreEqual(legacySagaData.SomeUpdatableSagaData, retrievedSagaData.SomeUpdatableSagaData, "SomeUpdatableSagaData does not match");
         }
+
+        readonly Func<Type, string> collectionNamingConvention = t => t.Name;
 
         class NServiceBusMongoDBLegacySaga : Saga<NServiceBusMongoDBLegacySagaData>, IAmStartedByMessages<MigrationStartMessage>
         {
@@ -58,29 +58,24 @@ namespace NServiceBus.Storage.MongoDB.Tests
 
         class NServiceBusMongoDBLegacySagaData : IContainSagaData
         {
+            public Guid SomeCorrelationPropertyId { get; set; }
+
+            public int SomeUpdatableSagaData { get; set; }
             public Guid Id { get; set; }
 
             public string OriginalMessageId { get; set; }
 
             public string Originator { get; set; }
-
-            public Guid SomeCorrelationPropertyId { get; set; }
-
-            public int SomeUpdatableSagaData { get; set; }
         }
     }
 }
 
 namespace NServiceBus.MongoDB
 {
+    using System;
+
     class NServiceBusMongoDBLegacySagaData : IContainSagaData
     {
-        public Guid Id { get; set; }
-
-        public string OriginalMessageId { get; set; }
-
-        public string Originator { get; set; }
-
         public int DocumentVersion { get; set; } //From NServiceBus.MongoDB.IHaveDocumentVersion
 
         public int ETag { get; set; } //From NServiceBus.MongoDB.IHaveDocumentVersion
@@ -88,5 +83,10 @@ namespace NServiceBus.MongoDB
         public Guid SomeCorrelationPropertyId { get; set; }
 
         public int SomeUpdatableSagaData { get; set; }
+        public Guid Id { get; set; }
+
+        public string OriginalMessageId { get; set; }
+
+        public string Originator { get; set; }
     }
 }

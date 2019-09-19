@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Outbox;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using System.Threading.Tasks;
+    using Extensibility;
+    using global::MongoDB.Driver;
+    using Outbox;
+
     class OutboxPersister : IOutboxStorage
     {
         public OutboxPersister(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention)
@@ -36,7 +36,7 @@ namespace NServiceBus.Storage.MongoDB
             var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
             var storageSession = mongoOutboxTransaction.StorageSession;
 
-            return storageSession.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = message.TransportOperations });
+            return storageSession.InsertOneAsync(new OutboxRecord {Id = message.MessageId, TransportOperations = message.TransportOperations});
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag context)

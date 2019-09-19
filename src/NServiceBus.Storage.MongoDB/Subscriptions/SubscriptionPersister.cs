@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Logging;
-using NServiceBus.Unicast.Subscriptions;
-using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Extensibility;
+    using global::MongoDB.Driver;
+    using Logging;
+    using Unicast.Subscriptions;
+    using Unicast.Subscriptions.MessageDrivenSubscriptions;
+
     class SubscriptionPersister : ISubscriptionStorage
     {
         public SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCollection)
@@ -50,6 +50,7 @@ namespace NServiceBus.Storage.MongoDB
             {
                 messageTypeNames.Add(messageType.TypeName);
             }
+
             var filter = filterBuilder.In(s => s.MessageTypeName, messageTypeNames);
             // This projection allows a covered query:
             var projection = Builders<EventSubscription>.Projection
@@ -137,12 +138,12 @@ namespace NServiceBus.Storage.MongoDB
                     .Ascending(x => x.MessageTypeName)
                     .Ascending(x => x.TransportAddress),
                 new CreateIndexOptions
-                { Unique = true });
+                    {Unique = true});
             var searchIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
                 .Ascending(x => x.MessageTypeName)
                 .Ascending(x => x.TransportAddress)
                 .Ascending(x => x.Endpoint));
-            subscriptionsCollection.Indexes.CreateMany(new[] { uniqueIndex, searchIndex });
+            subscriptionsCollection.Indexes.CreateMany(new[] {uniqueIndex, searchIndex});
         }
 
         IMongoCollection<EventSubscription> subscriptionsCollection;

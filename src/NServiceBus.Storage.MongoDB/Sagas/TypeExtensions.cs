@@ -1,8 +1,8 @@
-﻿using System;
-using MongoDB.Bson.Serialization;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using global::MongoDB.Bson.Serialization;
+
     static class TypeExtensions
     {
         public static string GetElementName(this Type type, string propertyName)

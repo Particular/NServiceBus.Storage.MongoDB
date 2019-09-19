@@ -1,12 +1,12 @@
-﻿using System;
-using MongoDB.Driver;
-using NServiceBus.Configuration.AdvancedExtensibility;
-using NServiceBus.Storage.MongoDB;
-
-namespace NServiceBus
+﻿namespace NServiceBus
 {
+    using System;
+    using Configuration.AdvancedExtensibility;
+    using MongoDB.Driver;
+    using Storage.MongoDB;
+
     /// <summary>
-    ///
+    /// Extension methods to configure the MongoDB persistence.
     /// </summary>
     public static class MongoSettingsExtensions
     {

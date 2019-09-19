@@ -1,16 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using NServiceBus.Persistence.ComponentTests;
-using NUnit.Framework;
-
-namespace NServiceBus.Storage.MongoDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
+    using System;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+    using Persistence.ComponentTests;
+
     public class When_persisting_a_saga_entity : SagaPersisterTests<PropertyTypesTestSaga, PropertyTypesTestSagaData>
     {
-        PropertyTypesTestSagaData entity;
-        PropertyTypesTestSagaData savedEntity;
-        RelatedClass relatedClass;
-
         [SetUp]
         public async Task Setup()
         {
@@ -20,8 +16,8 @@ namespace NServiceBus.Storage.MongoDB.Tests
                 TestComponent = new TestComponent {Property = "Prop"},
                 DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01").ToUniversalTime(),
                 Status = StatusEnum.AnotherStatus,
-                PolymorphicRelatedProperty = new PolymorphicProperty { SomeInt = 9 },
-                RelatedClass = new RelatedClass { Id = Guid.NewGuid() }
+                PolymorphicRelatedProperty = new PolymorphicProperty {SomeInt = 9},
+                RelatedClass = new RelatedClass {Id = Guid.NewGuid()}
             };
 
             relatedClass = entity.RelatedClass;
@@ -60,5 +56,9 @@ namespace NServiceBus.Storage.MongoDB.Tests
         {
             Assert.AreEqual(relatedClass.Id, savedEntity.RelatedClass.Id);
         }
+
+        PropertyTypesTestSagaData entity;
+        PropertyTypesTestSagaData savedEntity;
+        RelatedClass relatedClass;
     }
 }

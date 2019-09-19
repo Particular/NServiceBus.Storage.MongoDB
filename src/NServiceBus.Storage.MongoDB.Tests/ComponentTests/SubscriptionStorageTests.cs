@@ -11,9 +11,6 @@
     [TestFixture]
     class SubscriptionStorageTests
     {
-        PersistenceTestsConfiguration configuration;
-        ISubscriptionStorage storage;
-
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
@@ -67,7 +64,7 @@
             }, new ContextBag());
 
             Assert.AreEqual(2, subscribers.Count());
-            CollectionAssert.AreEquivalent(new[] { "address1", "address2" }, subscribers.Select(s => s.TransportAddress));
+            CollectionAssert.AreEquivalent(new[] {"address1", "address2"}, subscribers.Select(s => s.TransportAddress));
         }
 
         [Test]
@@ -102,7 +99,7 @@
             }, new ContextBag());
 
             Assert.AreEqual(2, subscribers.Count());
-            CollectionAssert.AreEquivalent(new[] { "address", "address" }, subscribers.Select(s => s.TransportAddress));
+            CollectionAssert.AreEquivalent(new[] {"address", "address"}, subscribers.Select(s => s.TransportAddress));
         }
 
         [Test]
@@ -211,5 +208,8 @@
         {
             return new MessageType(Guid.NewGuid().ToString("N"), "1.0.0");
         }
+
+        PersistenceTestsConfiguration configuration;
+        ISubscriptionStorage storage;
     }
 }

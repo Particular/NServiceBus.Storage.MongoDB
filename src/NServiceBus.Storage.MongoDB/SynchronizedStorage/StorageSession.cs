@@ -1,17 +1,15 @@
-﻿using System;
-using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Logging;
-using NServiceBus.Persistence;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using System.Threading.Tasks;
+    using Extensibility;
+    using global::MongoDB.Bson;
+    using global::MongoDB.Driver;
+    using Logging;
+    using Persistence;
+
     class StorageSession : CompletableSynchronizedStorageSession
     {
-        public IClientSessionHandle MongoSession { get; }
-
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession)
         {
             MongoSession = mongoSession;
@@ -28,6 +26,26 @@ namespace NServiceBus.Storage.MongoDB
             this.ownsMongoSession = ownsMongoSession;
         }
 
+        public IClientSessionHandle MongoSession { get; }
+
+        Task CompletableSynchronizedStorageSession.CompleteAsync()
+        {
+            if (ownsMongoSession)
+            {
+                return CompleteAsync();
+            }
+
+            return TaskEx.CompletedTask;
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (ownsMongoSession)
+            {
+                Dispose();
+            }
+        }
+
         public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(MongoSession, document);
 
         public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(MongoSession, document);
@@ -42,16 +60,6 @@ namespace NServiceBus.Storage.MongoDB
 
         public int RetrieveVersion(Type type) => contextBag.Get<int>(type.FullName);
 
-        Task CompletableSynchronizedStorageSession.CompleteAsync()
-        {
-            if (ownsMongoSession)
-            {
-                return CompleteAsync();
-            }
-
-            return TaskEx.CompletedTask;
-        }
-
         public Task CompleteAsync()
         {
             if (MongoSession.IsInTransaction)
@@ -60,14 +68,6 @@ namespace NServiceBus.Storage.MongoDB
             }
 
             return TaskEx.CompletedTask;
-        }
-
-        void IDisposable.Dispose()
-        {
-            if (ownsMongoSession)
-            {
-                Dispose();
-            }
         }
 
         public void Dispose()
@@ -87,11 +87,11 @@ namespace NServiceBus.Storage.MongoDB
             MongoSession.Dispose();
         }
 
-        static readonly ILog Log = LogManager.GetLogger<StorageSession>();
-
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;
         readonly bool ownsMongoSession;
+
+        static readonly ILog Log = LogManager.GetLogger<StorageSession>();
     }
 }

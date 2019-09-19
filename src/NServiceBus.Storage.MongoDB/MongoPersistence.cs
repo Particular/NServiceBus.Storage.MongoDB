@@ -1,11 +1,11 @@
-﻿using System;
-using MongoDB.Driver;
-using NServiceBus.Features;
-using NServiceBus.Persistence;
-using NServiceBus.Storage.MongoDB;
-
-namespace NServiceBus
+﻿namespace NServiceBus
 {
+    using System;
+    using Features;
+    using MongoDB.Driver;
+    using Persistence;
+    using Storage.MongoDB;
+
     /// <summary>
     /// </summary>
     public class MongoPersistence : PersistenceDefinition
@@ -40,13 +40,13 @@ namespace NServiceBus
             Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<SubscriptionStorage>());
         }
 
-        static IMongoClient defaultClient;
-
         internal static MongoDatabaseSettings DefaultDatabaseSettings { get; } = new MongoDatabaseSettings
         {
             ReadConcern = ReadConcern.Majority,
             WriteConcern = WriteConcern.WMajority,
             ReadPreference = ReadPreference.Primary
         };
+
+        static IMongoClient defaultClient;
     }
 }

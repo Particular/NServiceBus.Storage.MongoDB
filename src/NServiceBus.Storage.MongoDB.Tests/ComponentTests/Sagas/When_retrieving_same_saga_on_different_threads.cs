@@ -1,4 +1,5 @@
 // ReSharper disable AccessToDisposedClosure
+
 namespace NServiceBus.Persistence.ComponentTests
 {
     using System;
@@ -19,7 +20,7 @@ namespace NServiceBus.Persistence.ComponentTests
             Guid generatedSagaId;
             using (var insertSession = await configuration.SynchronizedStorage.OpenSession(insertContextBag))
             {
-                var sagaData = new TestSagaData { SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow };
+                var sagaData = new TestSagaData {SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow};
                 var correlationProperty = SetActiveSagaInstanceForSave(insertContextBag, new TestSaga(), sagaData);
                 generatedSagaId = sagaData.Id;
 
@@ -35,7 +36,7 @@ namespace NServiceBus.Persistence.ComponentTests
                 var winningContext = configuration.GetContextBagForSagaStorage();
                 using (var winningSaveSession = await configuration.SynchronizedStorage.OpenSession(winningContext))
                 {
-                    SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(winningContext, new TestSagaData { Id = generatedSagaId, SomeId = correlationPropertyData });
+                    SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(winningContext, new TestSagaData {Id = generatedSagaId, SomeId = correlationPropertyData});
                     var record = await persister.Get<TestSagaData>(generatedSagaId, winningSaveSession, winningContext);
                     SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(winningContext, record);
 
@@ -55,7 +56,7 @@ namespace NServiceBus.Persistence.ComponentTests
                 var losingSaveContext = configuration.GetContextBagForSagaStorage();
                 using (var losingSaveSession = await configuration.SynchronizedStorage.OpenSession(losingSaveContext))
                 {
-                    SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(losingSaveContext, new TestSagaData { Id = generatedSagaId, SomeId = correlationPropertyData });
+                    SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(losingSaveContext, new TestSagaData {Id = generatedSagaId, SomeId = correlationPropertyData});
                     var staleRecord = await persister.Get<TestSagaData>("SomeId", correlationPropertyData, losingSaveSession, losingSaveContext);
                     SetActiveSagaInstanceForGet<TestSaga, TestSagaData>(losingSaveContext, staleRecord);
 

@@ -1,4 +1,5 @@
 // ReSharper disable AccessToDisposedClosure
+
 namespace NServiceBus.Persistence.ComponentTests
 {
     using System;
@@ -13,7 +14,7 @@ namespace NServiceBus.Persistence.ComponentTests
         public async Task Save_process_is_repeatable()
         {
             var correlationPropertyData = Guid.NewGuid().ToString();
-            var saga = new TestSagaData { SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow };
+            var saga = new TestSagaData {SomeId = correlationPropertyData, DateTimeProperty = DateTime.UtcNow};
 
             var persister = configuration.SagaStorage;
             var insertContextBag = configuration.GetContextBagForSagaStorage();

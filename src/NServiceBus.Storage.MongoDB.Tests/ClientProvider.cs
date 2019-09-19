@@ -1,12 +1,10 @@
-﻿using System;
-using MongoDB.Driver;
-
-namespace NServiceBus.Storage.MongoDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
+    using System;
+    using global::MongoDB.Driver;
+
     static class ClientProvider
     {
-        static IMongoClient client;
-
         public static IMongoClient Client
         {
             get
@@ -21,5 +19,7 @@ namespace NServiceBus.Storage.MongoDB.Tests
                 return client;
             }
         }
+
+        static IMongoClient client;
     }
 }

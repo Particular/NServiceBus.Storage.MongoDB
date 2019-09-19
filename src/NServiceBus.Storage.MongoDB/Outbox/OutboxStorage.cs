@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Options;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
-using NServiceBus.Features;
-using NServiceBus.Outbox;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Features;
+    using global::MongoDB.Bson.Serialization;
+    using global::MongoDB.Bson.Serialization.Options;
+    using global::MongoDB.Bson.Serialization.Serializers;
+    using global::MongoDB.Driver;
+    using Outbox;
+
     class OutboxStorage : Feature
     {
         OutboxStorage()
         {
-            DependsOn<Features.Outbox>();
+            DependsOn<Outbox>();
             DependsOn<SynchronizedStorage>();
         }
 

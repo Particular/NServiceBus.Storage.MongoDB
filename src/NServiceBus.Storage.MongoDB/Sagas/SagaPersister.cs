@@ -1,14 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver;
-using NServiceBus.Extensibility;
-using NServiceBus.Persistence;
-using NServiceBus.Sagas;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using System.Threading.Tasks;
+    using Extensibility;
+    using global::MongoDB.Bson;
+    using global::MongoDB.Bson.Serialization;
+    using global::MongoDB.Driver;
+    using Persistence;
+    using Sagas;
+
     class SagaPersister : ISagaPersister
     {
         public SagaPersister(string versionElementName)
@@ -81,8 +81,9 @@ namespace NServiceBus.Storage.MongoDB
             return default;
         }
 
-        const string idElementName = "_id";
         readonly string versionElementName;
         readonly FilterDefinitionBuilder<BsonDocument> filterBuilder = Builders<BsonDocument>.Filter;
+
+        const string idElementName = "_id";
     }
 }

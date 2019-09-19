@@ -1,17 +1,17 @@
-using System;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver;
-using NServiceBus.Features;
-using NServiceBus.Sagas;
-
 namespace NServiceBus.Storage.MongoDB
 {
+    using System;
+    using Features;
+    using global::MongoDB.Bson;
+    using global::MongoDB.Bson.Serialization;
+    using global::MongoDB.Driver;
+    using Sagas;
+
     class SagaStorage : Feature
     {
         SagaStorage()
         {
-            DependsOn<Features.Sagas>();
+            DependsOn<Sagas>();
             DependsOn<SynchronizedStorage>();
         }
 
@@ -60,7 +60,8 @@ namespace NServiceBus.Storage.MongoDB
                 {
                     var propertyElementName = sagaMetadata.SagaEntityType.GetElementName(property.Name);
 
-                    var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions() { Unique = true });
+                    var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions
+                        {Unique = true});
                     database.GetCollection<BsonDocument>(collectionName).Indexes.CreateOne(indexModel);
                 }
                 else

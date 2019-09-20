@@ -8,7 +8,7 @@
     using Logging;
     using Persistence;
 
-    class StorageSession : CompletableSynchronizedStorageSession
+    class StorageSession : CompletableSynchronizedStorageSession, IExposeAMongoSession
     {
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession)
         {

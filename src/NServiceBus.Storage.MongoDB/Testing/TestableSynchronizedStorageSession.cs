@@ -1,7 +1,8 @@
-﻿namespace NServiceBus.Storage.MongoDB.Testing
+﻿namespace NServiceBus.Testing
 {
-    using global::MongoDB.Driver;
-    using NServiceBus.Persistence;
+    using MongoDB.Driver;
+    using Persistence;
+    using Storage.MongoDB;
 
     /// <summary>
     /// A fake implementation for <see cref="SynchronizedStorageSession"/> for testing purposes.

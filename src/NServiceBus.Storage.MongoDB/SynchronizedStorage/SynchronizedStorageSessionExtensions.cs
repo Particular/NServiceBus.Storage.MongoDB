@@ -11,9 +11,8 @@
     public static class SynchronizedStorageSessionExtensions
     {
         /// <summary>
+        /// Retrieves the current MongoDB client session from the context.
         /// </summary>
-        /// <param name="session"></param>
-        /// <returns></returns>
         public static IClientSessionHandle GetClientSession(this SynchronizedStorageSession session)
         {
             Guard.AgainstNull(nameof(session), session);

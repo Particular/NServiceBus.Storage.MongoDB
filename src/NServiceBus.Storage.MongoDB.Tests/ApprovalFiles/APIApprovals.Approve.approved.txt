@@ -25,9 +25,9 @@ namespace NServiceBus
 }
 namespace NServiceBus.Testing
 {
-    public class TestableSynchronizedStorageSession : NServiceBus.Persistence.SynchronizedStorageSession
+    public class TestableMongoSynchronizedStorageSession : NServiceBus.Persistence.SynchronizedStorageSession
     {
-        public TestableSynchronizedStorageSession(MongoDB.Driver.IClientSessionHandle clientSessionHandle) { }
+        public TestableMongoSynchronizedStorageSession(MongoDB.Driver.IClientSessionHandle clientSessionHandle) { }
         public MongoDB.Driver.IClientSessionHandle MongoSession { get; }
     }
 }

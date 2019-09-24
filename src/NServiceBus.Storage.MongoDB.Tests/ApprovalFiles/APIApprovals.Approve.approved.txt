@@ -23,3 +23,11 @@ namespace NServiceBus
         public static MongoDB.Driver.IClientSessionHandle GetClientSession(this NServiceBus.Persistence.SynchronizedStorageSession session) { }
     }
 }
+namespace NServiceBus.Testing
+{
+    public class TestableMongoSynchronizedStorageSession : NServiceBus.Persistence.SynchronizedStorageSession
+    {
+        public TestableMongoSynchronizedStorageSession(MongoDB.Driver.IClientSessionHandle clientSessionHandle) { }
+        public MongoDB.Driver.IClientSessionHandle MongoSession { get; }
+    }
+}

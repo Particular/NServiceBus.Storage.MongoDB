@@ -7,13 +7,13 @@
     /// <summary>
     /// A fake implementation for <see cref="SynchronizedStorageSession"/> for testing purposes.
     /// </summary>
-    public class TestableSynchronizedStorageSession : SynchronizedStorageSession, IExposeAMongoSession
+    public class TestableMongoSynchronizedStorageSession : SynchronizedStorageSession, IMongoSessionProvider
     {
         /// <summary>
-        /// Creates a new instance of <see cref="TestableSynchronizedStorageSession"/> using the provided <see cref="IClientSessionHandle"/>.
+        /// Creates a new instance of <see cref="TestableMongoSynchronizedStorageSession"/> using the provided <see cref="IClientSessionHandle"/>.
         /// </summary>
         /// <param name="clientSessionHandle"></param>
-        public TestableSynchronizedStorageSession(IClientSessionHandle clientSessionHandle)
+        public TestableMongoSynchronizedStorageSession(IClientSessionHandle clientSessionHandle)
         {
             MongoSession = clientSessionHandle;
         }

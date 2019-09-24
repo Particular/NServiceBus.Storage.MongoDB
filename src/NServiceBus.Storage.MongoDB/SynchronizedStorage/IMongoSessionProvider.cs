@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
-    interface IExposeAMongoSession
+    interface IMongoSessionProvider
     {
         global::MongoDB.Driver.IClientSessionHandle MongoSession { get; }
     }

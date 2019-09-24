@@ -17,7 +17,7 @@
         {
             Guard.AgainstNull(nameof(session), session);
 
-            if (session is IExposeAMongoSession storageSession)
+            if (session is IMongoSessionProvider storageSession)
             {
                 return storageSession.MongoSession;
             }

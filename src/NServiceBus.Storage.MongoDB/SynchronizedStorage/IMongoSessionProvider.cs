@@ -1,7 +1,9 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
+    using global::MongoDB.Driver;
+
     interface IMongoSessionProvider
     {
-        global::MongoDB.Driver.IClientSessionHandle MongoSession { get; }
+        IClientSessionHandle MongoSession { get; }
     }
 }

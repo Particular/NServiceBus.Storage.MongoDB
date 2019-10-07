@@ -19,7 +19,7 @@ Documentation, including configuration, usage, and samples can be found at http:
 - Projects in this solution require compatible SDKs for the following targets:
    - .NET Framework 4.5.2
    - .NET Standard 2.0
-- The projects in this solution use the new .NET csproj project format which requires .NET Core 2 or greater, which is included in Visual Studio versions 2017 and greater.
+- Projects in this solution use the new .NET csproj project format which requires .NET Core 2 or greater, which is included in Visual Studio versions 2017 and greater.
 - The projects also rely on NuGet for 3rd party dependencies.
 
 

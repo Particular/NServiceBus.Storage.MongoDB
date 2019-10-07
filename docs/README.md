@@ -12,6 +12,8 @@ A default `MongoClient`, which by default targets `mongodb://localhost:27017/`, 
 
 By default collections will be named after the saga data type `Name` property in lower case. To support the `NServiceBus.MongoDB` project, which uses the unaltered saga data types `Name` property, the collection naming convention can be overridden.
 
+For example: a saga class named `SampleSaga` will result in a MongoDB collection named `samplesaga`.
+
 ### Version Element
 
 MongoDB does not provide concurrency control. An incrementing integer, combined with filters during document updates, is used to implement a concurrency control system. 

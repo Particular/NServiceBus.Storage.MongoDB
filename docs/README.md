@@ -35,3 +35,7 @@ For saga data types the BSON serializer has been configured to ignore missing pr
 ### Cleanup
 
 Outbox cleanup is performed using a [time to live index](https://docs.mongodb.com/manual/core/index-ttl/). The index is created, or in the case of a changed TTL value recreated, on startup.
+
+### Outbox Transaction
+
+Outbox transactions are a wrapper around `StorageSession`, taking control of the session's commit and dispose actions.

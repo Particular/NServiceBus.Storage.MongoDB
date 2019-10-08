@@ -32,3 +32,6 @@ For saga data types the BSON serializer has been configured to ignore missing pr
 
 ## Outbox
 
+### Cleanup
+
+Outbox cleanup is performed using a [time to live index](https://docs.mongodb.com/manual/core/index-ttl/). The index is created, or in the case of a changed TTL value recreated, on startup.

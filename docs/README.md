@@ -22,7 +22,7 @@ MongoDB stores documents in the BSON format. The version is stored as a BSON ele
 
 By default the version element name is `_version`.
 
-When a saga data is retrieved, the version element's current value is recorded in the synchronized storage session. When the saga data is later updated the element value is incremented by one, and a filter is used to perform the update which matches the original version value. If the document is not found and no update operation has occurred the persister will throw an exception indicating concurrency control has been triggered.
+When a saga data is retrieved, the version element's current value is recorded in the `SynchronizedStorageSession`. When the saga data is later updated the element value is incremented by one, and a filter is used to perform the update which matches the original version value. If the document is not found and no update operation has occurred the persister will throw an exception indicating concurrency control has been triggered.
 
 In order to support compatibility with the `NServiceBus.MongoDB` and `NServiceBus.Persistence.MongoDB` projects, the version element name can be overridden to match the appropriate version element name used by those projects.
 

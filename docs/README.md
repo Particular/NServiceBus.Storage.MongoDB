@@ -16,7 +16,7 @@ For example: a saga class named `SampleSaga` will result in a MongoDB collection
 
 ### Version Element
 
-MongoDB does not provide concurrency control. An incrementing integer, combined with filters during document updates, is used to implement a concurrency control system. 
+MongoDB does not provide built-in concurrency control. An incrementing integer version number, combined with filters during document updates, is used to implement a concurrency control system. 
 
 MongoDB stores documents in the BSON format. The version is stored as a BSON element that is added and updated on the objects BSON serialized document before operations are sent to the server.
 

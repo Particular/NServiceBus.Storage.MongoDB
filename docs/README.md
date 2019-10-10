@@ -1,6 +1,10 @@
-## MongoDB Sessions
+## MongoDB Transactions
 
-The Saga and Outbox implementations support MongoDB transactions, which also requires support for MongoDB sessions. This limits the use of this package to MongoDB server 3.6 or greater.
+By default the Saga and Outbox implementations utilize [MongoDB transactions](https://docs.mongodb.com/manual/core/transactions/), which is only supported in MongoDB server version 4.0 or greater and cannot be used in all configurations of MongoDB server. MongoDB transactions rely on the MongoDB server sessions feature.
+
+## MongoDB Server Sessions
+
+The Saga and Outbox implementations are built around [MongoDB server sessions](https://docs.mongodb.com/manual/reference/server-sessions/). MongoDB sessions were introduced in MongoDB server version 3.6, however version 3.6 can only be used by this package when the user configures the package to disable use of transactions.
 
 ## Initialization
 

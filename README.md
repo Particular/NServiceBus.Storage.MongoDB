@@ -6,76 +6,36 @@ This package includes [MongoDB](https://www.mongodb.com/) persistence implementa
 - Outbox
 - Transactions
 
-## Install ##
-Add the `NServiceBus.Storage.MongoDB` package to your NServiceBus project.
 
- ```Install-Package NServiceBus.Storage.MongoDB```   
+## Documentation
 
-
-## Configuration ##
-
-**1** Set the `EndpointConfiguration` object to use `MongoPersistence`:
-
-```csharp
-using NServiceBus;
-
-class Program
-{
-    public async Task Main()
-    {
-        var endpointConfiguration = new EndpointConfiguration("Endpoint Name");
-        endpointConfiguration.UsePersistence<MongoPersistence>();
-    }
-}
-```
-
-**2** Hit F5. Assuming your MongoDB server is at `mongourl://localhost:27017`, it will just work.
+Documentation, including configuration, usage, and samples can be found at http://docs.particular.net/persistence/mongodb
 
 
-## Customizing the MongoDB connection ##
+## Developing
 
-Provide a custom `MongoClient` by calling the ```.Client(client)``` method:
+### Prerequisites
 
-```csharp
-endpointConfiguration
-	.UsePersistence<MongoDBPersistence>()
-	.MongoClient(new MongoClient("Custom Mongo URL"));
-```
-
-
-## Customizing the MongoDB connection
-
-By default, the persistence will use the endpoint name as the database to store NServiceBus objects. Provide a custom database name by calling the ```.DatabaseName(name)```method:
-
-```csharp
-endpointConfiguration
-	.UsePersistence<MongoDBPersistence>()
-	.DatabaseName("MyCustomName");
-```
-
-## Transactions
-
-By default, the persistence will use session [transactions](https://docs.mongodb.com/manual/core/transactions/) for making changes to Saga data. This allows atomic guarantees when multiple sagas are invoked by a single message. To support older MongoDB servers (< 4) and MongoDB sharded clusters, you can disable transactions by calling the `.UseTransactions(false)` method:
-
-```csharp
-endpointConfiguration
-	.UsePersistence<MongoDBPersistence>()
-	.UseTransactions(false);
-```
-
-You can join the existing MongoDB session transaction in your handlers by obtaining a reference to a database collection from the `IMessageHandlerContext`:
-
-```c#
-public Task Handle(MyMessage message, IMessageHandlerContext context)
-{
-    var collection = context.SynchronizedStorageSession().GetCollection<MyBusinessObject>("collectionname");    
-}
-```
-
-The transaction and session will be automatically completed by NServiceBus when handler processing is complete.
+- Projects in this solution require compatible SDKs for the following targets:
+   - .NET Framework 4.5.2
+   - .NET Standard 2.0
+- Projects in this solution use the new .NET csproj project format which requires .NET Core 2 or greater, which is included in Visual Studio versions 2017 and greater.
+- The projects also rely on NuGet for 3rd party dependencies.
 
 
-## Running tests locally
+### Coding Standards
+
+This solution includes a [Resharper .DotSettings code styles definition](https://www.jetbrains.com/resharper/features/code_formatting.html) as a [companion file](https://github.com/Particular/NServiceBus.Storage.MongoDB/blob/master/src/NServiceBus.Storage.MongoDB.sln.DotSettings) to the solution file.
+
+
+### Running tests
+
+Both test projects utilize NUnit. The test projects can be executed using the test runner included in Visual Studio or using the [`dotnet test` command](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test) from the command line.
+
+The tests in the AcceptanceTesting project and many of the tests in the Testing project require an active MongoDB server in order for the test to pass.
+
+
+#### MongoDB
 
 By default, both the AcceptanceTests and Tests projects will connect to any MongoDB server running at the default address of `mongodb://localhost:27017`.
 
@@ -87,13 +47,6 @@ For developers using Docker containers, the following docker command will quickl
 
 `docker run -d -p 27017:27017 --name TestMongoDB mongo:latest --replSet tr0`
 
-Once started, initialize the replication set (required for transaction support) by connecting to the database using a mongo shell. You can connect directly from your local machine using `mongo.exe` or use the following docker command to start a mongo shell inside the container:
+Once started, initialize the replication set (required for transaction support) by connecting to the database using a mongo shell. You can connect directly from your local machine using `mongo.exe` or use the following docker command to start a mongo shell inside the container and initialize the replication set:
 
-`docker exec -it TestMongoDB mongo`
-
-then use `rs.initiate()` in the shell to setup the replication set.
-
-
-## Documentation
-
-Documentation and samples can be found at http://docs.particular.net/persistence/mongodb
+`docker exec -it TestMongoDB "mongo --eval 'rs.initiate()'"`

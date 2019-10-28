@@ -33,9 +33,11 @@
                 {
                     if (useTransactions)
                     {
-                        if (client.Cluster.Description.Type != ClusterType.ReplicaSet)
+                        var clusterType = client.Cluster.Description.Type;
+
+                        if (clusterType != ClusterType.ReplicaSet && clusterType != ClusterType.Sharded)
                         {
-                            throw new Exception("Transactions are only supported on a replica set. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
+                            throw new Exception($"Transactions are supported only on replica set or sharded clusters. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
                         }
 
                         try

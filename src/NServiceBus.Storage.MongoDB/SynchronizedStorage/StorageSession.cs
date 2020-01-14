@@ -10,7 +10,7 @@
 
     class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction)
         {
             MongoSession = mongoSession;
 
@@ -24,6 +24,7 @@
             this.contextBag = contextBag;
             this.collectionNamingConvention = collectionNamingConvention;
             this.ownsMongoSession = ownsMongoSession;
+            this.useTransaction = useTransaction;
         }
 
         public IClientSessionHandle MongoSession { get; }
@@ -73,22 +74,32 @@
                 {
                     if (e.HasErrorLabel("TransientTransactionError"))
                     {
-                        await Task.Delay(20).ConfigureAwait(false);
-                        try
-                        {
-                            MongoSession.AbortTransaction();
-                            MongoSession.StartTransaction(new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority));
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.WriteLine(exception);
-                            throw;
-                        }
+                        await AbortTransaction().ConfigureAwait(false);
+
+                        await Task.Delay(random.Next(5, 20)).ConfigureAwait(false);
+
+                        StartTransaction();
                         continue;
                     }
 
                     throw;
                 }
+            }
+        }
+
+        public void StartTransaction()
+        {
+            if (useTransaction)
+            {
+                MongoSession.StartTransaction(transactionOptions);
+            }
+        }
+
+        public async Task AbortTransaction()
+        {
+            if (useTransaction)
+            {
+                await MongoSession.AbortTransactionAsync().ConfigureAwait(false);
             }
         }
 
@@ -123,11 +134,14 @@
             MongoSession.Dispose();
         }
 
+        static Random random = new Random();
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;
         readonly bool ownsMongoSession;
+        static TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
+        readonly bool useTransaction;
     }
 }

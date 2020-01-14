@@ -20,12 +20,9 @@
         {
             var mongoSession = await client.StartSessionAsync().ConfigureAwait(false);
 
-            if (useTransactions)
-            {
-                mongoSession.StartTransaction(new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority));
-            }
-
-            return new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention, true);
+            var session = new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention, true, useTransactions);
+            session.StartTransaction();
+            return session;
         }
 
         readonly IMongoClient client;

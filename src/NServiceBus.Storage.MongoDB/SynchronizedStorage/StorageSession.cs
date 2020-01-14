@@ -54,7 +54,43 @@
 
         public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter);
 
-        public IFindFluent<BsonDocument, BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T))).Find(MongoSession, filter);
+        public async Task<BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter)
+        {
+            var sagaCollection = database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T)));
+            var update = Builders<BsonDocument>.Update.Set("_lock", ObjectId.GenerateNewId());
+
+            while (true)
+            {
+                try
+                {
+                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, new FindOneAndUpdateOptions<BsonDocument>()
+                    {
+                        ReturnDocument = ReturnDocument.After
+                    }).ConfigureAwait(false);
+                    return result;
+                }
+                catch (MongoCommandException e)
+                {
+                    if (e.HasErrorLabel("TransientTransactionError"))
+                    {
+                        await Task.Delay(20).ConfigureAwait(false);
+                        try
+                        {
+                            MongoSession.AbortTransaction();
+                            MongoSession.StartTransaction(new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority));
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine(exception);
+                            throw;
+                        }
+                        continue;
+                    }
+
+                    throw;
+                }
+            }
+        }
 
         public void StoreVersion<T>(int version) => contextBag.Set(typeof(T).FullName, version);
 

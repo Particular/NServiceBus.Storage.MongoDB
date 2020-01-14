@@ -72,7 +72,7 @@
                 }
                 catch (MongoCommandException e)
                 {
-                    if (e.HasErrorLabel("TransientTransactionError"))
+                    if (useTransaction && e.HasErrorLabel("TransientTransactionError"))
                     {
                         await AbortTransaction().ConfigureAwait(false);
 

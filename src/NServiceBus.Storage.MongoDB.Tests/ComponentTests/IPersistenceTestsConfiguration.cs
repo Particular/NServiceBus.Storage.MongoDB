@@ -22,6 +22,8 @@ namespace NServiceBus.Persistence.ComponentTests
 
         bool SupportsTimeouts { get; }
 
+        bool SupportsPessimisticConcurrency { get; }
+
         ISagaIdGenerator SagaIdGenerator { get; }
 
         ISagaPersister SagaStorage { get; }

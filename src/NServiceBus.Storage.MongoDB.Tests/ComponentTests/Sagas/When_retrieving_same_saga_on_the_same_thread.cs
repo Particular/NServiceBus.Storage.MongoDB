@@ -13,6 +13,8 @@ namespace NServiceBus.Persistence.ComponentTests
         [Test]
         public async Task Save_should_fail_when_data_changes_between_read_and_update()
         {
+            configuration.RequiresOptimisticConcurrencySupport();
+
             var correlationPropertyData = Guid.NewGuid().ToString();
 
             var persister = configuration.SagaStorage;

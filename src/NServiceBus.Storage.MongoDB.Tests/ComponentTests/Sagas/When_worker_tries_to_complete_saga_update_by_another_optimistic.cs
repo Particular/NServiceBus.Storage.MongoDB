@@ -8,7 +8,7 @@ namespace NServiceBus.Persistence.ComponentTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class When_worker_tries_to_complete_saga_update_by_another : SagaPersisterTests<TestSaga, TestSagaData>
+    public class When_worker_tries_to_complete_saga_update_by_another_optimistic : SagaPersisterTests<TestSaga, TestSagaData>
     {
         [Test]
         public async Task Should_fail()

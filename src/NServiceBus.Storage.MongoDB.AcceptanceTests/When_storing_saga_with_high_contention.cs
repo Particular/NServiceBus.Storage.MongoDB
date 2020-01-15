@@ -14,6 +14,7 @@
     [TestFixture]
     public class When_storing_saga_with_high_contention : NServiceBusAcceptanceTest
     {
+        [Ignore("only for manual execution")]
         [Test]
         [Repeat(20)]
         public async Task Should_use_saga_data_type_name()

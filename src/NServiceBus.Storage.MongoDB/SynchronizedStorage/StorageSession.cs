@@ -76,7 +76,7 @@
                     {
                         await AbortTransaction().ConfigureAwait(false);
 
-                        await Task.Delay(random.Next(5, 20), CancellationToken.None).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), CancellationToken.None).ConfigureAwait(false);
 
                         StartTransaction();
                     }

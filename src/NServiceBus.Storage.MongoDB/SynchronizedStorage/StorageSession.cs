@@ -64,10 +64,7 @@
             {
                 try
                 {
-                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, new FindOneAndUpdateOptions<BsonDocument>
-                    {
-                        ReturnDocument = ReturnDocument.After
-                    }).ConfigureAwait(false);
+                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions).ConfigureAwait(false);
                     return result;
                 }
                 catch (MongoCommandException e) when (useTransaction)
@@ -142,7 +139,13 @@
 
         static Random random = new Random();
         static TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
+        static readonly TimeSpan DefaultTransactionTimeout = TimeSpan.FromSeconds(60);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
+
+        static FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions = new FindOneAndUpdateOptions<BsonDocument>
+        {
+            ReturnDocument = ReturnDocument.After
+        };
     }
 }

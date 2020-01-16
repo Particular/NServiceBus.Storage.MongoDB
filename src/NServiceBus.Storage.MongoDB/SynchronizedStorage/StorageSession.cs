@@ -58,7 +58,7 @@
         public async Task<BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter)
         {
             var sagaCollection = database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T)));
-            var update = Builders<BsonDocument>.Update.Set("_lock", ObjectId.GenerateNewId());
+            var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
 
             while (true)
             {

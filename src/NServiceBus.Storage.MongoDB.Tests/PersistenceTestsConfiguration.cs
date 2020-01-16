@@ -55,6 +55,8 @@
 
         public bool SupportsTimeouts { get; } = false;
 
+        public bool SupportsPessimisticConcurrency { get; } = true;
+
         public ISagaIdGenerator SagaIdGenerator { get; }
 
         public ISagaPersister SagaStorage { get; }

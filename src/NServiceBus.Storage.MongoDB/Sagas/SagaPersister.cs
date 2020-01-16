@@ -68,7 +68,7 @@
         {
             var storageSession = (StorageSession)session;
 
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue))).SingleOrDefaultAsync().ConfigureAwait(false);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue))).ConfigureAwait(false);
 
             if (document != null)
             {

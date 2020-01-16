@@ -10,7 +10,7 @@
 
     class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction)
         {
             MongoSession = mongoSession;
 
@@ -24,6 +24,7 @@
             this.contextBag = contextBag;
             this.collectionNamingConvention = collectionNamingConvention;
             this.ownsMongoSession = ownsMongoSession;
+            this.useTransaction = useTransaction;
         }
 
         public IClientSessionHandle MongoSession { get; }
@@ -54,7 +55,53 @@
 
         public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter);
 
-        public IFindFluent<BsonDocument, BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T))).Find(MongoSession, filter);
+        public async Task<BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter)
+        {
+            var sagaCollection = database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T)));
+            var update = Builders<BsonDocument>.Update.Set("_lock", ObjectId.GenerateNewId());
+
+            while (true)
+            {
+                try
+                {
+                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, new FindOneAndUpdateOptions<BsonDocument>()
+                    {
+                        ReturnDocument = ReturnDocument.After
+                    }).ConfigureAwait(false);
+                    return result;
+                }
+                catch (MongoCommandException e) when (useTransaction)
+                {
+                    if (e.HasErrorLabel("TransientTransactionError"))
+                    {
+                        await AbortTransaction().ConfigureAwait(false);
+
+                        await Task.Delay(random.Next(5, 20)).ConfigureAwait(false);
+
+                        StartTransaction();
+                        continue;
+                    }
+
+                    throw;
+                }
+            }
+        }
+
+        public void StartTransaction()
+        {
+            if (useTransaction)
+            {
+                MongoSession.StartTransaction(transactionOptions);
+            }
+        }
+
+        public async Task AbortTransaction()
+        {
+            if (useTransaction)
+            {
+                await MongoSession.AbortTransactionAsync().ConfigureAwait(false);
+            }
+        }
 
         public void StoreVersion<T>(int version) => contextBag.Set(typeof(T).FullName, version);
 
@@ -87,11 +134,14 @@
             MongoSession.Dispose();
         }
 
+        static Random random = new Random();
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;
         readonly bool ownsMongoSession;
+        static TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
+        readonly bool useTransaction;
     }
 }

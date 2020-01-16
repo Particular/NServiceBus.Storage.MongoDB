@@ -43,5 +43,21 @@ namespace NServiceBus.Persistence.ComponentTests
                 Assert.Ignore("Ignoring this test because it requires timout support from persister.");
             }
         }
+
+        public static void RequiresOptimisticConcurrencySupport(this IPersistenceTestsConfiguration configuration)
+        {
+            if (configuration.SupportsPessimisticConcurrency)
+            {
+                Assert.Ignore("Ignoring this test because it requires optimistic concurrency support from persister.");
+            }
+        }
+
+        public static void RequiresPessimisticConcurrencySupport(this IPersistenceTestsConfiguration configuration)
+        {
+            if (!configuration.SupportsPessimisticConcurrency)
+            {
+                Assert.Ignore("Ignoring this test because it requires pessimistic concurrency support from persister.");
+            }
+        }
     }
 }

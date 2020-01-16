@@ -19,7 +19,7 @@
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
             CollectionNamingConvention = collectionNamingConvention;
 
-            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
+            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout.HasValue ? transactionTimeout.Value : MongoPersistence.DefaultTransactionTimeout);
             SynchronizedStorageAdapter = new StorageSessionAdapter();
 
             SagaIdGenerator = new DefaultSagaIdGenerator();

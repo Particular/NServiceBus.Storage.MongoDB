@@ -8,9 +8,9 @@
 
     class MongoOutboxTransaction : OutboxTransaction
     {
-        public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, ContextBag context, Func<Type, string> collectionNamingConvention)
+        public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, ContextBag context, Func<Type, string> collectionNamingConvention, TimeSpan transactionTimeout)
         {
-            StorageSession = new StorageSession(mongoSession, databaseName, context, collectionNamingConvention, false, true);
+            StorageSession = new StorageSession(mongoSession, databaseName, context, collectionNamingConvention, false, true, transactionTimeout);
             StorageSession.StartTransaction();
         }
 

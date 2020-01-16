@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Bson;
@@ -10,7 +11,7 @@
 
     class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, TimeSpan transactionTimeout)
         {
             MongoSession = mongoSession;
 
@@ -25,9 +26,8 @@
             this.collectionNamingConvention = collectionNamingConvention;
             this.ownsMongoSession = ownsMongoSession;
             this.useTransaction = useTransaction;
+            this.transactionTimeout = transactionTimeout;
         }
-
-        public IClientSessionHandle MongoSession { get; }
 
         Task CompletableSynchronizedStorageSession.CompleteAsync()
         {
@@ -47,6 +47,8 @@
             }
         }
 
+        public IClientSessionHandle MongoSession { get; }
+
         public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(MongoSession, document);
 
         public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(MongoSession, document);
@@ -57,34 +59,37 @@
 
         public async Task<BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter)
         {
-            var sagaCollection = database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T)));
-            var update = Builders<BsonDocument>.Update.Set("_lock", ObjectId.GenerateNewId());
+            var collectionName = collectionNamingConvention(typeof(T));
+            var sagaCollection = database.GetCollection<BsonDocument>(collectionName);
+            var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
 
-            while (true)
+            using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
             {
-                try
+                while (!cancellationTokenSource.IsCancellationRequested)
                 {
-                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, new FindOneAndUpdateOptions<BsonDocument>()
+                    try
                     {
-                        ReturnDocument = ReturnDocument.After
-                    }).ConfigureAwait(false);
-                    return result;
-                }
-                catch (MongoCommandException e) when (useTransaction)
-                {
-                    if (e.HasErrorLabel("TransientTransactionError"))
+                        var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, CancellationToken.None)
+                            .ConfigureAwait(false);
+                        return result;
+                    }
+                    catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                     {
                         await AbortTransaction().ConfigureAwait(false);
 
-                        await Task.Delay(random.Next(5, 20)).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), CancellationToken.None).ConfigureAwait(false);
 
                         StartTransaction();
-                        continue;
                     }
-
-                    throw;
                 }
+
+                throw new TimeoutException($"Unable to acquire exclusive write lock for saga on collection '{collectionName}'.");
             }
+        }
+
+        bool WriteConflictUnderTransaction(MongoCommandException e)
+        {
+            return useTransaction && e.HasErrorLabel("TransientTransactionError") && e.CodeName == "WriteConflict";
         }
 
         public void StartTransaction()
@@ -134,14 +139,22 @@
             MongoSession.Dispose();
         }
 
-        static Random random = new Random();
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;
         readonly bool ownsMongoSession;
+        readonly bool useTransaction;
+
+        readonly TimeSpan transactionTimeout;
+
+        static Random random = new Random();
         static TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
-        readonly bool useTransaction;
+
+        static FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions = new FindOneAndUpdateOptions<BsonDocument>
+        {
+            ReturnDocument = ReturnDocument.After
+        };
     }
 }

@@ -37,7 +37,7 @@
 
                         //HINT: cluster configuration check is needed as the built-in checks, executed during "StartTransaction() call,
                         //      do not detect if the cluster configuration is a supported one. Only the version ranges are validated.
-                        //      Without this check, exceptions will be thrown during message processing. 
+                        //      Without this check, exceptions will be thrown during message processing.
                         if (clusterType != ClusterType.ReplicaSet && clusterType != ClusterType.Sharded)
                         {
                             throw new Exception($"Transactions are only supported on replica sets or sharded clusters. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
@@ -64,7 +64,7 @@
                 throw new Exception("Unable to connect to the MongoDB server. Check the connection settings, and verify the server is running and accessible.", ex);
             }
 
-            context.Container.ConfigureComponent(() => new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(() => new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<StorageSessionAdapter>(DependencyLifecycle.SingleInstance);
         }
     }

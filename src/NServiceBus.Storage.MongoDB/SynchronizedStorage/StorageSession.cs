@@ -74,7 +74,6 @@
                     await Task.Delay(random.Next(5, 20)).ConfigureAwait(false);
 
                     StartTransaction();
-                    continue;
                 }
             }
         }

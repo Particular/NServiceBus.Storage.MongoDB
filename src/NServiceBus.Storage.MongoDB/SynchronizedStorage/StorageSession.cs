@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Bson;
@@ -57,24 +58,31 @@
 
         public async Task<BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter)
         {
-            var sagaCollection = database.GetCollection<BsonDocument>(collectionNamingConvention(typeof(T)));
+            var collectionName = collectionNamingConvention(typeof(T));
+            var sagaCollection = database.GetCollection<BsonDocument>(collectionName);
             var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
 
-            while (true)
+            using (var cancellationTokenSource = new CancellationTokenSource(DefaultTransactionTimeout))
             {
-                try
+                while (!cancellationTokenSource.IsCancellationRequested)
                 {
-                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions).ConfigureAwait(false);
-                    return result;
-                }
-                catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
-                {
-                    await AbortTransaction().ConfigureAwait(false);
+                    try
+                    {
+                        var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, CancellationToken.None)
+                            .ConfigureAwait(false);
+                        return result;
+                    }
+                    catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
+                    {
+                        await AbortTransaction().ConfigureAwait(false);
 
-                    await Task.Delay(random.Next(5, 20)).ConfigureAwait(false);
+                        await Task.Delay(random.Next(5, 20), CancellationToken.None).ConfigureAwait(false);
 
-                    StartTransaction();
+                        StartTransaction();
+                    }
                 }
+
+                throw new TimeoutException($"Unable to acquire exclusive write lock for saga on collection '{collectionName}'.");
             }
         }
 

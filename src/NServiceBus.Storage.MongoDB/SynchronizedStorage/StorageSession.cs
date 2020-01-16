@@ -67,21 +67,21 @@
                     var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions).ConfigureAwait(false);
                     return result;
                 }
-                catch (MongoCommandException e) when (useTransaction)
+                catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                 {
-                    if (e.HasErrorLabel("TransientTransactionError"))
-                    {
-                        await AbortTransaction().ConfigureAwait(false);
+                    await AbortTransaction().ConfigureAwait(false);
 
-                        await Task.Delay(random.Next(5, 20)).ConfigureAwait(false);
+                    await Task.Delay(random.Next(5, 20)).ConfigureAwait(false);
 
-                        StartTransaction();
-                        continue;
-                    }
-
-                    throw;
+                    StartTransaction();
+                    continue;
                 }
             }
+        }
+
+        bool WriteConflictUnderTransaction(MongoCommandException e)
+        {
+            return useTransaction && e.HasErrorLabel("TransientTransactionError") && e.CodeName == "WriteConflict";
         }
 
         public void StartTransaction()

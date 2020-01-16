@@ -11,7 +11,7 @@
 
     class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, TimeSpan transactionTimeout)
         {
             MongoSession = mongoSession;
 
@@ -26,6 +26,7 @@
             this.collectionNamingConvention = collectionNamingConvention;
             this.ownsMongoSession = ownsMongoSession;
             this.useTransaction = useTransaction;
+            this.transactionTimeout = transactionTimeout;
         }
 
         Task CompletableSynchronizedStorageSession.CompleteAsync()
@@ -62,7 +63,7 @@
             var sagaCollection = database.GetCollection<BsonDocument>(collectionName);
             var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
 
-            using (var cancellationTokenSource = new CancellationTokenSource(DefaultTransactionTimeout))
+            using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
             {
                 while (!cancellationTokenSource.IsCancellationRequested)
                 {
@@ -144,9 +145,10 @@
         readonly bool ownsMongoSession;
         readonly bool useTransaction;
 
+        readonly TimeSpan transactionTimeout;
+
         static Random random = new Random();
         static TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
-        static readonly TimeSpan DefaultTransactionTimeout = TimeSpan.FromSeconds(60);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
 

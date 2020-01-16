@@ -49,6 +49,8 @@
             ReadPreference = ReadPreference.Primary
         };
 
+        internal static readonly TimeSpan DefaultTransactionTimeout = TimeSpan.FromSeconds(60);
+
         static IMongoClient defaultClient;
     }
 }

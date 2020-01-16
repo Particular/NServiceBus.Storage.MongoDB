@@ -22,14 +22,14 @@
     public class SagaPersisterTests
     {
         [OneTimeSetUp]
-        public async Task OneTimeSetUp()
+        public virtual async Task OneTimeSetUp()
         {
             configuration = new PersistenceTestsConfiguration();
             await configuration.Configure();
         }
 
         [OneTimeTearDown]
-        public async Task OneTimeTearDown()
+        public virtual async Task OneTimeTearDown()
         {
             await configuration.Cleanup();
         }

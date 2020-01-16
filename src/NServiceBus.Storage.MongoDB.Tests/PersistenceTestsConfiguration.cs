@@ -14,12 +14,12 @@
 
     public partial class PersistenceTestsConfiguration
     {
-        public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention)
+        public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention, TimeSpan? transactionTimeout = null)
         {
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
             CollectionNamingConvention = collectionNamingConvention;
 
-            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention);
+            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
             SynchronizedStorageAdapter = new StorageSessionAdapter();
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
@@ -33,7 +33,7 @@
             SubscriptionStorage = subscriptionPersister;
         }
 
-        public PersistenceTestsConfiguration() : this("_version", t => t.Name.ToLower())
+        public PersistenceTestsConfiguration(TimeSpan? transactionTimeout = null) : this("_version", t => t.Name.ToLower(), transactionTimeout)
         {
         }
 

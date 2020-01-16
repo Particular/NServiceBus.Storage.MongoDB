@@ -10,7 +10,7 @@
     {
         public OutboxPersister(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention)
         {
-            outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, collectionNamingConvention);
+            outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
 
             var collectionSettings = new MongoCollectionSettings
             {

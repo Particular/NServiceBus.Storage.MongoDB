@@ -27,8 +27,6 @@
             this.useTransaction = useTransaction;
         }
 
-        public IClientSessionHandle MongoSession { get; }
-
         Task CompletableSynchronizedStorageSession.CompleteAsync()
         {
             if (ownsMongoSession)
@@ -47,6 +45,8 @@
             }
         }
 
+        public IClientSessionHandle MongoSession { get; }
+
         public Task InsertOneAsync<T>(T document) => database.GetCollection<T>(collectionNamingConvention(typeof(T))).InsertOneAsync(MongoSession, document);
 
         public Task InsertOneAsync(Type type, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).InsertOneAsync(MongoSession, document);
@@ -64,7 +64,7 @@
             {
                 try
                 {
-                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, new FindOneAndUpdateOptions<BsonDocument>()
+                    var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, new FindOneAndUpdateOptions<BsonDocument>
                     {
                         ReturnDocument = ReturnDocument.After
                     }).ConfigureAwait(false);
@@ -134,14 +134,15 @@
             MongoSession.Dispose();
         }
 
-        static Random random = new Random();
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;
         readonly bool ownsMongoSession;
+        readonly bool useTransaction;
+
+        static Random random = new Random();
         static TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
-        readonly bool useTransaction;
     }
 }

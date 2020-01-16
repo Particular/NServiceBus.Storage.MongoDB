@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB.AcceptanceTests", "NServiceBus.Storage.MongoDB.AcceptanceTests\NServiceBus.Storage.MongoDB.AcceptanceTests.csproj", "{6BCA8AC9-E4BC-4920-BA3F-C218708B8A6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Storage.MongoDB.AcceptanceTests.NoTx", "NServiceBus.Storage.MongoDB.AcceptanceTests.NoTx\NServiceBus.Storage.MongoDB.AcceptanceTests.NoTx.csproj", "{8606004B-F6E3-4400-99D6-5502B136CE29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Storage.MongoDB.AcceptanceTests.NoTx", "NServiceBus.Storage.MongoDB.NoTx.AcceptanceTests\NServiceBus.Storage.MongoDB.NoTx.AcceptanceTests.csproj", "{8606004B-F6E3-4400-99D6-5502B136CE29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

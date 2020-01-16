@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.452
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB", "NServiceBus.Storage.MongoDB\NServiceBus.Storage.MongoDB.csproj", "{B34DDE97-B5F7-4FDE-8144-CE0A5C886947}"
 EndProject
@@ -13,7 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\GitVersion.yml = ..\GitVersion.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Storage.MongoDB.AcceptanceTests", "NServiceBus.Storage.MongoDB.AcceptanceTests\NServiceBus.Storage.MongoDB.AcceptanceTests.csproj", "{6BCA8AC9-E4BC-4920-BA3F-C218708B8A6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB.AcceptanceTests", "NServiceBus.Storage.MongoDB.AcceptanceTests\NServiceBus.Storage.MongoDB.AcceptanceTests.csproj", "{6BCA8AC9-E4BC-4920-BA3F-C218708B8A6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Storage.MongoDB.AcceptanceTests.NoTx", "NServiceBus.Storage.MongoDB.AcceptanceTests.NoTx\NServiceBus.Storage.MongoDB.AcceptanceTests.NoTx.csproj", "{8606004B-F6E3-4400-99D6-5502B136CE29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{6BCA8AC9-E4BC-4920-BA3F-C218708B8A6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BCA8AC9-E4BC-4920-BA3F-C218708B8A6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BCA8AC9-E4BC-4920-BA3F-C218708B8A6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8606004B-F6E3-4400-99D6-5502B136CE29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8606004B-F6E3-4400-99D6-5502B136CE29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8606004B-F6E3-4400-99D6-5502B136CE29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8606004B-F6E3-4400-99D6-5502B136CE29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Diagnostics;
-    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -14,24 +13,17 @@
     [TestFixture]
     public class When_storing_saga_with_high_contention : NServiceBusAcceptanceTest
     {
-        [Ignore("only for manual execution")]
         [Test]
-        [Repeat(20)]
-        public async Task Should_use_saga_data_type_name()
+        public async Task Should_succeed_without_retries()
         {
-            
-            File.AppendAllText(@"C:\data\saga.contention.stats.txt", string.Empty);
-
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<SagaEndpoint>(b => b
-                    .When(session => session.SendLocal(new StartSaga { SomeId = Guid.NewGuid() })))
+                .WithEndpoint<SagaEndpoint>(b => b.When(session => session.SendLocal(new StartSaga { SomeId = Guid.NewGuid() })))
                 .Done(c => c.Done)
                 .Run();
 
-            Console.WriteLine(context.Elapsed);
-            Console.WriteLine(context.NumberOfRetries);
-
-            File.AppendAllText(@"C:\data\saga.contention.stats.txt", $"{context.Elapsed}; {context.NumberOfMessages}; {context.NumberOfRetries}{Environment.NewLine}");
+            Assert.AreEqual(0, context.NumberOfRetries);
+            Assert.IsTrue(context.MessagesSent);
+            Assert.IsTrue(context.SagaStarted);
         }
 
         public class Context : ScenarioContext
@@ -46,7 +38,7 @@
 
             public TimeSpan Elapsed => Watch.Elapsed;
 
-            public int NumberOfMessages { get; } = 200;
+            public int NumberOfMessages { get; } = 20;
 
             public long NumberOfRetries => Interlocked.Read(ref numberOfRetries);
 
@@ -56,7 +48,7 @@
             }
         }
 
-        public class SagaEndpoint : EndpointConfigurationBuilder
+        class SagaEndpoint : EndpointConfigurationBuilder
         {
             public SagaEndpoint()
             {
@@ -69,7 +61,7 @@
                         s.OnMessageBeingRetried(m =>
                         {
                             c.IncrementNumberOfRetries();
-                            return Task.FromResult(0);
+                            return Task.CompletedTask;
                         });
                         s.NumberOfRetries(c.NumberOfMessages);
                     });
@@ -77,7 +69,7 @@
                 });
             }
 
-            public class HighContentionSaga : Saga<HighContentionSaga.HighContentionSagaData>, IAmStartedByMessages<StartSaga>, IHandleMessages<AdditionalMessage>
+            class HighContentionSaga : Saga<HighContentionSaga.HighContentionSagaData>, IAmStartedByMessages<StartSaga>, IHandleMessages<AdditionalMessage>
             {
                 public Context TestContext { get; set; }
 
@@ -87,13 +79,14 @@
                     mapper.ConfigureMapping<AdditionalMessage>(m => m.SomeId).ToSaga(d => d.SomeId);
                 }
 
-                public Task Handle(StartSaga message, IMessageHandlerContext context)
+                public async Task Handle(StartSaga message, IMessageHandlerContext context)
                 {
                     Data.SomeId = message.SomeId;
                     TestContext.Watch.Start();
                     TestContext.SagaStarted = true;
 
-                    return context.SendLocal(new FireInTheWhole { SomeId = message.SomeId });
+                    await Task.WhenAll(Enumerable.Range(0, TestContext.NumberOfMessages).Select(i => context.SendLocal(new AdditionalMessage {SomeId = message.SomeId})));
+                    TestContext.MessagesSent = true;
                 }
 
                 public class HighContentionSagaData : ContainSagaData
@@ -114,22 +107,6 @@
                 }
             }
 
-            class CreateLoadHandler : IHandleMessages<FireInTheWhole>
-            {
-                readonly Context testContext;
-
-                public CreateLoadHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
-                public async Task Handle(FireInTheWhole message, IMessageHandlerContext context)
-                {
-                    await Task.WhenAll(Enumerable.Range(0, testContext.NumberOfMessages).Select(i => context.SendLocal(new AdditionalMessage { SomeId = message.SomeId })));
-                    testContext.MessagesSent = true;
-                }
-            }
-
             class DoneHandler : IHandleMessages<DoneSaga>
             {
                 readonly Context testContext;
@@ -144,7 +121,7 @@
                     testContext.Watch.Stop();
                     testContext.HitCount = message.HitCount;
                     testContext.Done = true;
-                    return Task.FromResult(0);
+                    return Task.CompletedTask;
                 }
             }
         }
@@ -158,11 +135,6 @@
         {
             public Guid SomeId { get; set; }
             public int HitCount { get; set; }
-        }
-
-        public class FireInTheWhole : IMessage
-        {
-            public Guid SomeId { get; set; }
         }
 
         public class AdditionalMessage : IMessage

@@ -76,7 +76,7 @@
                     }
                     catch (OperationCanceledException)
                     {
-                        // no-op
+                        break;
                     }
                     catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                     {
@@ -88,7 +88,7 @@
                         }
                         catch (OperationCanceledException)
                         {
-                            continue;
+                            break;
                         }
 
                         StartTransaction();

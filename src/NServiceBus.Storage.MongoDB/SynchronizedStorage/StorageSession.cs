@@ -65,19 +65,31 @@
 
             using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
             {
-                while (!cancellationTokenSource.IsCancellationRequested)
+                var token = cancellationTokenSource.Token;
+                while (!token.IsCancellationRequested)
                 {
                     try
                     {
-                        var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, CancellationToken.None)
+                        var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, token)
                             .ConfigureAwait(false);
                         return result;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
                     }
                     catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                     {
                         await AbortTransaction().ConfigureAwait(false);
 
-                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), CancellationToken.None).ConfigureAwait(false);
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), token).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
 
                         StartTransaction();
                     }

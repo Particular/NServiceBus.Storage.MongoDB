@@ -3,7 +3,6 @@
     using System;
     using System.Globalization;
     using System.Threading.Tasks;
-    using Gateway.Deduplication;
     using global::MongoDB.Driver;
     using Outbox;
     using Sagas;
@@ -72,8 +71,6 @@
         public IQueryTimeouts TimeoutQuery { get; }
 
         public IOutboxStorage OutboxStorage { get; }
-
-        public IDeduplicateMessages GatewayStorage { get; }
 
         public async Task Configure()
         {

@@ -33,7 +33,7 @@
         {
             if (ownsMongoSession)
             {
-                return CompleteAsync();
+                return CommitTransaction();
             }
 
             return TaskEx.CompletedTask;
@@ -124,7 +124,7 @@
 
         public int RetrieveVersion(Type type) => contextBag.Get<int>(type.FullName);
 
-        public Task CompleteAsync()
+        public Task CommitTransaction()
         {
             if (MongoSession.IsInTransaction)
             {

@@ -18,7 +18,7 @@
 
         public Task Commit()
         {
-            return StorageSession.CompleteAsync();
+            return StorageSession.CommitTransaction();
         }
 
         public void Dispose()

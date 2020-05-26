@@ -49,7 +49,6 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
 
                 public Task Handle(StartSaga message, IMessageHandlerContext context)
                 {
-                    Data.DataId = message.DataId;
                     TestContext.Done = true;
 
                     return Task.CompletedTask;

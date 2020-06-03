@@ -14,8 +14,8 @@
     {
         OutboxStorage()
         {
+            Defaults(s => s.EnableFeatureByDefault<SynchronizedStorage>());
             DependsOn<Outbox>();
-            DependsOn<SynchronizedStorage>();
         }
 
         protected override void Setup(FeatureConfigurationContext context)

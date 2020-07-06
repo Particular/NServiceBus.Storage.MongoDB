@@ -10,7 +10,7 @@
     {
         public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, ContextBag context, Func<Type, string> collectionNamingConvention, TimeSpan transactionTimeout)
         {
-            StorageSession = new StorageSession(mongoSession, databaseName, context, collectionNamingConvention, false, true, transactionTimeout);
+            StorageSession = new StorageSession(mongoSession, databaseName, context, collectionNamingConvention, false, true, false, transactionTimeout);
             StorageSession.StartTransaction();
         }
 

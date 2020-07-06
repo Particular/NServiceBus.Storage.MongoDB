@@ -10,6 +10,12 @@ namespace NServiceBus.Persistence.ComponentTests
     [TestFixture]
     public class When_persisting_the_same_saga_twice_in_two_sessions_on_the_same_thread : SagaPersisterTests<TestSaga, TestSagaData>
     {
+        public override async Task OneTimeSetUp()
+        {
+            configuration = new PersistenceTestsConfiguration(null, true);
+            await configuration.Configure();
+        }
+
         [Test]
         public async Task Save_process_is_repeatable()
         {

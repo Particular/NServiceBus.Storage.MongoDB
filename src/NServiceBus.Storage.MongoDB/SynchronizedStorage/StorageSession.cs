@@ -11,7 +11,7 @@
 
     class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, TimeSpan transactionTimeout)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, bool useOptimisticConcurrency, TimeSpan transactionTimeout)
         {
             MongoSession = mongoSession;
 
@@ -26,6 +26,7 @@
             this.collectionNamingConvention = collectionNamingConvention;
             this.ownsMongoSession = ownsMongoSession;
             this.useTransaction = useTransaction;
+            this.useOptimisticConcurrency = useOptimisticConcurrency;
             this.transactionTimeout = transactionTimeout;
         }
 
@@ -56,11 +57,18 @@
         public Task<ReplaceOneResult> ReplaceOneAsync(Type type, FilterDefinition<BsonDocument> filter, BsonDocument document) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).ReplaceOneAsync(MongoSession, filter, document);
 
         public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter);
-
+        
         public async Task<BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter)
         {
             var collectionName = collectionNamingConvention(typeof(T));
             var sagaCollection = database.GetCollection<BsonDocument>(collectionName);
+
+            if (useOptimisticConcurrency)
+            {
+                var optimisticResult = sagaCollection.Find(MongoSession, filter);
+                return optimisticResult.ToBsonDocument();
+            }
+
             var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
 
             using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
@@ -156,6 +164,7 @@
         readonly Func<Type, string> collectionNamingConvention;
         readonly bool ownsMongoSession;
         readonly bool useTransaction;
+        readonly bool useOptimisticConcurrency;
 
         readonly TimeSpan transactionTimeout;
 

@@ -9,5 +9,6 @@
         public const string MongoClient = baseName + nameof(MongoClient);
         public const string UseTransactions = baseName + nameof(UseTransactions);
         public const string TimeToKeepOutboxDeduplicationData = baseName + nameof(TimeToKeepOutboxDeduplicationData);
+        public const string UseOptimisticConcurrency = baseName + nameof(UseOptimisticConcurrency);
     }
 }

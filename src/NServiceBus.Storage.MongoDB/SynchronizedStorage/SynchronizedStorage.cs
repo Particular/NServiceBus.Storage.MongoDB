@@ -13,6 +13,11 @@
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
             var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
+            if (!context.Settings.TryGet(SettingsKeys.UseOptimisticConcurrency, out bool useOptimisticConcurrency))
+            {
+                useOptimisticConcurrency = false; // Default value
+            }
+
             if (!context.Settings.TryGet(SettingsKeys.UseTransactions, out bool useTransactions))
             {
                 useTransactions = true;
@@ -64,7 +69,7 @@
                 throw new Exception("Unable to connect to the MongoDB server. Check the connection settings, and verify the server is running and accessible.", ex);
             }
 
-            context.Container.ConfigureComponent(() => new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout), DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(() => new StorageSessionFactory(client, useTransactions, useOptimisticConcurrency, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<StorageSessionAdapter>(DependencyLifecycle.SingleInstance);
         }
     }

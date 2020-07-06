@@ -9,6 +9,12 @@ namespace NServiceBus.Persistence.ComponentTests
     [TestFixture]
     public class When_retrieving_same_saga_on_different_threads : SagaPersisterTests
     {
+        public override async Task OneTimeSetUp()
+        {
+            configuration = new PersistenceTestsConfiguration(null, true);
+            await configuration.Configure();
+        }
+
         [Test]
         public async Task Save_should_fail_when_data_changes_between_read_and_update_on_same_thread()
         {

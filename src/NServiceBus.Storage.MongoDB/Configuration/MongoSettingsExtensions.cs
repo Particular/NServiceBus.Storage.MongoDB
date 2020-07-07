@@ -60,6 +60,17 @@
         }
 
         /// <summary>
+        /// Enables optimistic concurrency instead of the default pessimistic concurrency
+        /// </summary>
+        public static PersistenceExtensions<MongoPersistence> UseOptimisticConcurrency(this PersistenceExtensions<MongoPersistence> persistenceExtensions)
+        {
+            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+
+            persistenceExtensions.GetSettings().Set(SettingsKeys.UseOptimisticConcurrency, true);
+            return persistenceExtensions;
+        }
+
+        /// <summary>
         /// Community persistence compatibility settings
         /// </summary>
         public static CompatibilitySettings CommunityPersistenceCompatibility(this PersistenceExtensions<MongoPersistence> persistenceExtensions) => new CompatibilitySettings(persistenceExtensions.GetSettings());

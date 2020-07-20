@@ -19,30 +19,29 @@ namespace NServiceBus.Storage.MongoDB
         {
             if (!context.Settings.TryGet(SettingsKeys.VersionElementName, out string versionElementName))
             {
-                versionElementName = "_version";
+                versionElementName = SagaPersister.DefaultVersionElementName;
             }
 
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
+            var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+            var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 
+            InitializeSagaDataTypes(client, databaseName, collectionNamingConvention, sagaMetadataCollection);
+
+            context.Container.ConfigureComponent(() => new SagaPersister(versionElementName), DependencyLifecycle.SingleInstance);
+        }
+
+        internal static void InitializeSagaDataTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
+        {
             var databaseSettings = new MongoDatabaseSettings
             {
                 ReadConcern = ReadConcern.Majority,
                 ReadPreference = ReadPreference.Primary,
                 WriteConcern = WriteConcern.WMajority
             };
-
             var database = client.GetDatabase(databaseName, databaseSettings);
-            var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
-            var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 
-            InitializeSagaDataTypes(database, collectionNamingConvention, sagaMetadataCollection);
-
-            context.Container.ConfigureComponent(() => new SagaPersister(versionElementName), DependencyLifecycle.SingleInstance);
-        }
-
-        internal static void InitializeSagaDataTypes(IMongoDatabase database, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
-        {
             foreach (var sagaMetadata in sagaMetadataCollection)
             {
                 if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))

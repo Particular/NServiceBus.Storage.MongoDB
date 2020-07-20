@@ -3,6 +3,7 @@
     using System;
     using System.Globalization;
     using System.Threading.Tasks;
+    using MongoDB.Driver;
     using NServiceBus.Outbox;
     using NServiceBus.Sagas;
     using Persistence;
@@ -36,14 +37,22 @@
         public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; private set; }
         public IOutboxStorage OutboxStorage { get; private set; }
 
-        public Task Configure()
+        public async Task Configure()
         {
             Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
             SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName);
+            
             SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SessionTimeout.Value);
-            OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
 
-            return Task.CompletedTask;
+            var databaseSettings = new MongoDatabaseSettings
+            {
+                ReadConcern = ReadConcern.Majority,
+                ReadPreference = ReadPreference.Primary,
+                WriteConcern = WriteConcern.WMajority
+            };
+            var database = ClientProvider.Client.GetDatabase(databaseName, databaseSettings);
+            await database.CreateCollectionAsync(MongoPersistence.DefaultCollectionNamingConvention(typeof(OutboxRecord)));
+            OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
         }
 
         public async Task Cleanup()

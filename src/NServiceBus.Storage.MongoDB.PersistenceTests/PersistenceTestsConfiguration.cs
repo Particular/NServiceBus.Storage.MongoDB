@@ -13,17 +13,6 @@
 
     public partial class PersistenceTestsConfiguration
     {
-        public PersistenceTestsConfiguration() : this(MongoPersistence.DefaultTransactionTimeout)
-        {
-        }
-
-        public PersistenceTestsConfiguration(TimeSpan sessionTimeout)
-        {
-            SessionTimeout = sessionTimeout;
-        }
-
-        public bool SupportsOptimisticConcurrency => false;
-
         public bool SupportsDtc => false;
         public bool SupportsOutbox => true;
         public bool SupportsFinders => true;
@@ -42,7 +31,7 @@
             Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
             SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName);
             
-            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SessionTimeout.Value);
+            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
 
             var databaseSettings = new MongoDatabaseSettings
             {

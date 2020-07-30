@@ -1,18 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-<PropertyGroup>
+  <PropertyGroup>
     <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
-</PropertyGroup>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
 
-<ItemGroup>
+  <ItemGroup>
     <PackageReference Include="NServiceBus.PersistenceTests.Sources" Version="7.4.0-PullRequest5680.144" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
-</ItemGroup>
+  </ItemGroup>
 
-<ItemGroup>
-  <ProjectReference Include="..\NServiceBus.Storage.MongoDB\NServiceBus.Storage.MongoDB.csproj" />
-</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.Storage.MongoDB\NServiceBus.Storage.MongoDB.csproj" />
+  </ItemGroup>
 
 </Project>

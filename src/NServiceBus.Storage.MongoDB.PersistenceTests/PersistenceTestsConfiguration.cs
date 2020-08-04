@@ -31,7 +31,6 @@
 
             Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(client, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
             SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName);
-            
             SynchronizedStorage = new StorageSessionFactory(client, true, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
 
             var databaseSettings = new MongoDatabaseSettings

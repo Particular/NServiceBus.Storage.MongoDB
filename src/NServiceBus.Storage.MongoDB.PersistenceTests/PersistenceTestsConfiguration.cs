@@ -19,9 +19,13 @@
         public bool SupportsPessimisticConcurrency => true;
 
         public ISagaIdGenerator SagaIdGenerator { get; } = new DefaultSagaIdGenerator();
+
         public ISagaPersister SagaStorage { get; private set; }
+
         public ISynchronizedStorage SynchronizedStorage { get; private set; }
+
         public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; private set; }
+
         public IOutboxStorage OutboxStorage { get; private set; }
 
         public async Task Configure()

@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Persistence.ComponentTests;
 
     class When_migrating_NServiceBus_dot_Persistence_dot_MongoDb : SagaMigrationPersisterTests
     {
@@ -20,7 +19,7 @@
                 SomeUpdatableSagaData = GetHashCode()
             };
 
-            configuration = new PersistenceTestsConfiguration(nameof(legacySagaData.Version));
+            configuration = new SagaTestsConfiguration(nameof(legacySagaData.Version));
 
             await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId));
 

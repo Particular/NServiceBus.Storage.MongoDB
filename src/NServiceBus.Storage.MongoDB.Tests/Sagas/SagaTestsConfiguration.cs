@@ -1,6 +1,6 @@
 ﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
-namespace NServiceBus.Persistence.ComponentTests
+namespace NServiceBus.Storage.MongoDB.Tests
 {
     using System;
     using System.Globalization;
@@ -10,10 +10,10 @@ namespace NServiceBus.Persistence.ComponentTests
     using Extensibility;
     using global::MongoDB.Driver;
     using Sagas;
-    using Storage.MongoDB;
-    using Storage.MongoDB.Tests;
+    using MongoDB;
+    using Persistence;
 
-    public class PersistenceTestsConfiguration
+    public class SagaTestsConfiguration
     {
         public Func<ContextBag> GetContextBagForSagaStorage { get; set; } = () => new ContextBag();
 
@@ -35,7 +35,7 @@ namespace NServiceBus.Persistence.ComponentTests
 
         SagaMetadataCollection sagaMetadataCollection;
 
-        public PersistenceTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention, TimeSpan? transactionTimeout = null)
+        public SagaTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention, TimeSpan? transactionTimeout = null)
         {
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
             CollectionNamingConvention = collectionNamingConvention;
@@ -45,11 +45,11 @@ namespace NServiceBus.Persistence.ComponentTests
             SagaStorage = new SagaPersister(versionElementName);
         }
 
-        public PersistenceTestsConfiguration(TimeSpan? transactionTimeout = null) : this("_version", t => t.Name.ToLower(), transactionTimeout)
+        public SagaTestsConfiguration(TimeSpan? transactionTimeout = null) : this("_version", t => t.Name.ToLower(), transactionTimeout)
         {
         }
 
-        public PersistenceTestsConfiguration(string versionElementName) : this(versionElementName, t => t.Name.ToLower())
+        public SagaTestsConfiguration(string versionElementName) : this(versionElementName, t => t.Name.ToLower())
         {
         }
 

@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using global::MongoDB.Bson;
     using NUnit.Framework;
-    using Persistence.ComponentTests;
 
     class When_migrating_NServiceBus_dot_MongoDB : SagaMigrationPersisterTests
     {
@@ -21,7 +20,7 @@
                 SomeUpdatableSagaData = GetHashCode()
             };
 
-            configuration = new PersistenceTestsConfiguration(nameof(legacySagaData.DocumentVersion), collectionNamingConvention);
+            configuration = new SagaTestsConfiguration(nameof(legacySagaData.DocumentVersion), collectionNamingConvention);
 
             await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId), d =>
             {

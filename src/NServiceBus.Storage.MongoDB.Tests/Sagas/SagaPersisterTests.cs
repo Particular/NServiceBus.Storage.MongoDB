@@ -3,14 +3,13 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Persistence.ComponentTests;
 
     public class SagaPersisterTests
     {
         [OneTimeSetUp]
         public virtual async Task OneTimeSetUp()
         {
-            configuration = new PersistenceTestsConfiguration();
+            configuration = new SagaTestsConfiguration();
             await configuration.Configure();
         }
 
@@ -34,6 +33,6 @@
             return sagaData;
         }
 
-        protected PersistenceTestsConfiguration configuration;
+        protected SagaTestsConfiguration configuration;
     }
 }

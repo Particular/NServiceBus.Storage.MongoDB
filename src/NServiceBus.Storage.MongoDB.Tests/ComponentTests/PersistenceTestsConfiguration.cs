@@ -9,18 +9,13 @@ namespace NServiceBus.Persistence.ComponentTests
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
-    using Outbox;
     using Sagas;
     using Storage.MongoDB;
     using Storage.MongoDB.Tests;
-    using Timeout.Core;
-    using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
     public class PersistenceTestsConfiguration
     {
-        public Func<ContextBag> GetContextBagForTimeoutPersister { get; set; } = () => new ContextBag();
         public Func<ContextBag> GetContextBagForSagaStorage { get; set; } = () => new ContextBag();
-        public Func<ContextBag> GetContextBagForOutbox { get; set; } = () => new ContextBag();
 
         public SagaMetadataCollection SagaMetadataCollection
         {
@@ -46,17 +41,9 @@ namespace NServiceBus.Persistence.ComponentTests
             CollectionNamingConvention = collectionNamingConvention;
 
             SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout.HasValue ? transactionTimeout.Value : MongoPersistence.DefaultTransactionTimeout);
-            SynchronizedStorageAdapter = new StorageSessionAdapter();
 
             SagaIdGenerator = new DefaultSagaIdGenerator();
             SagaStorage = new SagaPersister(versionElementName);
-
-            OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, collectionNamingConvention);
-
-            var subscriptionCollection = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings).GetCollection<EventSubscription>("eventsubscriptions");
-            var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);
-            subscriptionPersister.CreateIndexes();
-            SubscriptionStorage = subscriptionPersister;
         }
 
         public PersistenceTestsConfiguration(TimeSpan? transactionTimeout = null) : this("_version", t => t.Name.ToLower(), transactionTimeout)
@@ -71,33 +58,11 @@ namespace NServiceBus.Persistence.ComponentTests
 
         public Func<Type, string> CollectionNamingConvention { get; }
 
-        public bool SupportsDtc { get; } = false;
-
-        public bool SupportsOutbox { get; } = true;
-
-        public bool SupportsFinders { get; } = true;
-
-        public bool SupportsSubscriptions { get; } = true;
-
-        public bool SupportsTimeouts { get; } = false;
-
-        public bool SupportsPessimisticConcurrency { get; } = true;
-
         public ISagaIdGenerator SagaIdGenerator { get; }
 
         public ISagaPersister SagaStorage { get; }
 
         public ISynchronizedStorage SynchronizedStorage { get; }
-
-        public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; }
-
-        public ISubscriptionStorage SubscriptionStorage { get; }
-
-        public IPersistTimeouts TimeoutStorage { get; }
-
-        public IQueryTimeouts TimeoutQuery { get; }
-
-        public IOutboxStorage OutboxStorage { get; }
 
         public async Task Configure()
         {
@@ -118,11 +83,6 @@ namespace NServiceBus.Persistence.ComponentTests
         public async Task Cleanup()
         {
             await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
-        }
-
-        public Task CleanupMessagesOlderThan(DateTimeOffset beforeStore)
-        {
-            return Task.FromResult(0);
         }
 
         class DefaultSagaIdGenerator : ISagaIdGenerator

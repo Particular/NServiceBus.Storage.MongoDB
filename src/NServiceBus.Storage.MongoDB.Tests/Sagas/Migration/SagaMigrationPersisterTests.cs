@@ -6,7 +6,6 @@
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization;
     using global::MongoDB.Driver;
-    using Persistence.ComponentTests;
 
     class SagaMigrationPersisterTests : SagaPersisterTests
     {

@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Persistence.ComponentTests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
     using System;
     using System.Globalization;
@@ -6,8 +6,7 @@
     using System.Threading.Tasks;
     using Extensibility;
     using NUnit.Framework;
-    using Storage.MongoDB;
-    using Storage.MongoDB.Tests;
+    using MongoDB;
     using Unicast.Subscriptions;
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
 

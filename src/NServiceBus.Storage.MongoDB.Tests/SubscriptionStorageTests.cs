@@ -1,10 +1,12 @@
-﻿namespace NServiceBus.Persistence.ComponentTests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Extensibility;
     using NUnit.Framework;
+    using MongoDB;
     using Unicast.Subscriptions;
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
@@ -12,23 +14,20 @@
     class SubscriptionStorageTests
     {
         [OneTimeSetUp]
-        public async Task OneTimeSetUp()
+        public void OneTimeSetUp()
         {
-            configuration = new PersistenceTestsConfiguration();
-            await configuration.Configure();
-            storage = configuration.SubscriptionStorage;
+            DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+
+            var subscriptionCollection = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings).GetCollection<EventSubscription>("eventsubscriptions");
+            var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);
+            subscriptionPersister.CreateIndexes();
+            storage = subscriptionPersister;
         }
 
         [OneTimeTearDown]
         public async Task OneTimeTearDown()
         {
-            await configuration.Cleanup();
-        }
-
-        [SetUp]
-        public void Setup()
-        {
-            configuration.RequiresSubscriptionSupport();
+            await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
         }
 
         [Test]
@@ -209,7 +208,7 @@
             return new MessageType(Guid.NewGuid().ToString("N"), "1.0.0");
         }
 
-        PersistenceTestsConfiguration configuration;
         ISubscriptionStorage storage;
+        string DatabaseName;
     }
 }

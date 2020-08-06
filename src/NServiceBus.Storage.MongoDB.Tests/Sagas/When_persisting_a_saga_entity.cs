@@ -3,9 +3,9 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Persistence.ComponentTests;
+    using Sagas;
 
-    public class When_persisting_a_saga_entity : SagaPersisterTests<PropertyTypesTestSaga, PropertyTypesTestSagaData>
+    public class When_persisting_a_saga_entity : SagaPersisterTests
     {
         [SetUp]
         public async Task Setup()
@@ -19,12 +19,18 @@
                 PolymorphicRelatedProperty = new PolymorphicProperty {SomeInt = 9},
                 RelatedClass = new RelatedClass {Id = Guid.NewGuid()}
             };
-
             relatedClass = entity.RelatedClass;
 
-            await SaveSaga(entity).ConfigureAwait(false);
+            var insertContextBag = configuration.GetContextBagForSagaStorage();
+            using (var insertSession = await configuration.SynchronizedStorage.OpenSession(insertContextBag))
+            {
+                var correlationProperty = new SagaCorrelationProperty(nameof(entity.Id), entity.Id);
 
-            savedEntity = await GetById(entity.Id).ConfigureAwait(false);
+                await configuration.SagaStorage.Save(entity, correlationProperty, insertSession, insertContextBag);
+                await insertSession.CompleteAsync();
+            }
+
+            savedEntity = await GetById<PropertyTypesTestSagaData>(entity.Id).ConfigureAwait(false);
         }
 
         [Test]

@@ -42,7 +42,6 @@ namespace NServiceBus.Persistence.ComponentTests
 
             SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout.HasValue ? transactionTimeout.Value : MongoPersistence.DefaultTransactionTimeout);
 
-            SagaIdGenerator = new DefaultSagaIdGenerator();
             SagaStorage = new SagaPersister(versionElementName);
         }
 
@@ -57,8 +56,6 @@ namespace NServiceBus.Persistence.ComponentTests
         public string DatabaseName { get; }
 
         public Func<Type, string> CollectionNamingConvention { get; }
-
-        public ISagaIdGenerator SagaIdGenerator { get; }
 
         public ISagaPersister SagaStorage { get; }
 
@@ -83,15 +80,6 @@ namespace NServiceBus.Persistence.ComponentTests
         public async Task Cleanup()
         {
             await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
-        }
-
-        class DefaultSagaIdGenerator : ISagaIdGenerator
-        {
-            public Guid Generate(SagaIdGeneratorContext context)
-            {
-                // intentionally ignore the property name and the value.
-                return CombGuid.Generate();
-            }
         }
     }
 }

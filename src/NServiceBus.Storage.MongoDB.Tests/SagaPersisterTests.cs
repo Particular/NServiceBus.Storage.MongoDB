@@ -11,11 +11,6 @@
         where TSagaData : class, IContainSagaData, new()
     {
         protected Task SaveSaga(TSagaData saga, params Type[] availableTypes) => SaveSaga<TSaga, TSagaData>(saga, availableTypes);
-        protected Task<TSagaData> GetByIdAndComplete(Guid sagaId, params Type[] availableTypes) => GetByIdAndComplete<TSaga, TSagaData>(sagaId, availableTypes);
-        protected Task<TSagaData> GetByIdAndUpdate(Guid sagaId, Action<TSagaData> update, params Type[] availableTypes) => GetByIdAndUpdate<TSaga, TSagaData>(sagaId, update, availableTypes);
-        protected Task<TSagaData> GetByCorrelationPropertyAndUpdate(string correlatedPropertyName, object correlationPropertyData, Action<TSagaData> update) => GetByCorrelationPropertyAndUpdate<TSaga, TSagaData>(correlatedPropertyName, correlationPropertyData, update);
-        protected Task<TSagaData> GetByCorrelationPropertyAndComplete(string correlatedPropertyName, object correlationPropertyData) => GetByCorrelationPropertyAndComplete<TSaga, TSagaData>(correlatedPropertyName, correlationPropertyData);
-        protected Task<TSagaData> GetByCorrelationProperty(string correlatedPropertyName, object correlationPropertyData) => GetByCorrelationProperty<TSaga, TSagaData>(correlatedPropertyName, correlationPropertyData);
         protected Task<TSagaData> GetById(Guid sagaId, params Type[] availableTypes) => GetById<TSaga, TSagaData>(sagaId, availableTypes);
     }
 
@@ -46,112 +41,6 @@
                 await configuration.SagaStorage.Save(saga, correlationProperty, insertSession, insertContextBag);
                 await insertSession.CompleteAsync();
             }
-        }
-
-        protected async Task<TSagaData> GetByIdAndComplete<TSaga, TSagaData>(Guid sagaId, params Type[] availableTypes)
-            where TSaga : Saga<TSagaData>, new()
-            where TSagaData : class, IContainSagaData, new()
-        {
-            var context = configuration.GetContextBagForSagaStorage();
-            TSagaData sagaData;
-            var persister = configuration.SagaStorage;
-            using (var completeSession = await configuration.SynchronizedStorage.OpenSession(context))
-            {
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, new TSagaData(), availableTypes);
-                sagaData = await persister.Get<TSagaData>(sagaId, completeSession, context);
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, sagaData, availableTypes);
-
-                await persister.Complete(sagaData, completeSession, context);
-                await completeSession.CompleteAsync();
-            }
-
-            return sagaData;
-        }
-
-        protected async Task<TSagaData> GetByIdAndUpdate<TSaga, TSagaData>(Guid sagaId, Action<TSagaData> update, params Type[] availableTypes)
-            where TSaga : Saga<TSagaData>, new()
-            where TSagaData : class, IContainSagaData, new()
-        {
-            var context = configuration.GetContextBagForSagaStorage();
-            TSagaData sagaData;
-            var persister = configuration.SagaStorage;
-            using (var completeSession = await configuration.SynchronizedStorage.OpenSession(context))
-            {
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, new TSagaData(), availableTypes);
-                sagaData = await persister.Get<TSagaData>(sagaId, completeSession, context);
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, sagaData, availableTypes);
-
-                update(sagaData);
-
-                await persister.Update(sagaData, completeSession, context);
-                await completeSession.CompleteAsync();
-            }
-
-            return sagaData;
-        }
-
-        protected async Task<TSagaData> GetByCorrelationPropertyAndUpdate<TSaga, TSagaData>(string correlatedPropertyName, object correlationPropertyData, Action<TSagaData> update)
-            where TSaga : Saga<TSagaData>, new()
-            where TSagaData : class, IContainSagaData, new()
-        {
-            var context = configuration.GetContextBagForSagaStorage();
-            TSagaData sagaData;
-            var persister = configuration.SagaStorage;
-            using (var completeSession = await configuration.SynchronizedStorage.OpenSession(context))
-            {
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, new TSagaData());
-
-                sagaData = await persister.Get<TSagaData>(correlatedPropertyName, correlationPropertyData, completeSession, context);
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, sagaData);
-
-                update(sagaData);
-
-                await persister.Update(sagaData, completeSession, context);
-                await completeSession.CompleteAsync();
-            }
-
-            return sagaData;
-        }
-
-        protected async Task<TSagaData> GetByCorrelationPropertyAndComplete<TSaga, TSagaData>(string correlatedPropertyName, object correlationPropertyData)
-            where TSaga : Saga<TSagaData>, new()
-            where TSagaData : class, IContainSagaData, new()
-        {
-            var context = configuration.GetContextBagForSagaStorage();
-            TSagaData sagaData;
-            var persister = configuration.SagaStorage;
-            using (var completeSession = await configuration.SynchronizedStorage.OpenSession(context))
-            {
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, new TSagaData());
-
-                sagaData = await persister.Get<TSagaData>(correlatedPropertyName, correlationPropertyData, completeSession, context);
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, sagaData);
-
-                await persister.Complete(sagaData, completeSession, context);
-                await completeSession.CompleteAsync();
-            }
-
-            return sagaData;
-        }
-
-        protected async Task<TSagaData> GetByCorrelationProperty<TSaga, TSagaData>(string correlatedPropertyName, object correlationPropertyData)
-            where TSaga : Saga<TSagaData>, new()
-            where TSagaData : class, IContainSagaData, new()
-        {
-            var context = configuration.GetContextBagForSagaStorage();
-            TSagaData sagaData;
-            var persister = configuration.SagaStorage;
-
-            using (var completeSession = await configuration.SynchronizedStorage.OpenSession(context))
-            {
-                SetActiveSagaInstanceForGet<TSaga, TSagaData>(context, new TSagaData());
-
-                sagaData = await persister.Get<TSagaData>(correlatedPropertyName, correlationPropertyData, completeSession, context);
-
-                await completeSession.CompleteAsync();
-            }
-
-            return sagaData;
         }
 
         protected async Task<TSagaData> GetById<TSaga, TSagaData>(Guid sagaId, params Type[] availableTypes)

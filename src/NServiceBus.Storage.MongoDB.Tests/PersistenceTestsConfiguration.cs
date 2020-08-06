@@ -85,7 +85,7 @@
 
             await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-            Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(database, CollectionNamingConvention, SagaMetadataCollection);
+            Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
         }
 
         public async Task Cleanup()

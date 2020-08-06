@@ -1,3 +1,4 @@
+[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("NServiceBus.Storage.MongoDB.PersistenceTests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("NServiceBus.Storage.MongoDB.Tests")]
 namespace NServiceBus
 {

@@ -85,5 +85,6 @@
         readonly FilterDefinitionBuilder<BsonDocument> filterBuilder = Builders<BsonDocument>.Filter;
 
         const string idElementName = "_id";
+        internal const string DefaultVersionElementName = "_version";
     }
 }

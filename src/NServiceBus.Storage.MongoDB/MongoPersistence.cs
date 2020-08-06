@@ -30,7 +30,7 @@
 
                 s.SetDefault(SettingsKeys.DatabaseName, s.EndpointName());
 
-                s.SetDefault(SettingsKeys.CollectionNamingConvention, (Func<Type, string>)(type => type.Name.ToLower()));
+                s.SetDefault(SettingsKeys.CollectionNamingConvention, DefaultCollectionNamingConvention);
 
                 s.SetDefault(DefaultDatabaseSettings);
             });
@@ -48,6 +48,7 @@
         };
 
         internal static readonly TimeSpan DefaultTransactionTimeout = TimeSpan.FromSeconds(60);
+        internal static readonly Func<Type, string> DefaultCollectionNamingConvention = type => type.Name.ToLower();
 
         static IMongoClient defaultClient;
     }

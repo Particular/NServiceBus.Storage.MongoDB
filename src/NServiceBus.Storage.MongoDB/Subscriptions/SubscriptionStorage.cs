@@ -7,11 +7,6 @@
 
     class SubscriptionStorage : Feature
     {
-        public SubscriptionStorage()
-        {
-            DependsOn<MessageDrivenSubscriptions>();
-        }
-
         protected override void Setup(FeatureConfigurationContext context)
         {
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();

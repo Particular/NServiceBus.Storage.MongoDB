@@ -36,7 +36,7 @@
                 return CommitTransaction();
             }
 
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
 
         void IDisposable.Dispose()
@@ -131,7 +131,7 @@
                 return MongoSession.CommitTransactionAsync();
             }
 
-            return TaskEx.CompletedTask;
+            return Task.CompletedTask;
         }
 
         public void Dispose()

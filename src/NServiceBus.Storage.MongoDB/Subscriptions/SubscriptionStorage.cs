@@ -7,6 +7,13 @@
 
     class SubscriptionStorage : Feature
     {
+        public SubscriptionStorage()
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            DependsOn<MessageDrivenSubscriptions>();
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
+
         protected override void Setup(FeatureConfigurationContext context)
         {
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();

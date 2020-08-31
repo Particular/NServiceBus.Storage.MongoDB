@@ -71,7 +71,12 @@
 
             class HighContentionSaga : Saga<HighContentionSaga.HighContentionSagaData>, IAmStartedByMessages<StartSaga>, IHandleMessages<AdditionalMessage>
             {
-                public Context TestContext { get; set; }
+                Context testContext;
+
+                public HighContentionSaga(Context testContext)
+                {
+                    this.testContext = testContext;
+                }
 
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<HighContentionSagaData> mapper)
                 {
@@ -82,11 +87,11 @@
                 public async Task Handle(StartSaga message, IMessageHandlerContext context)
                 {
                     Data.SomeId = message.SomeId;
-                    TestContext.Watch.Start();
-                    TestContext.SagaStarted = true;
+                    testContext.Watch.Start();
+                    testContext.SagaStarted = true;
 
-                    await Task.WhenAll(Enumerable.Range(0, TestContext.NumberOfMessages).Select(i => context.SendLocal(new AdditionalMessage {SomeId = message.SomeId})));
-                    TestContext.MessagesSent = true;
+                    await Task.WhenAll(Enumerable.Range(0, testContext.NumberOfMessages).Select(i => context.SendLocal(new AdditionalMessage {SomeId = message.SomeId})));
+                    testContext.MessagesSent = true;
                 }
 
                 public class HighContentionSagaData : ContainSagaData
@@ -99,7 +104,7 @@
                 {
                     Data.Hit++;
 
-                    if (Data.Hit >= TestContext.NumberOfMessages)
+                    if (Data.Hit >= testContext.NumberOfMessages)
                     {
                         MarkAsComplete();
                         await context.SendLocal(new DoneSaga { SomeId = message.SomeId, HitCount = Data.Hit });

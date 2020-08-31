@@ -45,11 +45,16 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
             public class MySaga : Saga<MySaga.MySagaData>,
                 IAmStartedByMessages<StartSaga>
             {
-                public Context TestContext { get; set; }
+                Context testContext;
+
+                public MySaga(Context testContext)
+                {
+                    this.testContext = testContext;
+                }
 
                 public Task Handle(StartSaga message, IMessageHandlerContext context)
                 {
-                    TestContext.Done = true;
+                    testContext.Done = true;
 
                     return Task.CompletedTask;
                 }

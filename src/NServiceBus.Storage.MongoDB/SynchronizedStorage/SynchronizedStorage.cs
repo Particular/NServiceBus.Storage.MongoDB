@@ -4,6 +4,8 @@
     using Features;
     using global::MongoDB.Driver;
     using global::MongoDB.Driver.Core.Clusters;
+    using Microsoft.Extensions.DependencyInjection;
+    using Persistence;
 
     class SynchronizedStorage : Feature
     {
@@ -64,8 +66,9 @@
                 throw new Exception("Unable to connect to the MongoDB server. Check the connection settings, and verify the server is running and accessible.", ex);
             }
 
-            context.Container.ConfigureComponent(() => new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout), DependencyLifecycle.SingleInstance);
-            context.Container.ConfigureComponent<StorageSessionAdapter>(DependencyLifecycle.SingleInstance);
+            context.Services.AddSingleton<ISynchronizedStorage>(
+                new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout));
+            context.Services.AddSingleton<ISynchronizedStorageAdapter, StorageSessionAdapter>();
         }
     }
 }

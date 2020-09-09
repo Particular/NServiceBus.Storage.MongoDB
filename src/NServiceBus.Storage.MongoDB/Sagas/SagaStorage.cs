@@ -30,7 +30,7 @@ namespace NServiceBus.Storage.MongoDB
 
             InitializeSagaDataTypes(client, databaseName, collectionNamingConvention, sagaMetadataCollection);
 
-            context.Services.AddSingleton(new SagaPersister(versionElementName));
+            context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName));
         }
 
         internal static void InitializeSagaDataTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)

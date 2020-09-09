@@ -3,6 +3,7 @@
     using System;
     using Features;
     using global::MongoDB.Driver;
+    using Microsoft.Extensions.DependencyInjection;
     using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
     class SubscriptionStorage : Feature
@@ -26,7 +27,7 @@
             var subscriptionPersister = new SubscriptionPersister(collection);
             subscriptionPersister.CreateIndexes();
 
-            context.Container.RegisterSingleton<ISubscriptionStorage>(subscriptionPersister);
+            context.Services.AddSingleton<ISubscriptionStorage>(subscriptionPersister);
         }
     }
 }

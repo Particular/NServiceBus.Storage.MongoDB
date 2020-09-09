@@ -5,6 +5,7 @@ namespace NServiceBus.Storage.MongoDB
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization;
     using global::MongoDB.Driver;
+    using Microsoft.Extensions.DependencyInjection;
     using Sagas;
 
     class SagaStorage : Feature
@@ -29,7 +30,7 @@ namespace NServiceBus.Storage.MongoDB
 
             InitializeSagaDataTypes(client, databaseName, collectionNamingConvention, sagaMetadataCollection);
 
-            context.Container.ConfigureComponent(() => new SagaPersister(versionElementName), DependencyLifecycle.SingleInstance);
+            context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName));
         }
 
         internal static void InitializeSagaDataTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)

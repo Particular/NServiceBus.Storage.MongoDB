@@ -8,6 +8,7 @@
     using global::MongoDB.Bson.Serialization.Options;
     using global::MongoDB.Bson.Serialization.Serializers;
     using global::MongoDB.Driver;
+    using Microsoft.Extensions.DependencyInjection;
     using Outbox;
 
     class OutboxStorage : Feature
@@ -75,7 +76,7 @@
                 outboxCollection.Indexes.CreateOne(indexModel);
             }
 
-            context.Container.ConfigureComponent(() => new OutboxPersister(client, databaseName, collectionNamingConvention), DependencyLifecycle.SingleInstance);
+            context.Services.AddSingleton<IOutboxStorage>(new OutboxPersister(client, databaseName, collectionNamingConvention));
         }
 
         const string outboxCleanupIndexName = "OutboxCleanup";

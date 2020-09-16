@@ -23,11 +23,6 @@ Documentation, including configuration, usage, and samples can be found at http:
 - The projects also rely on NuGet for 3rd party dependencies.
 
 
-### Coding Standards
-
-This solution includes a [Resharper .DotSettings code styles definition](https://www.jetbrains.com/resharper/features/code_formatting.html) as a [companion file](https://github.com/Particular/NServiceBus.Storage.MongoDB/blob/master/src/NServiceBus.Storage.MongoDB.sln.DotSettings) to the solution file.
-
-
 ### Running tests
 
 Both test projects utilize NUnit. The test projects can be executed using the test runner included in Visual Studio or using the [`dotnet test` command](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test) from the command line.

@@ -29,9 +29,7 @@ class ConfigureEndpointMongoPersistence : IConfigureEndpointTestExecution
         {
             await client.DropDatabaseAsync(databaseName);
         }
-        // ReSharper disable once EmptyGeneralCatchClause
         catch (Exception)
         { }
     }
 }
-

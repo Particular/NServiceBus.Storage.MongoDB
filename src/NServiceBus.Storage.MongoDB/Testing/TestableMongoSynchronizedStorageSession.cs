@@ -12,7 +12,7 @@
         /// <summary>
         /// Creates a new instance of <see cref="TestableMongoSynchronizedStorageSession"/> using the provided <see cref="IClientSessionHandle"/>.
         /// </summary>
-        /// <param name="clientSessionHandle"></param>
+        /// <param name="clientSessionHandle">Handle to the MongoDB client session</param>
         public TestableMongoSynchronizedStorageSession(IClientSessionHandle clientSessionHandle)
         {
             MongoSession = clientSessionHandle;

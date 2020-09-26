@@ -68,7 +68,6 @@
             //    .ToListAsync()
             //    .ConfigureAwait(false);
             // =========================================================
-
             var subscriptions = await subscriptionsCollection
                 .Find(filter)
                 .Project(projection)

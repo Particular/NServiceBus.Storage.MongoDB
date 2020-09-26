@@ -1,6 +1,4 @@
-﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-
-namespace NServiceBus.Storage.MongoDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
     using System;
     using System.Globalization;
@@ -27,10 +25,13 @@ namespace NServiceBus.Storage.MongoDB.Tests
                     sagaMetadataCollection = new SagaMetadataCollection();
                     sagaMetadataCollection.Initialize(sagaTypes);
                 }
-
                 return sagaMetadataCollection;
             }
-            set { sagaMetadataCollection = value; }
+
+            set
+            {
+                sagaMetadataCollection = value;
+            }
         }
 
         SagaMetadataCollection sagaMetadataCollection;

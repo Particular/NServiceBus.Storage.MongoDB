@@ -10,7 +10,7 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
     public class When_mixing_persistence_with_other_persistence_for_sagas_and_outbox : NServiceBusAcceptanceTest
     {
         [Test]
-        public async Task Should_work()
+        public async Task Should_not_interfere_with_synchronized_session()
         {
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<EndpointWithMixedPersistence>(
@@ -35,7 +35,8 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>(config =>
                 {
-                    config.UsePersistence<MongoPersistence, StorageType.Sagas>();
+                    // Mongo is configured by default, so we're adding the acceptancetestingpersistence mixed in
+                    config.UsePersistence<AcceptanceTestingPersistence, StorageType.Sagas>();
                     config.UsePersistence<AcceptanceTestingPersistence, StorageType.Outbox>();
 
                     config.EnableOutbox();
@@ -75,7 +76,5 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
         {
             public Guid DataId { get; set; }
         }
-        
-        public class FakePersistence : 
     }
 }

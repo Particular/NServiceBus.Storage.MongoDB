@@ -35,8 +35,8 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>(config =>
                 {
-                    config.UsePersistence<LearningPersistence, StorageType.Sagas>();
-                    config.UsePersistence<LearningPersistence, StorageType.Outbox>();
+                    config.UsePersistence<MongoPersistence, StorageType.Sagas>();
+                    config.UsePersistence<AcceptanceTestingPersistence, StorageType.Outbox>();
 
                     config.EnableOutbox();
                 });
@@ -75,5 +75,7 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
         {
             public Guid DataId { get; set; }
         }
+        
+        public class FakePersistence : 
     }
 }

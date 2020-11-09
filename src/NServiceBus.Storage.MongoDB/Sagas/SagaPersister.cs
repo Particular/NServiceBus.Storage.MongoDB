@@ -68,7 +68,17 @@
         {
             var storageSession = (StorageSession)session;
 
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue))).ConfigureAwait(false);
+            BsonValue bsonValue;
+            if (elementValue is Guid guid)
+            {
+                bsonValue = new BsonBinaryData(guid, GuidRepresentation.CSharpLegacy);
+            }
+            else
+            {
+                bsonValue = BsonValue.Create(elementValue);
+            }
+            
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, bsonValue)).ConfigureAwait(false);
 
             if (document != null)
             {

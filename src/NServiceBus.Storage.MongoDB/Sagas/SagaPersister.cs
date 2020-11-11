@@ -1,4 +1,7 @@
-﻿namespace NServiceBus.Storage.MongoDB
+﻿using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Serializers;
+
+namespace NServiceBus.Storage.MongoDB
 {
     using System;
     using System.Threading.Tasks;
@@ -56,7 +59,8 @@
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
-            var result = await storageSession.DeleteOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version)).ConfigureAwait(false);
+            var guid = new BsonBinaryData(sagaData.Id, GuidRepresentation.CSharpLegacy);
+            var result = await storageSession.DeleteOneAsync(sagaDataType, filterBuilder.Eq(idElementName, guid) & filterBuilder.Eq(versionElementName, version)).ConfigureAwait(false);
 
             if (result.DeletedCount != 1)
             {

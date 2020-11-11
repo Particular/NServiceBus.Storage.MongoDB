@@ -1,3 +1,7 @@
+using System.Linq;
+using System.Reflection;
+using MongoDB.Bson.Serialization.Serializers;
+
 namespace NServiceBus.Storage.MongoDB
 {
     using System;
@@ -43,12 +47,23 @@ namespace NServiceBus.Storage.MongoDB
             };
             var database = client.GetDatabase(databaseName, databaseSettings);
 
+            //TODO we also need to map when implementing IContainsSagaData directly or on one of the base types.
+            if (!BsonClassMap.IsClassMapRegistered(typeof(ContainSagaData)))
+            {
+                var classMap = new BsonClassMap(typeof(ContainSagaData));
+                classMap.AutoMap();
+                classMap.MapIdProperty(nameof(ContainSagaData.Id)).SetSerializer(new GuidSerializer(GuidRepresentation.CSharpLegacy));
+                BsonClassMap.RegisterClassMap(classMap);
+            }
+
             foreach (var sagaMetadata in sagaMetadataCollection)
             {
                 if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
                 {
                     var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
                     classMap.AutoMap();
+                    //classMap.MapIdMember(sagaMetadata.SagaEntityType.GetMember(nameof(IContainSagaData.Id))[0]).SetSerializer(new GuidSerializer(GuidRepresentation.CSharpLegacy));
+                    //classMap.MapIdProperty(nameof(IContainSagaData.Id)).SetSerializer(new GuidSerializer(GuidRepresentation.CSharpLegacy));
                     classMap.SetIgnoreExtraElements(true);
 
                     BsonClassMap.RegisterClassMap(classMap);

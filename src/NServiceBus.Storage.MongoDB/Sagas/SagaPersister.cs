@@ -1,7 +1,4 @@
-﻿using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Serializers;
-
-namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
     using System.Threading.Tasks;
@@ -47,10 +44,10 @@ namespace NServiceBus.Storage.MongoDB
         }
 
         public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(idElementName, sagaId, session);
+            GetSagaData<TSagaData>("Id", sagaId, session);
 
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session);
+            GetSagaData<TSagaData>(propertyName, propertyValue, session);
 
         public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
@@ -68,21 +65,25 @@ namespace NServiceBus.Storage.MongoDB
             }
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, SynchronizedStorageSession session)
+        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, SynchronizedStorageSession session) where TSagaData : class, IContainSagaData
         {
             var storageSession = (StorageSession)session;
 
-            BsonValue bsonValue;
-            if (elementValue is Guid guid)
-            {
-                bsonValue = new BsonBinaryData(guid, GuidRepresentation.CSharpLegacy);
-            }
-            else
-            {
-                bsonValue = BsonValue.Create(elementValue);
-            }
+            ////BsonValue bsonValue;
+            ////if (elementValue is Guid guid)
+            ////{
+            ////    bsonValue = new BsonBinaryData(guid, GuidRepresentation.CSharpLegacy);
+            ////}
+            ////else
+            ////{
+            ////    bsonValue = BsonValue.Create(elementValue);
+            ////}
             
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, bsonValue)).ConfigureAwait(false);
+            var builder = new FilterDefinitionBuilder<TSagaData>();
+            var filter = builder.Eq(elementName, elementValue);
+            var filterDocument = filter.Render(BsonSerializer.LookupSerializer<TSagaData>(), BsonSerializer.SerializerRegistry);
+
+            var document = await storageSession.Find<TSagaData>(filterDocument).ConfigureAwait(false);
 
             if (document != null)
             {

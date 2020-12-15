@@ -1,4 +1,4 @@
-[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("NServiceBus.Storage.MongoDB.Tests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NServiceBus.Storage.MongoDB.Tests")]
 namespace NServiceBus
 {
     public class CompatibilitySettings : NServiceBus.Configuration.AdvancedExtensibility.ExposeSettings
@@ -10,7 +10,7 @@ namespace NServiceBus
     {
         public MongoPersistence() { }
     }
-    public class static MongoSettingsExtensions
+    public static class MongoSettingsExtensions
     {
         public static NServiceBus.CompatibilitySettings CommunityPersistenceCompatibility(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> DatabaseName(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, string databaseName) { }
@@ -18,7 +18,7 @@ namespace NServiceBus
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> TimeToKeepOutboxDeduplicationData(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, System.TimeSpan timeToKeepOutboxDeduplicationData) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> UseTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, bool useTransactions) { }
     }
-    public class static SynchronizedStorageSessionExtensions
+    public static class SynchronizedStorageSessionExtensions
     {
         public static MongoDB.Driver.IClientSessionHandle GetClientSession(this NServiceBus.Persistence.SynchronizedStorageSession session) { }
     }

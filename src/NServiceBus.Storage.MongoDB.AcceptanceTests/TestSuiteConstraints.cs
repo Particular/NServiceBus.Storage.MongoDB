@@ -1,7 +1,7 @@
-﻿using NServiceBus.AcceptanceTesting.Support;
-
-namespace NServiceBus.AcceptanceTests
+﻿namespace NServiceBus.AcceptanceTests
 {
+    using NServiceBus.AcceptanceTesting.Support;
+
     public partial class TestSuiteConstraints
     {
         public bool SupportsDtc => false;

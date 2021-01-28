@@ -6,14 +6,12 @@
     {
         public static bool EqualTo<T>(this T item, object obj, Func<T, T, bool> equals) where T : class
         {
-            var x = obj as T;
-
             if (ReferenceEquals(item, obj))
             {
                 return true;
             }
 
-            if (item == null || x == null)
+            if (item == null || !(obj is T x))
             {
                 return false;
             }

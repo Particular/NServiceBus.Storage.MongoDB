@@ -13,11 +13,11 @@
             entity = new PropertyTypesTestSagaData
             {
                 Id = Guid.NewGuid(),
-                TestComponent = new TestComponent {Property = "Prop"},
+                TestComponent = new TestComponent { Property = "Prop" },
                 DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01").ToUniversalTime(),
                 Status = StatusEnum.AnotherStatus,
-                PolymorphicRelatedProperty = new PolymorphicProperty {SomeInt = 9},
-                RelatedClass = new RelatedClass {Id = Guid.NewGuid()}
+                PolymorphicRelatedProperty = new PolymorphicProperty { SomeInt = 9 },
+                RelatedClass = new RelatedClass { Id = Guid.NewGuid() }
             };
             relatedClass = entity.RelatedClass;
 

@@ -7,9 +7,9 @@
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
-    using Sagas;
     using MongoDB;
     using Persistence;
+    using Sagas;
 
     public class SagaTestsConfiguration
     {
@@ -41,7 +41,7 @@
             DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
             CollectionNamingConvention = collectionNamingConvention;
 
-            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout.HasValue ? transactionTimeout.Value : MongoPersistence.DefaultTransactionTimeout);
+            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
 
             SagaStorage = new SagaPersister(versionElementName);
         }
@@ -75,7 +75,7 @@
 
             await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-            Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
+            MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
         }
 
         public async Task Cleanup()

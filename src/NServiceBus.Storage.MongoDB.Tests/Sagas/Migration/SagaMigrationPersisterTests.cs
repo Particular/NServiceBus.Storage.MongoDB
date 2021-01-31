@@ -25,7 +25,7 @@
             var propertyElementName = BsonClassMap.LookupClassMap(sagaDataType).AllMemberMaps.First(m => m.MemberName == correlationPropertyName).ElementName;
 
             var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions
-                {Unique = true});
+            { Unique = true });
 
             await collection.Indexes.CreateOneAsync(indexModel);
 

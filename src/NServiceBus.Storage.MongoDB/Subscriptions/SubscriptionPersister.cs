@@ -110,7 +110,7 @@
                     filterBuilder.Eq(s => s.MessageTypeName, subscription.MessageTypeName),
                     filterBuilder.Eq(s => s.TransportAddress, subscription.TransportAddress));
                 var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscription.Endpoint);
-                var options = new UpdateOptions {IsUpsert = true};
+                var options = new UpdateOptions { IsUpsert = true };
 
                 var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
                 if (result.ModifiedCount > 0)
@@ -137,12 +137,12 @@
                     .Ascending(x => x.MessageTypeName)
                     .Ascending(x => x.TransportAddress),
                 new CreateIndexOptions
-                    {Unique = true});
+                { Unique = true });
             var searchIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
                 .Ascending(x => x.MessageTypeName)
                 .Ascending(x => x.TransportAddress)
                 .Ascending(x => x.Endpoint));
-            subscriptionsCollection.Indexes.CreateMany(new[] {uniqueIndex, searchIndex});
+            subscriptionsCollection.Indexes.CreateMany(new[] { uniqueIndex, searchIndex });
         }
 
         IMongoCollection<EventSubscription> subscriptionsCollection;

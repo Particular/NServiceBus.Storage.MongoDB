@@ -90,7 +90,7 @@
                     testContext.Watch.Start();
                     testContext.SagaStarted = true;
 
-                    await Task.WhenAll(Enumerable.Range(0, testContext.NumberOfMessages).Select(i => context.SendLocal(new AdditionalMessage {SomeId = message.SomeId})));
+                    await Task.WhenAll(Enumerable.Range(0, testContext.NumberOfMessages).Select(i => context.SendLocal(new AdditionalMessage { SomeId = message.SomeId })));
                     testContext.MessagesSent = true;
                 }
 

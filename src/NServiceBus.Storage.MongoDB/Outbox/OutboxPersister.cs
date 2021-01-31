@@ -36,7 +36,7 @@
             var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
             var storageSession = mongoOutboxTransaction.StorageSession;
 
-            return storageSession.InsertOneAsync(new OutboxRecord {Id = message.MessageId, TransportOperations = message.TransportOperations});
+            return storageSession.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = message.TransportOperations });
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag context)

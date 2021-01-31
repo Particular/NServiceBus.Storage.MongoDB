@@ -61,7 +61,7 @@ namespace NServiceBus.Storage.MongoDB
                     var propertyElementName = sagaMetadata.SagaEntityType.GetElementName(property.Name);
 
                     var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions
-                        {Unique = true});
+                    { Unique = true });
                     database.GetCollection<BsonDocument>(collectionName).Indexes.CreateOne(indexModel);
                 }
                 else

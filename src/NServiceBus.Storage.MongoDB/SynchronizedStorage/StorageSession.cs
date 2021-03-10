@@ -29,7 +29,7 @@
             this.transactionTimeout = transactionTimeout;
         }
 
-        Task CompletableSynchronizedStorageSession.CompleteAsync()
+        Task CompletableSynchronizedStorageSession.CompleteAsync(CancellationToken cancellationToken)
         {
             if (ownsMongoSession)
             {

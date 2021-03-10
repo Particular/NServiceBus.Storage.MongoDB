@@ -14,6 +14,10 @@
 
         public bool SupportsOutbox => true;
 
+        public bool SupportsPurgeOnStartup => true;
+
+        public bool SupportsDelayedDelivery => true;
+
         public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsNativeDeferral);
 
         public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointMongoPersistence();

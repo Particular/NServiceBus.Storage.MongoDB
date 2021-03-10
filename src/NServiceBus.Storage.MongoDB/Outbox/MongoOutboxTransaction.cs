@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
@@ -16,7 +17,7 @@
 
         public StorageSession StorageSession { get; }
 
-        public Task Commit()
+        public Task Commit(CancellationToken cancellationToken = default)
         {
             return StorageSession.CommitTransaction();
         }

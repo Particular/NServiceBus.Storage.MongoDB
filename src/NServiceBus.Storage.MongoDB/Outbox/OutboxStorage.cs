@@ -30,6 +30,18 @@
             var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
             var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
+            if (!context.Settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData, out TimeSpan timeToKeepOutboxDeduplicationData))
+            {
+                timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
+            }
+
+            InitializeOutboxTypes(client, databaseName, collectionNamingConvention, timeToKeepOutboxDeduplicationData);
+
+            context.Services.AddSingleton<IOutboxStorage>(new OutboxPersister(client, databaseName, collectionNamingConvention));
+        }
+
+        internal static void InitializeOutboxTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, TimeSpan timeToKeepOutboxDeduplicationData)
+        {
             if (!BsonClassMap.IsClassMapRegistered(typeof(TransportOperation)))
             {
                 BsonClassMap.RegisterClassMap<TransportOperation>(cm =>
@@ -38,11 +50,6 @@
                     cm.MapMember(c => c.Headers).SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
                     cm.MapMember(c => c.Options).SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
                 });
-            }
-
-            if (!context.Settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData, out TimeSpan timeToKeepOutboxDeduplicationData))
-            {
-                timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
             }
 
             var collectionSettings = new MongoCollectionSettings
@@ -75,8 +82,6 @@
 
                 outboxCollection.Indexes.CreateOne(indexModel);
             }
-
-            context.Services.AddSingleton<IOutboxStorage>(new OutboxPersister(client, databaseName, collectionNamingConvention));
         }
 
         const string outboxCleanupIndexName = "OutboxCleanup";

@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
@@ -27,7 +28,7 @@
         {
             var outboxRecord = await outboxRecordCollection.Find(record => record.Id == messageId).SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            return outboxRecord != null ? new OutboxMessage(outboxRecord.Id, outboxRecord.TransportOperations) : null;
+            return outboxRecord != null ? new OutboxMessage(outboxRecord.Id, outboxRecord.TransportOperations?.Select(op => op.ToTransportType()).ToArray()) : null;
         }
 
         public Task<OutboxTransaction> BeginTransaction(ContextBag context, CancellationToken cancellationToken = default) => outboxTransactionFactory.BeginTransaction(context);
@@ -36,14 +37,15 @@
         {
             var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
             var storageSession = mongoOutboxTransaction.StorageSession;
+            var storageTransportOperations = message.TransportOperations.Select(op => new StorageTransportOperation(op)).ToArray();
 
-            return storageSession.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = message.TransportOperations });
+            return storageSession.InsertOneAsync(new OutboxRecord { Id = message.MessageId, TransportOperations = storageTransportOperations });
         }
 
         public async Task SetAsDispatched(string messageId, ContextBag context, CancellationToken cancellationToken = default)
         {
             var update = Builders<OutboxRecord>.Update
-                .Set(record => record.TransportOperations, new TransportOperation[0])
+                .Set(record => record.TransportOperations, Array.Empty<StorageTransportOperation>())
                 .CurrentDate(record => record.Dispatched);
 
             await outboxRecordCollection.UpdateOneAsync(record => record.Id == messageId, update, cancellationToken: cancellationToken).ConfigureAwait(false);

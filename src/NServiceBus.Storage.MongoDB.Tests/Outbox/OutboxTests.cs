@@ -16,9 +16,9 @@
 
             var operations = new Outbox.TransportOperation[]
             {
-                new Outbox.TransportOperation(RandomString(), FillDictionary(new Dictionary<string, string>(), 3), Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
-                new Outbox.TransportOperation(RandomString(), FillDictionary(new Dictionary<string, string>(), 3), Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
-                new Outbox.TransportOperation(RandomString(), FillDictionary(new Dictionary<string, string>(), 3), Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
+                new Outbox.TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3), Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
+                new Outbox.TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3), Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
+                new Outbox.TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3), Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
 
             };
             var testMessage = new Outbox.OutboxMessage(msgId, operations);

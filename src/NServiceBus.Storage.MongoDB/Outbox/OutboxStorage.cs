@@ -42,13 +42,13 @@
 
         internal static void InitializeOutboxTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, TimeSpan timeToKeepOutboxDeduplicationData)
         {
-            if (!BsonClassMap.IsClassMapRegistered(typeof(TransportOperation)))
+            if (!BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
             {
-                BsonClassMap.RegisterClassMap<TransportOperation>(cm =>
+                BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
                 {
                     cm.AutoMap();
                     cm.MapMember(c => c.Headers).SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
-                    cm.MapMember(c => c.Options).SetSerializer(new DictionaryInterfaceImplementerSerializer<Transport.DispatchProperties>(DictionaryRepresentation.ArrayOfDocuments));
+                    cm.MapMember(c => c.Options).SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
                 });
             }
 

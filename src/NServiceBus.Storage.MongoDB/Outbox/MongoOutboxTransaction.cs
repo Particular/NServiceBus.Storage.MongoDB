@@ -19,7 +19,7 @@
 
         public Task Commit(CancellationToken cancellationToken = default)
         {
-            return StorageSession.CommitTransaction();
+            return StorageSession.CommitTransaction(cancellationToken);
         }
 
         public void Dispose()

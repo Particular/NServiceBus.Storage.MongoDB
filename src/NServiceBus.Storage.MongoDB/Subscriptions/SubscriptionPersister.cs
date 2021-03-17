@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
@@ -15,7 +16,7 @@
             this.subscriptionsCollection = subscriptionsCollection;
         }
 
-        public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context, CancellationToken cancellationToken = default)
         {
             var subscription = new EventSubscription
             {
@@ -33,17 +34,17 @@
             return AddOrUpdateSubscription(subscription);
         }
 
-        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context, CancellationToken cancellationToken = default)
         {
             var filter = filterBuilder.And(
                 filterBuilder.Eq(s => s.MessageTypeName, messageType.TypeName),
                 filterBuilder.Eq(s => s.TransportAddress, subscriber.TransportAddress));
-            var result = await subscriptionsCollection.DeleteManyAsync(filter).ConfigureAwait(false);
+            var result = await subscriptionsCollection.DeleteManyAsync(filter, cancellationToken).ConfigureAwait(false);
 
             Log.DebugFormat("Deleted {0} subscriptions for address '{1}' on message type '{2}'", result.DeletedCount, subscriber.TransportAddress, messageType.TypeName);
         }
 
-        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
+        public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context, CancellationToken cancellationToken = default)
         {
             var messageTypeNames = new List<string>();
             foreach (var messageType in messageTypes)
@@ -71,7 +72,7 @@
             var subscriptions = await subscriptionsCollection
                 .Find(filter)
                 .Project(projection)
-                .ToListAsync()
+                .ToListAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
             var result = new List<Subscriber>(subscriptions.Count);

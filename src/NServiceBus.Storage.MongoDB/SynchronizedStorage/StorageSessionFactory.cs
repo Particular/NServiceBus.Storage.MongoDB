@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
@@ -17,9 +18,9 @@
             this.transactionTimeout = transactionTimeout;
         }
 
-        public async Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag)
+        public async Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag, CancellationToken cancellationToken = default)
         {
-            var mongoSession = await client.StartSessionAsync().ConfigureAwait(false);
+            var mongoSession = await client.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var session = new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention, true, useTransactions, transactionTimeout);
             session.StartTransaction();

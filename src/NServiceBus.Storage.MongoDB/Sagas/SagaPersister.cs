@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Bson;
@@ -16,7 +17,7 @@
             this.versionElementName = versionElementName;
         }
 
-        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
@@ -24,10 +25,10 @@
             var document = sagaData.ToBsonDocument();
             document.Add(versionElementName, 0);
 
-            await storageSession.InsertOneAsync(sagaDataType, document).ConfigureAwait(false);
+            await storageSession.InsertOneAsync(sagaDataType, document, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
@@ -35,7 +36,7 @@
             var version = storageSession.RetrieveVersion(sagaDataType);
             var document = sagaData.ToBsonDocument().SetElement(new BsonElement(versionElementName, version + 1));
 
-            var result = await storageSession.ReplaceOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), document).ConfigureAwait(false);
+            var result = await storageSession.ReplaceOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), document, cancellationToken).ConfigureAwait(false);
 
             if (result.ModifiedCount != 1)
             {
@@ -43,20 +44,20 @@
             }
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
             GetSagaData<TSagaData>(idElementName, sagaId, session);
 
-        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : class, IContainSagaData =>
+        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
             GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session);
 
-        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
+        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
-            var result = await storageSession.DeleteOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version)).ConfigureAwait(false);
+            var result = await storageSession.DeleteOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), cancellationToken).ConfigureAwait(false);
 
             if (result.DeletedCount != 1)
             {

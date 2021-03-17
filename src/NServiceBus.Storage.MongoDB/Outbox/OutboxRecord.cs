@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
-    using Outbox;
 
     class OutboxRecord
     {
@@ -9,6 +8,6 @@
 
         public DateTime? Dispatched { get; set; }
 
-        public TransportOperation[] TransportOperations { get; set; }
+        public StorageTransportOperation[] TransportOperations { get; set; }
     }
 }

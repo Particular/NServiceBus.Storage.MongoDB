@@ -45,10 +45,10 @@
         }
 
         public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(idElementName, sagaId, session);
+            GetSagaData<TSagaData>(idElementName, sagaId, session, cancellationToken);
 
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session);
+            GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session, cancellationToken);
 
         public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
@@ -65,11 +65,11 @@
             }
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, SynchronizedStorageSession session)
+        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, SynchronizedStorageSession session, CancellationToken cancellationToken)
         {
             var storageSession = (StorageSession)session;
 
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue))).ConfigureAwait(false);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue)), cancellationToken).ConfigureAwait(false);
 
             if (document != null)
             {

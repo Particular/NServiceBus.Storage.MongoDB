@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
@@ -16,9 +17,9 @@
             this.collectionNamingConvention = collectionNamingConvention;
         }
 
-        public async Task<OutboxTransaction> BeginTransaction(ContextBag context)
+        public async Task<OutboxTransaction> BeginTransaction(ContextBag context, CancellationToken cancellationToken = default)
         {
-            var mongoSession = await client.StartSessionAsync().ConfigureAwait(false);
+            var mongoSession = await client.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return new MongoOutboxTransaction(mongoSession, databaseName, context, collectionNamingConvention, transactionTimeout);
         }

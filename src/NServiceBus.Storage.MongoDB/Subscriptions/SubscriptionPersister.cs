@@ -28,10 +28,10 @@
             if (IsLegacySubscription(subscription))
             {
                 // support for older versions of NServiceBus which do not provide a logical endpoint name. We do not want to replace a non-null value with null.
-                return AddLegacySubscription(subscription);
+                return AddLegacySubscription(subscription, cancellationToken);
             }
 
-            return AddOrUpdateSubscription(subscription);
+            return AddOrUpdateSubscription(subscription, cancellationToken);
         }
 
         public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context, CancellationToken cancellationToken = default)
@@ -88,11 +88,11 @@
 
         static bool IsLegacySubscription(EventSubscription subscription) => subscription.Endpoint == null;
 
-        async Task AddLegacySubscription(EventSubscription subscription)
+        async Task AddLegacySubscription(EventSubscription subscription, CancellationToken cancellationToken)
         {
             try
             {
-                await subscriptionsCollection.InsertOneAsync(subscription).ConfigureAwait(false);
+                await subscriptionsCollection.InsertOneAsync(subscription, cancellationToken: cancellationToken).ConfigureAwait(false);
                 Log.DebugFormat("Created legacy subscription for '{0}' on '{1}'", subscription.TransportAddress, subscription.MessageTypeName);
             }
             catch (MongoWriteException e) when (e.WriteError?.Code == DuplicateKeyErrorCode)
@@ -103,7 +103,7 @@
             }
         }
 
-        async Task AddOrUpdateSubscription(EventSubscription subscription)
+        async Task AddOrUpdateSubscription(EventSubscription subscription, CancellationToken cancellationToken)
         {
             try
             {
@@ -113,7 +113,7 @@
                 var update = Builders<EventSubscription>.Update.Set(s => s.Endpoint, subscription.Endpoint);
                 var options = new UpdateOptions { IsUpsert = true };
 
-                var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
+                var result = await subscriptionsCollection.UpdateOneAsync(filter, update, options, cancellationToken).ConfigureAwait(false);
                 if (result.ModifiedCount > 0)
                 {
                     // ModifiedCount is also 0 when the update values match exactly the existing document.

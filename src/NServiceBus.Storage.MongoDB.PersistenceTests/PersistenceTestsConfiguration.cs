@@ -2,6 +2,7 @@
 {
     using System;
     using System.Globalization;
+    using System.Threading;
     using System.Threading.Tasks;
     using MongoDB.Driver;
     using NServiceBus.Outbox;
@@ -29,7 +30,7 @@
 
         public IOutboxStorage OutboxStorage { get; private set; }
 
-        public async Task Configure()
+        public async Task Configure(CancellationToken cancellationToken = default)
         {
             var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
             client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
@@ -45,13 +46,13 @@
                 WriteConcern = WriteConcern.WMajority
             };
             var database = client.GetDatabase(databaseName, databaseSettings);
-            await database.CreateCollectionAsync(MongoPersistence.DefaultCollectionNamingConvention(typeof(OutboxRecord)));
+            await database.CreateCollectionAsync(MongoPersistence.DefaultCollectionNamingConvention(typeof(OutboxRecord)), cancellationToken: cancellationToken);
             OutboxStorage = new OutboxPersister(client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
         }
 
-        public async Task Cleanup()
+        public async Task Cleanup(CancellationToken cancellationToken = default)
         {
-            await client.DropDatabaseAsync(databaseName);
+            await client.DropDatabaseAsync(databaseName, cancellationToken);
         }
 
         readonly string databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);

@@ -65,28 +65,30 @@
 
             using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
             {
-                var token = cancellationTokenSource.Token;
-                while (!token.IsCancellationRequested)
+                var timedToken = cancellationTokenSource.Token;
+                var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedToken, cancellationToken);
+                var combinedToken = combinedTokenSource.Token;
+                while (!timedToken.IsCancellationRequested)
                 {
                     try
                     {
-                        var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, token)
+                        var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedToken)
                             .ConfigureAwait(false);
                         return result;
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (timedToken.IsCancellationRequested)
                     {
                         break;
                     }
                     catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                     {
-                        await AbortTransaction(cancellationToken).ConfigureAwait(false);
+                        await AbortTransaction(combinedToken).ConfigureAwait(false);
 
                         try
                         {
-                            await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), token).ConfigureAwait(false);
+                            await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), combinedToken).ConfigureAwait(false);
                         }
-                        catch (OperationCanceledException)
+                        catch (OperationCanceledException) when (timedToken.IsCancellationRequested)
                         {
                             break;
                         }

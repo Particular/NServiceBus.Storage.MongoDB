@@ -63,37 +63,24 @@
             var sagaCollection = database.GetCollection<BsonDocument>(collectionName);
             var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
 
-            using (var cancellationTokenSource = new CancellationTokenSource(transactionTimeout))
+            using (var timedTokenSource = new CancellationTokenSource(transactionTimeout))
+            using (var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedTokenSource.Token, cancellationToken))
             {
-                var timedToken = cancellationTokenSource.Token;
-                var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedToken, cancellationToken);
-                var combinedToken = combinedTokenSource.Token;
-                while (!timedToken.IsCancellationRequested)
+                while (!timedTokenSource.IsCancellationRequested)
                 {
                     try
                     {
-                        var result = await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedToken)
-                            .ConfigureAwait(false);
-                        return result;
-                    }
-                    catch (OperationCanceledException) when (timedToken.IsCancellationRequested)
-                    {
-                        break;
+                        return await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedTokenSource.Token).ConfigureAwait(false);
                     }
                     catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                     {
-                        await AbortTransaction(combinedToken).ConfigureAwait(false);
-
-                        try
-                        {
-                            await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), combinedToken).ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException) when (timedToken.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
+                        await AbortTransaction(combinedTokenSource.Token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), combinedTokenSource.Token).ConfigureAwait(false);
                         StartTransaction();
+                    }
+                    catch (OperationCanceledException) when (timedTokenSource.IsCancellationRequested)
+                    {
+                        break;
                     }
                 }
 

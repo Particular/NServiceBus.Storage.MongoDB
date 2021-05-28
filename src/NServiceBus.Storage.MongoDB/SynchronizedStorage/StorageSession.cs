@@ -70,16 +70,21 @@
                 {
                     try
                     {
-                        return await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedTokenSource.Token).ConfigureAwait(false);
+                        try
+                        {
+                            return await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedTokenSource.Token).ConfigureAwait(false);
+                        }
+                        catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
+                        {
+                            await AbortTransaction(combinedTokenSource.Token).ConfigureAwait(false);
+                            await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), combinedTokenSource.Token).ConfigureAwait(false);
+                            StartTransaction();
+                        }
                     }
-                    catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
+                    catch (Exception ex) when (ex.IsCausedBy(timedTokenSource.Token))
                     {
-                        await AbortTransaction(combinedTokenSource.Token).ConfigureAwait(false);
-                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), combinedTokenSource.Token).ConfigureAwait(false);
-                        StartTransaction();
-                    }
-                    catch (OperationCanceledException) when (timedTokenSource.IsCancellationRequested)
-                    {
+                        // log the exception in case the stack trace will ever be useful for debugging
+                        Log.Debug("Operation canceled when time out exhausted for acquiring exclusive write lock.", ex);
                         break;
                     }
                 }
@@ -152,12 +157,12 @@
 
         readonly TimeSpan transactionTimeout;
 
-        static Random random = new Random();
-        static TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
+        static readonly Random random = new Random();
+        static readonly TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
 
-        static FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions = new FindOneAndUpdateOptions<BsonDocument>
+        static readonly FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions = new FindOneAndUpdateOptions<BsonDocument>
         {
             ReturnDocument = ReturnDocument.After
         };

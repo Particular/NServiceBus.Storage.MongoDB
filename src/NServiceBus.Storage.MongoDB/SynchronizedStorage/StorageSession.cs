@@ -81,7 +81,10 @@
                             StartTransaction();
                         }
                     }
+#pragma warning disable PS0019 // When catching System.Exception, cancellation needs to be properly accounted for - justification:
+                    // Cancellation is properly accounted for. In this case, we only want to catch cancellation by one of the tokens used to create the combined token.
                     catch (Exception ex) when (ex.IsCausedBy(timedTokenSource.Token))
+#pragma warning restore PS0019 // When catching System.Exception, cancellation needs to be properly accounted for
                     {
                         // log the exception in case the stack trace will ever be useful for debugging
                         Log.Debug("Operation canceled when time out exhausted for acquiring exclusive write lock.", ex);

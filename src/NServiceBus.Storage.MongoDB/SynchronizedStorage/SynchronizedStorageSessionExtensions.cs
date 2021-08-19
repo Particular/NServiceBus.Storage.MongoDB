@@ -6,14 +6,14 @@
     using Storage.MongoDB;
 
     /// <summary>
-    /// MongoDB persistence specific extension methods for the <see cref="SynchronizedStorageSession"/>.
+    /// MongoDB persistence specific extension methods for the <see cref="ISynchronizedStorageSession"/>.
     /// </summary>
     public static class SynchronizedStorageSessionExtensions
     {
         /// <summary>
         /// Retrieves the current MongoDB client session from the context.
         /// </summary>
-        public static IClientSessionHandle GetClientSession(this SynchronizedStorageSession session)
+        public static IClientSessionHandle GetClientSession(this ISynchronizedStorageSession session)
         {
             Guard.AgainstNull(nameof(session), session);
 

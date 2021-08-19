@@ -55,7 +55,7 @@
             await client.DropDatabaseAsync(databaseName, cancellationToken);
         }
 
-        readonly string databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+        readonly string databaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
         MongoClient client;
     }
 }

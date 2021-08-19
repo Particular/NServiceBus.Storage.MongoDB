@@ -9,7 +9,7 @@
     using Logging;
     using Persistence;
 
-    class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
+    class StorageSession : ICompletableSynchronizedStorageSession, IMongoSessionProvider
     {
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, TimeSpan transactionTimeout)
         {
@@ -29,7 +29,7 @@
             this.transactionTimeout = transactionTimeout;
         }
 
-        Task CompletableSynchronizedStorageSession.CompleteAsync(CancellationToken cancellationToken)
+        Task ICompletableSynchronizedStorageSession.CompleteAsync(CancellationToken cancellationToken)
         {
             if (ownsMongoSession)
             {

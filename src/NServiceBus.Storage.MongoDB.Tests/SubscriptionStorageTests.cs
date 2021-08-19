@@ -16,7 +16,7 @@
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            DatabaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+            DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
             var subscriptionCollection = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings).GetCollection<EventSubscription>("eventsubscriptions");
             var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);

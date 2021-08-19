@@ -15,7 +15,7 @@
                 Id = Guid.NewGuid(),
                 TestComponent = new TestComponent { Property = "Prop" },
                 DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01").ToUniversalTime(),
-                Status = StatusEnum.AnotherStatus,
+                Status = Statuses.AnotherStatus,
                 PolymorphicRelatedProperty = new PolymorphicProperty { SomeInt = 9 },
                 RelatedClass = new RelatedClass { Id = Guid.NewGuid() }
             };

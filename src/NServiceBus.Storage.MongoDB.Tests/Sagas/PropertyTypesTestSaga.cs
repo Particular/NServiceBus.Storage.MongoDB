@@ -23,7 +23,7 @@
 
         public virtual IList<OrderLine> OrderLines { get; set; }
 
-        public virtual StatusEnum Status { get; set; }
+        public virtual Statuses Status { get; set; }
 
         public virtual DateTime DateTimeProperty { get; set; }
 
@@ -67,7 +67,7 @@
         public virtual Guid Id { get; set; }
     }
 
-    public enum StatusEnum
+    public enum Statuses
     {
         SomeStatus,
         AnotherStatus

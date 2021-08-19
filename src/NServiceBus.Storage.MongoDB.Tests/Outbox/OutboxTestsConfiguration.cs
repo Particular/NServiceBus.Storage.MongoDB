@@ -34,7 +34,7 @@
 
         public ISynchronizedStorage SynchronizedStorage { get; }
 
-        public Task<OutboxTransaction> CreateTransaction(ContextBag context)
+        public Task<IOutboxTransaction> CreateTransaction(ContextBag context)
         {
             return transactionFactory.BeginTransaction(context);
         }

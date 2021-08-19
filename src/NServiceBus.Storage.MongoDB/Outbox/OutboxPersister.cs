@@ -31,9 +31,9 @@
             return outboxRecord != null ? new OutboxMessage(outboxRecord.Id, outboxRecord.TransportOperations?.Select(op => op.ToTransportType()).ToArray()) : null;
         }
 
-        public Task<OutboxTransaction> BeginTransaction(ContextBag context, CancellationToken cancellationToken = default) => outboxTransactionFactory.BeginTransaction(context, cancellationToken);
+        public Task<IOutboxTransaction> BeginTransaction(ContextBag context, CancellationToken cancellationToken = default) => outboxTransactionFactory.BeginTransaction(context, cancellationToken);
 
-        public Task Store(OutboxMessage message, OutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
+        public Task Store(OutboxMessage message, IOutboxTransaction transaction, ContextBag context, CancellationToken cancellationToken = default)
         {
             var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
             var storageSession = mongoOutboxTransaction.StorageSession;

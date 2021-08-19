@@ -17,7 +17,7 @@
             this.versionElementName = versionElementName;
         }
 
-        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
@@ -28,7 +28,7 @@
             await storageSession.InsertOneAsync(sagaDataType, document, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public async Task Update(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
@@ -44,13 +44,13 @@
             }
         }
 
-        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
             GetSagaData<TSagaData>(idElementName, sagaId, session, cancellationToken);
 
-        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
+        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
             GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session, cancellationToken);
 
-        public async Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
+        public async Task Complete(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
@@ -65,7 +65,7 @@
             }
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, SynchronizedStorageSession session, CancellationToken cancellationToken)
+        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, ISynchronizedStorageSession session, CancellationToken cancellationToken)
         {
             var storageSession = (StorageSession)session;
 

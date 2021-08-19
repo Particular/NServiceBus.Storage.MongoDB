@@ -18,7 +18,7 @@
             this.transactionTimeout = transactionTimeout;
         }
 
-        public async Task<CompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag, CancellationToken cancellationToken = default)
+        public async Task<ICompletableSynchronizedStorageSession> OpenSession(ContextBag contextBag, CancellationToken cancellationToken = default)
         {
             var mongoSession = await client.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 

@@ -7,7 +7,7 @@
     using global::MongoDB.Driver;
     using Outbox;
 
-    class MongoOutboxTransaction : OutboxTransaction
+    class MongoOutboxTransaction : IOutboxTransaction
     {
         public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, ContextBag context, Func<Type, string> collectionNamingConvention, TimeSpan transactionTimeout)
         {

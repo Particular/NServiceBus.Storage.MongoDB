@@ -12,7 +12,7 @@
         {
             MessageId = source.MessageId;
             Options = source.Options != null ? new Dictionary<string, string>(source.Options) : new Dictionary<string, string>();
-            Body = source.Body;
+            Body = source.Body.ToArray();
             Headers = source.Headers;
         }
 

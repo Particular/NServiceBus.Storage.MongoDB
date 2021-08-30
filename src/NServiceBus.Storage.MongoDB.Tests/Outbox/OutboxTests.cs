@@ -44,7 +44,7 @@
                 var receivedOp = received.TransportOperations[op];
 
                 Assert.AreEqual(expectedOp.MessageId, receivedOp.MessageId);
-                Assert.AreEqual(Convert.ToBase64String(expectedOp.Body), Convert.ToBase64String(receivedOp.Body));
+                Assert.AreEqual(Convert.ToBase64String(expectedOp.Body.ToArray()), Convert.ToBase64String(receivedOp.Body.ToArray()));
                 foreach (var header in expectedOp.Headers.Keys)
                 {
                     Assert.AreEqual(expectedOp.Headers[header], receivedOp.Headers[header]);

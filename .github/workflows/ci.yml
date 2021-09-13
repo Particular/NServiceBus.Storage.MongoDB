@@ -1,4 +1,3 @@
-# Rename this file to ci.yml while the template is being added.
 name: CI
 on:
   push:
@@ -60,7 +59,7 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
-     - name: Stop built-in MongoDB server (Windows)
+      - name: Stop built-in MongoDB server (Windows)
         if: matrix.name == 'Windows'
         shell: pwsh
         run:  |

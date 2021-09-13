@@ -60,26 +60,5 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
-      - name: Azure login
-        uses: azure/login@v1.3.0
-        with:
-          creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
-      - name: Setup infrastructure
-        id: setup-infrastructure
-        shell: pwsh
-        run: |
-          # Retrieve the Azure region in which this workflow is running. This region should be used to create addtional resources.
-          $hostInfo = curl -H Metadata:true "169.254.169.254/metadata/instance?api-version=2017-08-01" | ConvertFrom-Json
-          $region = $hostInfo.compute.location
-
-          # Provide a PowerShell script that will initialize dependent infrastructure. Use the GitHubActions-RG resource group for all resources.
-          # Check for error conditions and ensure that the dependent infrastructure is available and running before moving to the next step.
-          # Output parameters can be set for future steps to use by using the echo ::set-output name=key::value command.
       - name: Run tests
         uses: Particular/run-tests-action@v1.0.0
-      - name: Teardown infrastructure
-        if: ${{ always() }}
-        shell: pwsh
-        run: |
-          # Provide a PowerShell script that will shutdown/clean up any dependent infrastructure that has been set up.
-          # Any output parameters specified in the setup stage can be accessed by using {{steps.setup-infrastructure.outputs.key}}

@@ -81,8 +81,3 @@ jobs:
           mongodb-replica-set: tr0
       - name: Run tests
         uses: Particular/run-tests-action@v1.0.0
-      - name: Teardown infrastructure (Windows)
-        if: ${{ always() && matrix.name == 'Windows' }}
-        shell: pwsh
-        run: |
-          mongo --eval "db.getSiblingDB('admin').shutdownServer()"

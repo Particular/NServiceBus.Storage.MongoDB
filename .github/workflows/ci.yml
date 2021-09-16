@@ -1,0 +1,67 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+      - release-*
+  pull_request:
+  workflow_dispatch:
+env:
+  DOTNET_NOLOGO: true
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-2019
+            name: Windows
+          - os: ubuntu-20.04
+            name: Linux
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v1.8.2
+        with:
+          dotnet-version: 5.0.x
+      - name: Setup .NET Core 3.1 runtime
+        uses: actions/setup-dotnet@v1.8.2
+        with:
+          dotnet-version: 3.1.x
+      - name: Build
+        run: dotnet build src --configuration Release
+      - name: Upload packages
+        if: matrix.name == 'Windows'
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: NuGet packages
+          path: nugets/
+          retention-days: 7
+      - name: Stop built-in MongoDB server (Windows)
+        if: matrix.name == 'Windows'
+        shell: pwsh
+        run:  |
+          # Need to stop default MongoDB server as it does not support replication
+          Stop-Service -Name "MongoDB"
+          Start-Sleep -s 5
+      - name: Setup MongoDB server (Windows)
+        if: matrix.name == 'Windows'
+        shell: pwsh
+        run: |
+          mkdir /temp/mongodb
+          # We need a MongoDB server started with a replica set configuration:
+          Start-Process mongod -ArgumentList "--dbpath /temp/mongodb --replSet tr0 --bind_ip 127.0.0.1" -WindowStyle Hidden
+          Start-Sleep -s 5
+          mongo --eval 'rs.initiate()'
+      - name: Setup MongoDB server (Linux)
+        if: matrix.name == 'Linux'
+        uses: supercharge/mongodb-github-action@1.6.0
+        with:
+          mongodb-replica-set: tr0
+      - name: Run tests
+        uses: Particular/run-tests-action@v1.0.0

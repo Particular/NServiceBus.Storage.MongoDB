@@ -1,0 +1,17 @@
+[*.cs]
+
+# Justification: release branch
+dotnet_diagnostic.CA1710.severity = none
+dotnet_diagnostic.CA1711.severity = none
+
+# Justification: test project
+dotnet_diagnostic.CA2007.severity = none
+
+# IDE0055: Fix formatting
+dotnet_diagnostic.IDE0055.severity = none
+
+# IDE0019: Use pattern matching
+dotnet_diagnostic.IDE0019.severity = none
+
+# IDE0030: Use coalesce expression
+dotnet_diagnostic.IDE0030.severity = none

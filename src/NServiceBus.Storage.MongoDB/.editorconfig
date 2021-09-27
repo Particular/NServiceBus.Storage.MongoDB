@@ -1,0 +1,7 @@
+[*.cs]
+
+# Justification: release branch
+dotnet_diagnostic.CA1711.severity = none
+
+# IDE0055: Fix formatting
+dotnet_diagnostic.IDE0055.severity = none

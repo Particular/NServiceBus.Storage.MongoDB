@@ -60,7 +60,7 @@ jobs:
           mongo --eval 'rs.initiate()'
       - name: Setup MongoDB server (Linux)
         if: matrix.name == 'Linux'
-        uses: supercharge/mongodb-github-action@1.6.0
+        uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-replica-set: tr0
       - name: Run tests

@@ -8,3 +8,8 @@ dotnet_diagnostic.IDE0065.severity = none
 
 # CA2007: Consider calling ConfigureAwait on the awaited task
 dotnet_diagnostic.CA2007.severity = none
+
+# Justification: Persistence library doesn't need saga analyzers
+dotnet_diagnostic.NSB0004.severity = none
+dotnet_diagnostic.NSB0009.severity = none
+dotnet_diagnostic.NSB0012.severity = none

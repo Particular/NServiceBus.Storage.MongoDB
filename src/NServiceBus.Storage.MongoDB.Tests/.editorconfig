@@ -15,3 +15,8 @@ dotnet_diagnostic.IDE0019.severity = none
 
 # IDE0030: Use coalesce expression
 dotnet_diagnostic.IDE0030.severity = none
+
+# Justification: Persistence library doesn't need saga analyzers
+dotnet_diagnostic.NSB0004.severity = none
+dotnet_diagnostic.NSB0009.severity = none
+dotnet_diagnostic.NSB0012.severity = none

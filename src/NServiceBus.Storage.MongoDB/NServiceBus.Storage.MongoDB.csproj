@@ -8,7 +8,7 @@
     <PackageReference Include="MongoDB.Driver" Version="[2.9.2, 3.0.0)" />
     <PackageReference Include="NServiceBus" Version="[7.1.10, 8.0.0)" />
     <PackageReference Include="Particular.CodeRules" Version="0.2.1" PrivateAssets="All" />
-    <PackageReference Include="Particular.Packaging" Version="1.2.1" PrivateAssets="All" />
+    <PackageReference Include="Particular.Packaging" Version="2.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

@@ -59,5 +59,5 @@ replication:
   replSetName: rs0
 ```
 
-- Restart the MongoDB Windows service
+- Restart the MongoDB Windows service (if installed as a service) or start the MongoDB server from the command line
 - Open the `mongosh` and type in `rs.initiate()`

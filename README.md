@@ -48,7 +48,7 @@ Once started, initialize the replication set (required for transaction support) 
 
 `docker exec -it TestMongoDB mongo --eval 'rs.initiate()'`
 
-##### Bare metal
+##### Local installation
 
 - Install the MongoDB server using the installer from the [MongoDB website](https://docs.mongodb.com/manual/installation/).
 - Install the MongoDB shell (`mongosh`) from the [MongoDB website](https://www.mongodb.com/try/download/shell?jmp=docs)

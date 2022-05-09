@@ -8,8 +8,8 @@
     using Extensibility;
     using global::MongoDB.Driver;
     using MongoDB;
-    using Persistence;
     using Sagas;
+    using SynchronizedStorageSession = SynchronizedStorageSession;
 
     public class SagaTestsConfiguration
     {
@@ -41,8 +41,8 @@
             DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
             CollectionNamingConvention = collectionNamingConvention;
 
-            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
-
+            var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
+            SessionFactory = () => new SynchronizedStorageSession(synchronizedStorage);
             SagaStorage = new SagaPersister(versionElementName);
         }
 
@@ -60,7 +60,7 @@
 
         public ISagaPersister SagaStorage { get; }
 
-        public ISynchronizedStorage SynchronizedStorage { get; }
+        internal Func<SynchronizedStorageSession> SessionFactory { get; private set; }
 
         public async Task Configure()
         {

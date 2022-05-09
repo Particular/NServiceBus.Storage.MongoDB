@@ -9,6 +9,7 @@
     using NServiceBus.Sagas;
     using Persistence;
     using Storage.MongoDB;
+    using SynchronizedStorageSession = Storage.MongoDB.SynchronizedStorageSession;
 
     public partial class PersistenceTestsConfiguration
     {
@@ -22,11 +23,9 @@
 
         public ISagaIdGenerator SagaIdGenerator { get; } = new DefaultSagaIdGenerator();
 
+        public Func<ICompletableSynchronizedStorageSession> CreateStorageSession { get; private set; }
+
         public ISagaPersister SagaStorage { get; private set; }
-
-        public ISynchronizedStorage SynchronizedStorage { get; private set; }
-
-        public ISynchronizedStorageAdapter SynchronizedStorageAdapter { get; private set; }
 
         public IOutboxStorage OutboxStorage { get; private set; }
 
@@ -37,7 +36,8 @@
 
             Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(client, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
             SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName);
-            SynchronizedStorage = new StorageSessionFactory(client, true, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
+            var synchronizedStorage = new StorageSessionFactory(client, true, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
+            CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);
 
             var databaseSettings = new MongoDatabaseSettings
             {
@@ -54,6 +54,7 @@
         {
             await client.DropDatabaseAsync(databaseName, cancellationToken);
         }
+
 
         readonly string databaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
         MongoClient client;

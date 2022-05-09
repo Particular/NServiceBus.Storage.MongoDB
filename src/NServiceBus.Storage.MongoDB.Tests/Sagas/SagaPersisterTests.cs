@@ -23,8 +23,9 @@
         {
             var readContextBag = configuration.GetContextBagForSagaStorage();
             TSagaData sagaData;
-            using (var readSession = await configuration.SynchronizedStorage.OpenSession(readContextBag))
+            using (var readSession = configuration.SessionFactory())
             {
+                await readSession.Open(readContextBag);
                 sagaData = await configuration.SagaStorage.Get<TSagaData>(sagaId, readSession, readContextBag);
 
                 await readSession.CompleteAsync();

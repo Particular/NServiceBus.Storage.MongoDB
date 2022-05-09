@@ -66,9 +66,10 @@
                 throw new Exception("Unable to connect to the MongoDB server. Check the connection settings, and verify the server is running and accessible.", ex);
             }
 
-            context.Services.AddSingleton<ISynchronizedStorage>(
+            context.Services.AddScoped<ICompletableSynchronizedStorageSession, SynchronizedStorageSession>();
+
+            context.Services.AddSingleton(
                 new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout));
-            context.Services.AddSingleton<ISynchronizedStorageAdapter, StorageSessionAdapter>();
         }
     }
 }

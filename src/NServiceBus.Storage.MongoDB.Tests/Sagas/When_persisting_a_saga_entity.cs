@@ -22,8 +22,9 @@
             relatedClass = entity.RelatedClass;
 
             var insertContextBag = configuration.GetContextBagForSagaStorage();
-            using (var insertSession = await configuration.SynchronizedStorage.OpenSession(insertContextBag))
+            using (var insertSession = configuration.SessionFactory())
             {
+                await insertSession.Open(insertContextBag);
                 var correlationProperty = new SagaCorrelationProperty(nameof(entity.Id), entity.Id);
 
                 await configuration.SagaStorage.Save(entity, correlationProperty, insertSession, insertContextBag);

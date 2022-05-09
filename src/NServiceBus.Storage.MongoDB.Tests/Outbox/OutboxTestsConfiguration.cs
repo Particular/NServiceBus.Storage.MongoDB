@@ -7,7 +7,6 @@
     using global::MongoDB.Driver;
     using MongoDB;
     using NServiceBus.Outbox;
-    using Persistence;
 
     public class OutboxTestsConfiguration
     {
@@ -18,7 +17,6 @@
             DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
             CollectionNamingConvention = collectionNamingConvention;
 
-            SynchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
             transactionFactory = new MongoOutboxTransactionFactory(ClientProvider.Client, DatabaseName, CollectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
         }
 
@@ -31,8 +29,6 @@
         public Func<Type, string> CollectionNamingConvention { get; }
 
         public IOutboxStorage OutboxStorage { get; private set; }
-
-        public ISynchronizedStorage SynchronizedStorage { get; }
 
         public Task<IOutboxTransaction> CreateTransaction(ContextBag context)
         {

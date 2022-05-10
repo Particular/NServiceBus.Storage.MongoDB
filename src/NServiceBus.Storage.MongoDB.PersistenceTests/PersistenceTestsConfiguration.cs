@@ -50,13 +50,11 @@
             OutboxStorage = new OutboxPersister(client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
         }
 
-        public async Task Cleanup(CancellationToken cancellationToken = default)
-        {
+        public async Task Cleanup(CancellationToken cancellationToken = default) =>
             await client.DropDatabaseAsync(databaseName, cancellationToken);
-        }
 
 
-        readonly string databaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
+        readonly string databaseName = $"Test_{DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture)}";
         MongoClient client;
     }
 }

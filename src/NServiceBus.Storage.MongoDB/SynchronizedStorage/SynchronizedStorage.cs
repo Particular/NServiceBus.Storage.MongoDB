@@ -9,6 +9,10 @@
 
     class SynchronizedStorage : Feature
     {
+        public SynchronizedStorage() =>
+            // Depends on the core feature
+            DependsOn<Features.SynchronizedStorage>();
+
         protected override void Setup(FeatureConfigurationContext context)
         {
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();

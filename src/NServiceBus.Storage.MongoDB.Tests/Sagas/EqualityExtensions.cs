@@ -11,7 +11,7 @@
                 return true;
             }
 
-            if (item == null || !(obj is T x))
+            if (item == null || obj is not T x)
             {
                 return false;
             }

@@ -18,7 +18,7 @@
             Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
             Guard.AgainstNull(nameof(mongoClient), mongoClient);
 
-            persistenceExtensions.GetSettings().Set(SettingsKeys.MongoClient, (Func<IMongoClient>)(() => mongoClient));
+            persistenceExtensions.GetSettings().Set(SettingsKeys.MongoClient, () => mongoClient);
             return persistenceExtensions;
         }
 

@@ -18,7 +18,7 @@
         {
             Defaults(s =>
             {
-                s.SetDefault(SettingsKeys.MongoClient, (Func<IMongoClient>)(() =>
+                s.SetDefault(SettingsKeys.MongoClient, () =>
                 {
                     if (defaultClient == null)
                     {
@@ -26,7 +26,7 @@
                     }
 
                     return defaultClient;
-                }));
+                });
 
                 s.SetDefault(SettingsKeys.DatabaseName, s.EndpointName());
 

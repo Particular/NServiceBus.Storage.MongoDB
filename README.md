@@ -38,10 +38,26 @@ To use a different Mongo URL, you can set the `NServiceBusStorageMongoDB_Connect
 
 Instructions for installing MongoDB can be found on the [MongoDB website](https://docs.mongodb.com/manual/installation/).
 
+##### Docker
+
 For developers using Docker containers, the following docker command will quickly setup a container configured to use the default port:
 
 `docker run -d -p 27017:27017 --name TestMongoDB mongo:latest --replSet tr0`
 
-Once started, initialize the replication set (required for transaction support) by connecting to the database using a mongo shell. You can connect directly from your local machine using `mongo.exe` or use the following docker command to start a mongo shell inside the container and initialize the replication set:
+Once started, initialize the replication set (required for transaction support) by connecting to the database using a mongo shell. You can use the following docker command to start a mongo shell inside the container and initialize the replication set:
 
 `docker exec -it TestMongoDB mongo --eval 'rs.initiate()'`
+
+##### Local installation
+
+- Install the MongoDB server using the installer from the [MongoDB website](https://docs.mongodb.com/manual/installation/).
+- Install the MongoDB shell (`mongosh`) from the [MongoDB website](https://www.mongodb.com/try/download/shell?jmp=docs)
+- In the server configuration file (`mongod.cfg`) add followinng lines to enable replica set mode:
+
+```
+replication:
+  replSetName: rs0
+```
+
+- Restart the MongoDB Windows service (if installed as a service) or start the MongoDB server from the command line
+- Open the `mongosh` and type in `rs.initiate()`

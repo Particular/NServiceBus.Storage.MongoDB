@@ -9,6 +9,10 @@
 
     class SynchronizedStorage : Feature
     {
+        public SynchronizedStorage() =>
+            // Depends on the core feature
+            DependsOn<Features.SynchronizedStorage>();
+
         protected override void Setup(FeatureConfigurationContext context)
         {
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
@@ -40,7 +44,7 @@
                         //HINT: cluster configuration check is needed as the built-in checks, executed during "StartTransaction() call,
                         //      do not detect if the cluster configuration is a supported one. Only the version ranges are validated.
                         //      Without this check, exceptions will be thrown during message processing.
-                        if (clusterType != ClusterType.ReplicaSet && clusterType != ClusterType.Sharded)
+                        if (clusterType is not ClusterType.ReplicaSet and not ClusterType.Sharded)
                         {
                             throw new Exception($"Transactions are only supported on replica sets or sharded clusters. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
                         }
@@ -66,9 +70,10 @@
                 throw new Exception("Unable to connect to the MongoDB server. Check the connection settings, and verify the server is running and accessible.", ex);
             }
 
-            context.Services.AddSingleton<ISynchronizedStorage>(
+            context.Services.AddScoped<ICompletableSynchronizedStorageSession, SynchronizedStorageSession>();
+
+            context.Services.AddSingleton(
                 new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout));
-            context.Services.AddSingleton<ISynchronizedStorageAdapter, StorageSessionAdapter>();
         }
     }
 }

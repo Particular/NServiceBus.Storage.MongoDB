@@ -35,6 +35,8 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>(config =>
                 {
+                    config.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
+
                     // Mongo is configured by default, so we're adding the acceptancetestingpersistence mixed in
                     config.UsePersistence<AcceptanceTestingPersistence, StorageType.Sagas>();
                     config.UsePersistence<AcceptanceTestingPersistence, StorageType.Outbox>();
@@ -48,10 +50,7 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
             {
                 Context testContext;
 
-                public MySaga(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
+                public MySaga(Context testContext) => this.testContext = testContext;
 
                 public Task Handle(StartSaga message, IMessageHandlerContext context)
                 {

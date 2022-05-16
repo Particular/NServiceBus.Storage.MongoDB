@@ -19,7 +19,7 @@
 
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
-            var storageSession = (StorageSession)session;
+            var storageSession = ((SynchronizedStorageSession)session).Session;
             var sagaDataType = sagaData.GetType();
 
             var document = sagaData.ToBsonDocument();
@@ -30,7 +30,7 @@
 
         public async Task Update(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
-            var storageSession = (StorageSession)session;
+            var storageSession = ((SynchronizedStorageSession)session).Session;
             var sagaDataType = sagaData.GetType();
 
             var version = storageSession.RetrieveVersion(sagaDataType);
@@ -52,7 +52,7 @@
 
         public async Task Complete(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
-            var storageSession = (StorageSession)session;
+            var storageSession = ((SynchronizedStorageSession)session).Session;
             var sagaDataType = sagaData.GetType();
 
             var version = storageSession.RetrieveVersion(sagaDataType);
@@ -67,7 +67,7 @@
 
         async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, ISynchronizedStorageSession session, CancellationToken cancellationToken)
         {
-            var storageSession = (StorageSession)session;
+            var storageSession = ((SynchronizedStorageSession)session).Session;
 
             var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue)), cancellationToken).ConfigureAwait(false);
 

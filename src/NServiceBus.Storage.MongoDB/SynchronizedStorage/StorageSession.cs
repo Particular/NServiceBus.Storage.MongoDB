@@ -7,11 +7,10 @@
     using global::MongoDB.Bson;
     using global::MongoDB.Driver;
     using Logging;
-    using Persistence;
 
-    class StorageSession : ICompletableSynchronizedStorageSession, IMongoSessionProvider
+    class StorageSession
     {
-        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, TimeSpan transactionTimeout)
+        public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool useTransaction, TimeSpan transactionTimeout)
         {
             MongoSession = mongoSession;
 
@@ -24,27 +23,8 @@
 
             this.contextBag = contextBag;
             this.collectionNamingConvention = collectionNamingConvention;
-            this.ownsMongoSession = ownsMongoSession;
             this.useTransaction = useTransaction;
             this.transactionTimeout = transactionTimeout;
-        }
-
-        Task ICompletableSynchronizedStorageSession.CompleteAsync(CancellationToken cancellationToken)
-        {
-            if (ownsMongoSession)
-            {
-                return CommitTransaction(cancellationToken);
-            }
-
-            return Task.CompletedTask;
-        }
-
-        void IDisposable.Dispose()
-        {
-            if (ownsMongoSession)
-            {
-                Dispose();
-            }
         }
 
         public IClientSessionHandle MongoSession { get; }
@@ -155,7 +135,6 @@
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;
         readonly Func<Type, string> collectionNamingConvention;
-        readonly bool ownsMongoSession;
         readonly bool useTransaction;
 
         readonly TimeSpan transactionTimeout;

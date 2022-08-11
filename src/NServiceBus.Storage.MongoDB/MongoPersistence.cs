@@ -20,10 +20,7 @@
             {
                 s.SetDefault(SettingsKeys.MongoClient, () =>
                 {
-                    if (defaultClient == null)
-                    {
-                        defaultClient = new MongoClient();
-                    }
+                    defaultClient ??= new MongoClient();
 
                     return defaultClient;
                 });

@@ -49,9 +49,9 @@ jobs:
         if: matrix.name == 'Windows'
         shell: pwsh
         run: |
-          mkdir /temp/mongodb
+          mkdir D:\temp\mongodb
           # We need a MongoDB server started with a replica set configuration:
-          mongod --dbpath /temp/mongodb --replSet tr0 --bind_ip 127.0.0.1 --install --serviceName "NServiceBusMongoDB"
+          mongod --dbpath D:\temp\mongodb --replSet tr0 --bind_ip 127.0.0.1 --install --serviceName "NServiceBusMongoDB"
           Start-Service -Name NServiceBusMongoDB
           mongo --eval 'rs.initiate()'
       - name: Setup MongoDB server (Linux)

@@ -42,11 +42,13 @@ jobs:
         if: matrix.name == 'Windows'
         shell: pwsh
         run: |
-          mkdir /temp/mongodb
+          mkdir D:\temp\nservicebus-mongodb
+          mkdir D:\temp\nservicebus-mongodb\data
+          mkdir D:\temp\nservicebus-mongodb\logs
           # We need a MongoDB server started with a replica set configuration:
-          Start-Process mongod -ArgumentList "--dbpath /temp/mongodb --replSet tr0 --bind_ip 127.0.0.1" -WindowStyle Hidden
-          Start-Sleep -s 5
-          mongo --eval 'rs.initiate()'
+          mongod --dbpath D:\temp\nservicebus-mongodb\data --logpath D:\temp\nservicebus-mongodb\logs\logs.txt --replSet tr0 --bind_ip 127.0.0.1 --install --serviceName NServiceBusMongoDB --serviceDisplayName NServiceBusMongoDB
+          net start NServiceBusMongoDB
+          mongo --eval 'rs.initiate()'    
       - name: Setup MongoDB server (Linux)
         if: matrix.name == 'Linux'
         uses: supercharge/mongodb-github-action@1.7.0

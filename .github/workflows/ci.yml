@@ -29,7 +29,7 @@ jobs:
           mkdir D:\temp\nservicebus-mongodb\data
           mkdir D:\temp\nservicebus-mongodb\logs
           # We need a MongoDB server started with a replica set configuration:
-          mongod --dbpath D:\temp\nservicebus-mongodb\data --logpath D:\temp\nservicebus-mongodb\logs\logs.txt --replSet tr0 --bind_ip 127.0.0.1 --install --serviceName NServiceBusMongoDB
+          mongod --dbpath D:\temp\nservicebus-mongodb\data --logpath D:\temp\nservicebus-mongodb\logs\logs.txt --replSet tr0 --bind_ip 127.0.0.1 --install --serviceName NServiceBusMongoDB --serviceDisplayName NServiceBusMongoDB
           net start NServiceBusMongoDB
           mongo --eval 'rs.initiate()'    
       - name: Checkout

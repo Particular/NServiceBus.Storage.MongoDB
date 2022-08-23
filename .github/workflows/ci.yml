@@ -21,6 +21,16 @@ jobs:
             name: Linux
       fail-fast: false
     steps:
+      - name: Setup MongoDB server (Windows)
+        if: matrix.name == 'Windows'
+        shell: pwsh
+        run: |
+          mkdir D:\temp\nservicebus-mongodb
+          mkdir D:\temp\nservicebus-mongodb\data
+          mkdir D:\temp\nservicebus-mongodb\logs
+          # We need a MongoDB server started with a replica set configuration:
+          mongod --fork --dbpath D:\temp\nservicebus-mongodb\data --logpath D:\temp\nservicebus-mongodb\logs\logs.txt --replSet tr0 --bind_ip 127.0.0.1
+          mongo --eval 'rs.initiate()'    
       - name: Checkout
         uses: actions/checkout@v3.0.2
         with:
@@ -45,17 +55,6 @@ jobs:
           # Need to stop default MongoDB server as it does not support replication
           Stop-Service -Name "MongoDB"
           Start-Sleep -s 5
-      - name: Setup MongoDB server (Windows)
-        if: matrix.name == 'Windows'
-        shell: pwsh
-        run: |
-          mkdir D:\temp\nservicebus-mongodb
-          mkdir D:\temp\nservicebus-mongodb\data
-          mkdir D:\temp\nservicebus-mongodb\logs
-          # We need a MongoDB server started with a replica set configuration:
-          mongod --dbpath D:\temp\nservicebus-mongodb\data --logpath D:\temp\nservicebus-mongodb\logs\logs.txt --replSet tr0 --bind_ip 127.0.0.1 --install --serviceName "NServiceBusMongoDB"
-          Start-Service -Name NServiceBusMongoDB
-          mongo --eval 'rs.initiate()'
       - name: Setup MongoDB server (Linux)
         if: matrix.name == 'Linux'
         uses: supercharge/mongodb-github-action@1.7.0

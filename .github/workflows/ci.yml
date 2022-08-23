@@ -38,13 +38,6 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
-      - name: Stop built-in MongoDB server (Windows)
-        if: matrix.name == 'Windows'
-        shell: pwsh
-        run:  |
-          # Need to stop default MongoDB server as it does not support replication
-          Stop-Service -Name "MongoDB"
-          Start-Sleep -s 5
       - name: Setup MongoDB server (Windows)
         if: matrix.name == 'Windows'
         shell: pwsh

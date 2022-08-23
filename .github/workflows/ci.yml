@@ -29,8 +29,8 @@ jobs:
           mkdir D:\temp\nservicebus-mongodb\data
           mkdir D:\temp\nservicebus-mongodb\logs
           # We need a MongoDB server started with a replica set configuration:
-          Start-Process mongod -ArgumentList="--dbpath D:\temp\nservicebus-mongodb\data --logpath D:\temp\nservicebus-mongodb\logs\logs.txt --replSet tr0 --bind_ip 127.0.0.1" -WindowStyle Hidden
-          Start-Sleep -s 5
+          mongod --dbpath D:\temp\nservicebus-mongodb\data --logpath D:\temp\nservicebus-mongodb\logs\logs.txt --replSet tr0 --bind_ip 127.0.0.1 --install --serviceName nservicebusmongodb
+          net start nservicebusmongodb
           mongo --eval 'rs.initiate()'    
       - name: Checkout
         uses: actions/checkout@v3.0.2

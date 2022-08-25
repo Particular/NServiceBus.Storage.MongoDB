@@ -40,25 +40,8 @@ jobs:
           name: NuGet packages
           path: nugets/
           retention-days: 7
-      - name: Stop built-in MongoDB server (Windows)
-        if: matrix.name == 'Windows'
-        shell: pwsh
-        run:  |
-          # Need to stop default MongoDB server as it does not support replication
-          Stop-Service -Name "MongoDB"
-          Start-Sleep -s 5
-      - name: Setup MongoDB server (Windows)
-        if: matrix.name == 'Windows'
-        shell: pwsh
-        run: |
-          mkdir /temp/mongodb
-          # We need a MongoDB server started with a replica set configuration:
-          Start-Process mongod -ArgumentList "--dbpath /temp/mongodb --replSet tr0 --bind_ip 127.0.0.1" -WindowStyle Hidden
-          Start-Sleep -s 5
-          mongo --eval 'rs.initiate()'
-      - name: Setup MongoDB server (Linux)
-        if: matrix.name == 'Linux'
-        uses: supercharge/mongodb-github-action@1.6.0
+      - name: Setup MongoDB Server
+        uses: Particular/setup-mongodb-action@v1.0.1
         with:
           mongodb-replica-set: tr0
       - name: Run tests

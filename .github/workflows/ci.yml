@@ -39,7 +39,7 @@ jobs:
           path: nugets/
           retention-days: 7
       - name: Setup MongoDB Server
-        uses: Particular/setup-mongodb-action@v1.0.1
+        uses: Particular/setup-mongodb-action@v1.0.2
         with:
           mongodb-replica-set: tr0
       - name: Run tests

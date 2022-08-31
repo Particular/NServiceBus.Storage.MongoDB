@@ -113,6 +113,11 @@
 
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (MongoSession.IsInTransaction)
             {
                 try
@@ -130,7 +135,10 @@
             }
 
             MongoSession.Dispose();
+            disposed = true;
         }
+
+        bool disposed;
 
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;

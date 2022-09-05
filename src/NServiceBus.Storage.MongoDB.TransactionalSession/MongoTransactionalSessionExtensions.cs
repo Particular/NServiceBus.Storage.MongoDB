@@ -6,7 +6,7 @@ using NServiceBus.Configuration.AdvancedExtensibility;
 /// <summary>
 /// MongoDB persistence extensions for <see cref="ITransactionalSession"/> support.
 /// </summary>
-public static class MongoDBTransactionalSessionExtensions
+public static class MongoTransactionalSessionExtensions
 {
     /// <summary>
     /// Enables transactional session for this endpoint.

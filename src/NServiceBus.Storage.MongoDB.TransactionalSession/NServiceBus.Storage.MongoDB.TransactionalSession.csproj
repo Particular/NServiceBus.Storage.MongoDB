@@ -13,4 +13,8 @@
     <PackageReference Include="NServiceBus.TransactionalSession" Version="[2.0.0-beta.4, 3.0.0)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.Storage.MongoDB\NServiceBus.Storage.MongoDB.csproj" />
+  </ItemGroup>
+
 </Project>

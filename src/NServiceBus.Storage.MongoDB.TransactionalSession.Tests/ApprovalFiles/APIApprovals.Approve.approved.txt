@@ -1,0 +1,11 @@
+namespace NServiceBus.TransactionalSession
+{
+    public sealed class MongoSessionOptions : NServiceBus.TransactionalSession.OpenSessionOptions
+    {
+        public MongoSessionOptions() { }
+    }
+    public static class MongoTransactionalSessionExtensions
+    {
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> EnableTransactionalSession(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions) { }
+    }
+}

@@ -10,8 +10,6 @@
 
     public class TransactionSessionDefaultServer : IEndpointSetupTemplate
     {
-        public TransportTransactionMode TransportTransactionMode { get; set; } = TransportTransactionMode.SendsAtomicWithReceive;
-
         public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration,
             Func<EndpointConfiguration, Task> configurationBuilderCustomization)
         {
@@ -27,7 +25,6 @@
 
             builder.UseTransport(new AcceptanceTestingTransport
             {
-                TransportTransactionMode = TransportTransactionMode,
                 StorageLocation = storageDir
             });
 

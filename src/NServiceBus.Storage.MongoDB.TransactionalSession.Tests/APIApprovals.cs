@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Persistence.CosmosDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests
 {
     using NUnit.Framework;
     using Particular.Approvals;

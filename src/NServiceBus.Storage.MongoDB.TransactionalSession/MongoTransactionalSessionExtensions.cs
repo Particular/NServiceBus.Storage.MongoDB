@@ -1,5 +1,7 @@
 ﻿namespace NServiceBus.TransactionalSession;
 
+using System.Threading;
+using System.Threading.Tasks;
 using Features;
 using NServiceBus.Configuration.AdvancedExtensibility;
 
@@ -18,4 +20,10 @@ public static class MongoTransactionalSessionExtensions
 
         return persistenceExtensions;
     }
+
+    /// <summary>
+    /// Opens the transactional session.
+    /// </summary>
+    public static Task Open(this ITransactionalSession session, CancellationToken cancellationToken = default) =>
+        session.Open(new MongoSessionOptions(), cancellationToken);
 }

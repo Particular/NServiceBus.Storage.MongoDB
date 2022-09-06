@@ -21,7 +21,7 @@
                 {
                     using var scope = ctx.ServiceProvider.CreateScope();
                     using var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>();
-                    await transactionalSession.Open(new MongoSessionOptions());
+                    await transactionalSession.Open();
                     ctx.SessionId = transactionalSession.SessionId;
 
                     var mongoSession = transactionalSession.SynchronizedStorageSession.GetClientSession();

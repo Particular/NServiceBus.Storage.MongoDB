@@ -6,19 +6,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.Storage.MongoDB\NServiceBus.Storage.MongoDB.csproj" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="Nunit" Version="3.13.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
-    <!-- DO NOT REMOVE MongoDB.Driver, it is added so that dependabot knows about version changes-->
-    <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
-    <PackageReference Include="NServiceBus" Version="8.0.0-rc.3" />
-    <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="Particular.Approvals" Version="0.3.0" />
     <PackageReference Include="PublicApiGenerator" Version="10.3.0" />
+    <PackageReference Include="NServiceBus.TransactionalSession" Version="2.0.0-beta.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.Storage.MongoDB.TransactionalSession\NServiceBus.Storage.MongoDB.TransactionalSession.csproj" />
   </ItemGroup>
 
 </Project>

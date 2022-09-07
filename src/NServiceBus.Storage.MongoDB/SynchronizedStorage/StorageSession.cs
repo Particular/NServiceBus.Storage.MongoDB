@@ -9,7 +9,7 @@
     using Logging;
     using Persistence;
 
-    class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
+    class StorageSession : CompletableSynchronizedStorageSession, IMongoSynchronizedStorageSession
     {
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, TimeSpan transactionTimeout)
         {

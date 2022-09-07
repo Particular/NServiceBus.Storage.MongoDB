@@ -21,11 +21,19 @@ namespace NServiceBus
     public static class SynchronizedStorageSessionExtensions
     {
         public static MongoDB.Driver.IClientSessionHandle GetClientSession(this NServiceBus.Persistence.SynchronizedStorageSession session) { }
+        public static NServiceBus.Storage.MongoDB.IMongoSynchronizedStorageSession MongoPersistenceSession(this NServiceBus.Persistence.SynchronizedStorageSession session) { }
+    }
+}
+namespace NServiceBus.Storage.MongoDB
+{
+    public interface IMongoSynchronizedStorageSession
+    {
+        MongoDB.Driver.IClientSessionHandle MongoSession { get; }
     }
 }
 namespace NServiceBus.Testing
 {
-    public class TestableMongoSynchronizedStorageSession : NServiceBus.Persistence.SynchronizedStorageSession
+    public class TestableMongoSynchronizedStorageSession : NServiceBus.Persistence.SynchronizedStorageSession, NServiceBus.Storage.MongoDB.IMongoSynchronizedStorageSession
     {
         public TestableMongoSynchronizedStorageSession(MongoDB.Driver.IClientSessionHandle clientSessionHandle) { }
         public MongoDB.Driver.IClientSessionHandle MongoSession { get; }

@@ -3,7 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Features;
-using NServiceBus.Configuration.AdvancedExtensibility;
+using Configuration.AdvancedExtensibility;
 
 /// <summary>
 /// MongoDB persistence extensions for <see cref="ITransactionalSession"/> support.
@@ -16,7 +16,7 @@ public static class MongoTransactionalSessionExtensions
     public static PersistenceExtensions<MongoPersistence> EnableTransactionalSession(
         this PersistenceExtensions<MongoPersistence> persistenceExtensions)
     {
-        persistenceExtensions.GetSettings().EnableFeatureByDefault(typeof(TransactionalSession));
+        persistenceExtensions.GetSettings().EnableFeatureByDefault<MongoTransactionalSession>();
 
         return persistenceExtensions;
     }

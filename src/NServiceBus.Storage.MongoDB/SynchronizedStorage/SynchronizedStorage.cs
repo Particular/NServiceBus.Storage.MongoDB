@@ -4,9 +4,12 @@
     using Features;
     using global::MongoDB.Driver;
     using global::MongoDB.Driver.Core.Clusters;
+    using Persistence;
 
     class SynchronizedStorage : Feature
     {
+        public SynchronizedStorage() => DependsOn<Features.SynchronizedStorage>();
+
         protected override void Setup(FeatureConfigurationContext context)
         {
             var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
@@ -66,6 +69,7 @@
 
             context.Container.ConfigureComponent(() => new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout), DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<StorageSessionAdapter>(DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent(b => b.Build<CompletableSynchronizedStorageSessionAdapter>().AdaptedSession.MongoPersistenceSession(), DependencyLifecycle.InstancePerUnitOfWork);
         }
     }
 }

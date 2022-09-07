@@ -1,5 +1,6 @@
-﻿namespace NServiceBus.TransactionalSession;
-
-sealed class MongoTransactionalSession : TransactionalSession
+﻿namespace NServiceBus.TransactionalSession
 {
+    sealed class MongoTransactionalSession : TransactionalSession
+    {
+    }
 }

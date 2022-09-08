@@ -46,7 +46,7 @@ For developers using Docker containers, the following docker command will quickl
 
 Once started, initialize the replication set (required for transaction support) by connecting to the database using a mongo shell. You can use the following docker command to start a mongo shell inside the container and initialize the replication set:
 
-`docker exec -it TestMongoDB mongo --eval 'rs.initiate()'`
+`docker exec -it TestMongoDB mongosh --eval 'rs.initiate()'`
 
 ##### Local installation
 

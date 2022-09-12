@@ -8,7 +8,7 @@
     using Persistence;
     using Transport;
 
-    class SynchronizedStorageSession : ICompletableSynchronizedStorageSession, IMongoSessionProvider
+    class SynchronizedStorageSession : ICompletableSynchronizedStorageSession, IMongoSynchronizedStorageSession
     {
         public StorageSession Session { get; private set; }
         public IClientSessionHandle MongoSession => Session.MongoSession;

@@ -13,13 +13,19 @@
         /// <summary>
         /// Retrieves the current MongoDB client session from the context.
         /// </summary>
-        public static IClientSessionHandle GetClientSession(this ISynchronizedStorageSession session)
+        public static IClientSessionHandle GetClientSession(this ISynchronizedStorageSession session) =>
+            session.MongoPersistenceSession().MongoSession;
+
+        /// <summary>
+        /// Retrieves the shared <see cref="IMongoSynchronizedStorageSession"/> from the <see cref="SynchronizedStorageSession"/>.
+        /// </summary>
+        public static IMongoSynchronizedStorageSession MongoPersistenceSession(this ISynchronizedStorageSession session)
         {
             Guard.AgainstNull(nameof(session), session);
 
-            if (session is IMongoSessionProvider storageSession)
+            if (session is IMongoSynchronizedStorageSession mongoSession)
             {
-                return storageSession.MongoSession;
+                return mongoSession;
             }
 
             throw new Exception($"Cannot access the synchronized storage session. Ensure that 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>()' has been called.");

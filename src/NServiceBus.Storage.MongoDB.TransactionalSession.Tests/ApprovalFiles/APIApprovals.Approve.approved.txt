@@ -1,8 +1,8 @@
 namespace NServiceBus.TransactionalSession
 {
-    public sealed class MongoSessionOptions : NServiceBus.TransactionalSession.OpenSessionOptions
+    public sealed class MongoOpenSessionOptions : NServiceBus.TransactionalSession.OpenSessionOptions
     {
-        public MongoSessionOptions() { }
+        public MongoOpenSessionOptions() { }
     }
     public static class MongoTransactionalSessionExtensions
     {

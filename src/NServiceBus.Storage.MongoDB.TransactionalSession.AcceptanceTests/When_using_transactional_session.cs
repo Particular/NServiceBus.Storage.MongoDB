@@ -82,7 +82,7 @@
                     using (var scope = ctx.Builder.CreateChildBuilder())
                     using (var transactionalSession = scope.Build<ITransactionalSession>())
                     {
-                        await transactionalSession.Open(new MongoSessionOptions());
+                        await transactionalSession.Open(new MongoOpenSessionOptions());
                         ctx.SessionId = transactionalSession.SessionId;
 
                         await transactionalSession.SendLocal(new SampleMessage());
@@ -118,7 +118,7 @@
                     using var scope = ctx.Builder.CreateChildBuilder();
                     using var transactionalSession = scope.Build<ITransactionalSession>();
 
-                    await transactionalSession.Open(new MongoSessionOptions());
+                    await transactionalSession.Open(new MongoOpenSessionOptions());
 
                     var sendOptions = new SendOptions();
                     sendOptions.RequireImmediateDispatch();

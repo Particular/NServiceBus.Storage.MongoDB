@@ -11,7 +11,7 @@
         [Test]
         public void Approve()
         {
-            var publicApi = typeof(MongoSessionOptions).Assembly.GeneratePublicApi(new ApiGeneratorOptions
+            var publicApi = typeof(MongoOpenSessionOptions).Assembly.GeneratePublicApi(new ApiGeneratorOptions
             {
                 ExcludeAttributes = new[] { "System.Runtime.Versioning.TargetFrameworkAttribute", "System.Reflection.AssemblyMetadataAttribute" }
             });

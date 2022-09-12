@@ -1,29 +1,30 @@
-﻿namespace NServiceBus.TransactionalSession;
-
-using System.Threading;
-using System.Threading.Tasks;
-using Features;
-using Configuration.AdvancedExtensibility;
-
-/// <summary>
-/// MongoDB persistence extensions for <see cref="ITransactionalSession"/> support.
-/// </summary>
-public static class MongoTransactionalSessionExtensions
+﻿namespace NServiceBus.TransactionalSession
 {
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Features;
+    using Configuration.AdvancedExtensibility;
+
     /// <summary>
-    /// Enables transactional session for this endpoint.
+    /// MongoDB persistence extensions for <see cref="ITransactionalSession"/> support.
     /// </summary>
-    public static PersistenceExtensions<MongoPersistence> EnableTransactionalSession(
-        this PersistenceExtensions<MongoPersistence> persistenceExtensions)
+    public static class MongoTransactionalSessionExtensions
     {
-        persistenceExtensions.GetSettings().EnableFeatureByDefault<MongoTransactionalSession>();
+        /// <summary>
+        /// Enables transactional session for this endpoint.
+        /// </summary>
+        public static PersistenceExtensions<MongoPersistence> EnableTransactionalSession(
+            this PersistenceExtensions<MongoPersistence> persistenceExtensions)
+        {
+            persistenceExtensions.GetSettings().EnableFeatureByDefault<MongoTransactionalSession>();
 
-        return persistenceExtensions;
+            return persistenceExtensions;
+        }
+
+        /// <summary>
+        /// Opens the transactional session.
+        /// </summary>
+        public static Task Open(this ITransactionalSession session, CancellationToken cancellationToken = default) =>
+            session.Open(new MongoSessionOptions(), cancellationToken);
     }
-
-    /// <summary>
-    /// Opens the transactional session.
-    /// </summary>
-    public static Task Open(this ITransactionalSession session, CancellationToken cancellationToken = default) =>
-        session.Open(new MongoSessionOptions(), cancellationToken);
 }

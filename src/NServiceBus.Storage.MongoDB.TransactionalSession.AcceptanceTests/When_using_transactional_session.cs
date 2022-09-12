@@ -7,6 +7,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
     using NUnit.Framework;
+    using Storage.MongoDB;
 
     public class When_using_transactional_session : NServiceBusAcceptanceTest
     {
@@ -14,7 +15,7 @@
 
         [TestCase(true)]
         [TestCase(false)]
-        public async Task Should_send_messages_on_transactional_session_commit(bool outboxEnabled)
+        public async Task Should_send_messages_and_store_document_in_synchronized_session_on_transactional_session_commit(bool outboxEnabled)
         {
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<AnEndpoint>(s => s.When(async (_, ctx) =>
@@ -44,7 +45,37 @@
 
         [TestCase(true)]
         [TestCase(false)]
-        public async Task Should_not_send_messages_if_session_is_not_committed(bool outboxEnabled)
+        public async Task Should_send_messages_and_store_document_in_mongo_session_on_transactional_session_commit(bool outboxEnabled)
+        {
+            var context = await Scenario.Define<Context>()
+                .WithEndpoint<AnEndpoint>(s => s.When(async (_, ctx) =>
+                {
+                    using var scope = ctx.ServiceProvider.CreateScope();
+                    using var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>();
+                    await transactionalSession.Open();
+                    ctx.SessionId = transactionalSession.SessionId;
+
+                    var mongoSession = scope.ServiceProvider.GetRequiredService<IMongoSynchronizedStorageSession>();
+                    await mongoSession.MongoSession.Client.GetDatabase(SetupFixture.DatabaseName)
+                        .GetCollection<SampleDocument>(CollectionName)
+                        .InsertOneAsync(mongoSession.MongoSession, new SampleDocument { Id = transactionalSession.SessionId });
+
+                    await transactionalSession.SendLocal(new SampleMessage(), CancellationToken.None);
+
+                    await transactionalSession.Commit(CancellationToken.None).ConfigureAwait(false);
+                }))
+                .Done(c => c.MessageReceived)
+                .Run();
+
+            var documents = await SetupFixture.MongoClient.GetDatabase(SetupFixture.DatabaseName)
+                .GetCollection<SampleDocument>(CollectionName)
+                .FindAsync<SampleDocument>(Builders<SampleDocument>.Filter.Where(d => d.Id == context.SessionId));
+            Assert.AreEqual(1, documents.ToList().Count);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_not_send_messages_and_store_document_if_session_is_not_committed(bool outboxEnabled)
         {
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<AnEndpoint>(s => s.When(async (statelessSession, ctx) =>

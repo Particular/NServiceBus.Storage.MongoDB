@@ -36,6 +36,8 @@ namespace NServiceBus.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>(config =>
                 {
+                    config.ConfigureTransport().Transactions(TransportTransactionMode.ReceiveOnly);
+
                     config.EnableOutbox();
                     config.RegisterComponents(c =>
                     {

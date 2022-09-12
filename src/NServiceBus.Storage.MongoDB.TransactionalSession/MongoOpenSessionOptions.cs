@@ -3,7 +3,7 @@
     /// <summary>
     /// The options allowing to control the behavior of the transactional session.
     /// </summary>
-    public sealed class MongoSessionOptions : OpenSessionOptions
+    public sealed class MongoOpenSessionOptions : OpenSessionOptions
     {
     }
 }

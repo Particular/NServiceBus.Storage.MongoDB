@@ -83,7 +83,7 @@
                     using (var scope = ctx.ServiceProvider.CreateScope())
                     using (var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>())
                     {
-                        await transactionalSession.Open(new MongoSessionOptions());
+                        await transactionalSession.Open(new MongoOpenSessionOptions());
                         ctx.SessionId = transactionalSession.SessionId;
 
                         await transactionalSession.SendLocal(new SampleMessage());
@@ -119,7 +119,7 @@
                     using var scope = ctx.ServiceProvider.CreateScope();
                     using var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>();
 
-                    await transactionalSession.Open(new MongoSessionOptions());
+                    await transactionalSession.Open(new MongoOpenSessionOptions());
 
                     var sendOptions = new SendOptions();
                     sendOptions.RequireImmediateDispatch();

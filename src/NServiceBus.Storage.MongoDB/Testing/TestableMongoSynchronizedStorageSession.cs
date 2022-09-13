@@ -7,7 +7,7 @@
     /// <summary>
     /// A fake implementation for <see cref="SynchronizedStorageSession"/> for testing purposes.
     /// </summary>
-    public class TestableMongoSynchronizedStorageSession : SynchronizedStorageSession, IMongoSessionProvider
+    public class TestableMongoSynchronizedStorageSession : SynchronizedStorageSession, IMongoSynchronizedStorageSession
     {
         /// <summary>
         /// Creates a new instance of <see cref="TestableMongoSynchronizedStorageSession"/> using the provided <see cref="IClientSessionHandle"/>.

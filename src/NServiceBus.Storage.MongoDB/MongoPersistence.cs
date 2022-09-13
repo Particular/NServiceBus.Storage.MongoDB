@@ -18,8 +18,6 @@
         {
             Defaults(s =>
             {
-                s.EnableFeatureByDefault<SynchronizedStorage>();
-
                 s.SetDefault(SettingsKeys.MongoClient, (Func<IMongoClient>)(() =>
                 {
                     if (defaultClient == null)

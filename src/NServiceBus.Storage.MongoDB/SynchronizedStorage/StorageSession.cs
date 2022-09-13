@@ -9,7 +9,7 @@
     using Logging;
     using Persistence;
 
-    class StorageSession : CompletableSynchronizedStorageSession, IMongoSessionProvider
+    class StorageSession : CompletableSynchronizedStorageSession, IMongoSynchronizedStorageSession
     {
         public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag, Func<Type, string> collectionNamingConvention, bool ownsMongoSession, bool useTransaction, TimeSpan transactionTimeout)
         {
@@ -136,6 +136,11 @@
 
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (MongoSession.IsInTransaction)
             {
                 try
@@ -149,7 +154,10 @@
             }
 
             MongoSession.Dispose();
+            disposed = true;
         }
+
+        bool disposed;
 
         readonly IMongoDatabase database;
         readonly ContextBag contextBag;

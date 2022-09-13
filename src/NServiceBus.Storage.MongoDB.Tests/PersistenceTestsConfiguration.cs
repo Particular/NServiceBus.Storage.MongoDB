@@ -73,7 +73,9 @@
 
         public IOutboxStorage OutboxStorage { get; }
 
+#pragma warning disable CS0618
         public IDeduplicateMessages GatewayStorage { get; }
+#pragma warning restore CS0618
 
         public async Task Configure()
         {

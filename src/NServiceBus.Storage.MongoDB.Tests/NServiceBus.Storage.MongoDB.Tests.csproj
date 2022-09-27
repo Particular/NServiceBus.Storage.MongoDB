@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
     <!-- DO NOT REMOVE MongoDB.Driver, it is added so that dependabot knows about version changes-->
     <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
     <PackageReference Include="NServiceBus" Version="8.0.0-rc.3" />

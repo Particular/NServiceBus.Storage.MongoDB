@@ -4,7 +4,6 @@ namespace NServiceBus.Storage.MongoDB
     using Features;
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization;
-    using global::MongoDB.Bson.Serialization.Serializers;
     using global::MongoDB.Driver;
     using Microsoft.Extensions.DependencyInjection;
     using Sagas;
@@ -56,12 +55,6 @@ namespace NServiceBus.Storage.MongoDB
 
                     BsonClassMap.RegisterClassMap(classMap);
                 }
-
-                // Types must be explicitly mapped
-                _ = BsonSerializer.TryRegisterSerializer(sagaMetadata.SagaEntityType,
-                    new ObjectSerializer(type =>
-                        ObjectSerializer.DefaultAllowedTypes(type) ||
-                        type.FullName == sagaMetadata.SagaEntityType.FullName));
 
                 var collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
 

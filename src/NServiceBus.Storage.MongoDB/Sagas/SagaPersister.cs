@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Bson;
-    using global::MongoDB.Bson.Serialization;
     using global::MongoDB.Driver;
     using Persistence;
     using Sagas;
@@ -69,17 +68,19 @@
         {
             var storageSession = ((SynchronizedStorageSession)session).Session;
 
+
             var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue)), cancellationToken).ConfigureAwait(false);
+            return document;
 
-            if (document != null)
-            {
-                var version = document.GetValue(versionElementName);
-                storageSession.StoreVersion<TSagaData>(version.AsInt32);
-
-                return BsonSerializer.Deserialize<TSagaData>(document);
-            }
-
-            return default;
+            // if (document != null)
+            // {
+            //     var version = document.GetValue(versionElementName);
+            //     storageSession.StoreVersion<TSagaData>(version.AsInt32);
+            //
+            //     return BsonSerializer.Deserialize<TSagaData>(document);
+            // }
+            //
+            // return default;
         }
 
         readonly string versionElementName;

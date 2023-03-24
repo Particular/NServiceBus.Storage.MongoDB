@@ -37,11 +37,11 @@
 
         public Task<DeleteResult> DeleteOneAsync(Type type, FilterDefinition<BsonDocument> filter, CancellationToken cancellationToken = default) => database.GetCollection<BsonDocument>(collectionNamingConvention(type)).DeleteOneAsync(MongoSession, filter, cancellationToken: cancellationToken);
 
-        public async Task<BsonDocument> Find<T>(FilterDefinition<BsonDocument> filter, CancellationToken cancellationToken = default)
+        public async Task<T> Find<T>(BsonDocument filter, CancellationToken cancellationToken = default)
         {
             var collectionName = collectionNamingConvention(typeof(T));
-            var sagaCollection = database.GetCollection<BsonDocument>(collectionName);
-            var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
+            var sagaCollection = database.GetCollection<T>(collectionName);
+            var update = new BsonDocument("_lockToken", ObjectId.GenerateNewId());
 
             using (var timedTokenSource = new CancellationTokenSource(transactionTimeout))
             using (var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedTokenSource.Token, cancellationToken))
@@ -52,7 +52,15 @@
                     {
                         try
                         {
-                            return await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedTokenSource.Token).ConfigureAwait(false);
+                            // return await sagaCollection.FindOneAndUpdateAsync(MongoSession, new BsonDocumentFilterDefinition<T>(filter), update, new FindOneAndUpdateOptions<T>(), combinedTokenSource.Token);
+                            //sagaCollection.FindOneAndUpdateAsync(MongoSession, )
+                            return await sagaCollection.FindOneAndUpdateAsync(MongoSession, new BsonDocumentFilterDefinition<T>(filter),
+                                new BsonDocumentUpdateDefinition<T>(update),
+                                new FindOneAndUpdateOptions<T>
+                                {
+                                    ReturnDocument = ReturnDocument.After,
+                                },
+                                combinedTokenSource.Token).ConfigureAwait(false);
                         }
                         catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                         {
@@ -151,10 +159,10 @@
         static readonly TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();
-
-        static readonly FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions = new FindOneAndUpdateOptions<BsonDocument>
-        {
-            ReturnDocument = ReturnDocument.After
-        };
+        //
+        // static readonly FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions = new FindOneAndUpdateOptions<BsonDocument>
+        // {
+        //     ReturnDocument = ReturnDocument.After
+        // };
     }
 }

@@ -24,14 +24,14 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
                 .Done(c => c.Done)
                 .Run();
 
-            Assert.AreEqual("SetByMapping", context.SomeValuePassedIntoTheConstructor);
+            Assert.AreEqual("SetByMapping", context.SomeValueSetByMapping);
         }
 
         public class Context : ScenarioContext
         {
             public Guid RunId { get; set; }
             public bool Done { get; set; }
-            public string SomeValuePassedIntoTheConstructor { get; set; }
+            public string SomeValueSetByMapping { get; set; }
         }
 
         public class EndpointWithCustomMapping : EndpointConfigurationBuilder
@@ -47,7 +47,10 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
                                 m.AutoMap();
                                 m.SetIgnoreExtraElements(true);
 
-                                m.MapProperty(s => s.SomeValueSetByMapping).SetDefaultValue("SetByMapping");
+                                m.SetCreator(() => new SagaWithCustomMap.SagaWithCustomMapSagaData
+                                {
+                                    SomeValueSetByMapping = "set",
+                                });
                             });
                 });
             }
@@ -67,7 +70,7 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
                 public Task Handle(CompleteSaga message, IMessageHandlerContext context)
                 {
                     MarkAsComplete();
-                    testContext.SomeValuePassedIntoTheConstructor = Data.SomeValueSetByMapping;
+                    testContext.SomeValueSetByMapping = Data.SomeValueSetByMapping;
                     testContext.Done = true;
                     return Task.CompletedTask;
                 }

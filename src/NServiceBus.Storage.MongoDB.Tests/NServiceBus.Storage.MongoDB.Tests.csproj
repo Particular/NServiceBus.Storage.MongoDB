@@ -11,14 +11,13 @@
 
   <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
-    <!-- DO NOT REMOVE MongoDB.Driver, it is added so that dependabot knows about version changes-->
-    <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
-    <PackageReference Include="NServiceBus" Version="8.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.19.1" />
+    <PackageReference Include="NServiceBus" Version="8.0.3" />
     <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
-    <PackageReference Include="Particular.Approvals" Version="0.3.0" />
-    <PackageReference Include="PublicApiGenerator" Version="10.3.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+    <PackageReference Include="Particular.Approvals" Version="0.4.1" />
+    <PackageReference Include="PublicApiGenerator" Version="11.0.0" />
   </ItemGroup>
 
 </Project>

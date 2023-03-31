@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net462;net6.0;net7.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <!-- We want the root namespace to match the transactional session one -->
     <RootNamespace>NServiceBus.TransactionalSession.AcceptanceTests</RootNamespace>
@@ -14,6 +14,7 @@
     <PackageReference Include="NServiceBus.TransactionalSession" Version="1.0.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.19.1" />
   </ItemGroup>
 
   <ItemGroup>

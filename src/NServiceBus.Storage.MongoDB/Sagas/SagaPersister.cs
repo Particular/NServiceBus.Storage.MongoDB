@@ -21,7 +21,7 @@
             var storageSession = (StorageSession)session;
             var sagaDataType = sagaData.GetType();
 
-            var document = sagaData.ToBsonDocument();
+            var document = sagaData.ToBsonDocument(sagaDataType);
             document.Add(versionElementName, 0);
 
             await storageSession.InsertOneAsync(sagaDataType, document).ConfigureAwait(false);
@@ -33,7 +33,7 @@
             var sagaDataType = sagaData.GetType();
 
             var version = storageSession.RetrieveVersion(sagaDataType);
-            var document = sagaData.ToBsonDocument().SetElement(new BsonElement(versionElementName, version + 1));
+            var document = sagaData.ToBsonDocument(sagaDataType).SetElement(new BsonElement(versionElementName, version + 1));
 
             var result = await storageSession.ReplaceOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), document).ConfigureAwait(false);
 

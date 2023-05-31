@@ -13,7 +13,7 @@
     <PackageReference Include="NServiceBus.AcceptanceTesting" Version="8.0.3" />
     <PackageReference Include="NServiceBus.TransactionalSession" Version="2.0.1" />
     <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.19.1" />
   </ItemGroup>
 

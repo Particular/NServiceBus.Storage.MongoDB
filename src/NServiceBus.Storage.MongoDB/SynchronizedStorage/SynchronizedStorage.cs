@@ -71,7 +71,7 @@
             }
 
             context.Services.AddScoped<ICompletableSynchronizedStorageSession, SynchronizedStorageSession>();
-            context.Services.AddScoped(sp => sp.GetRequiredService<ICompletableSynchronizedStorageSession>().MongoPersistenceSession());
+            context.Services.AddScoped(sp => (sp.GetService<ISynchronizedStorageSession>() as IMongoSynchronizedStorageSession)!);
 
             context.Services.AddSingleton(
                 new StorageSessionFactory(client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout));

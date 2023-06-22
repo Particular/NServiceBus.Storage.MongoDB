@@ -63,27 +63,29 @@
 
             var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
             var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
-            var existingExpiration = outboxCleanupIndex?.GetElement("expireAfterSeconds").Value.ToInt32();
-
-            var createIndex = outboxCleanupIndex is null;
-
-            if (existingExpiration.HasValue && TimeSpan.FromSeconds(existingExpiration.Value) != timeToKeepOutboxDeduplicationData)
+            var createIndex = false;
+            if (outboxCleanupIndex is null)
+            {
+                createIndex = true;
+            }
+            else if (!outboxCleanupIndex.TryGetElement("expireAfterSeconds", out var existingExpiration) || TimeSpan.FromSeconds(existingExpiration.Value.ToInt32()) != timeToKeepOutboxDeduplicationData)
             {
                 outboxCollection.Indexes.DropOne(OutboxCleanupIndexName);
                 createIndex = true;
             }
 
-            if (createIndex)
+            if (!createIndex)
             {
-                var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(record => record.Dispatched), new CreateIndexOptions
-                {
-                    ExpireAfter = timeToKeepOutboxDeduplicationData,
-                    Name = OutboxCleanupIndexName,
-                    Background = true
-                });
-
-                outboxCollection.Indexes.CreateOne(indexModel);
+                return;
             }
+
+            var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(record => record.Dispatched), new CreateIndexOptions
+            {
+                ExpireAfter = timeToKeepOutboxDeduplicationData,
+                Name = OutboxCleanupIndexName,
+                Background = true
+            });
+            outboxCollection.Indexes.CreateOne(indexModel);
         }
 
         internal const string OutboxCleanupIndexName = "OutboxCleanup";

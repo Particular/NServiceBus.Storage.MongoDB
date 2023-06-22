@@ -62,14 +62,14 @@
             };
 
             var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
-            var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == outboxCleanupIndexName);
+            var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
             var existingExpiration = outboxCleanupIndex?.GetElement("expireAfterSeconds").Value.ToInt32();
 
             var createIndex = outboxCleanupIndex is null;
 
             if (existingExpiration.HasValue && TimeSpan.FromSeconds(existingExpiration.Value) != timeToKeepOutboxDeduplicationData)
             {
-                outboxCollection.Indexes.DropOne(outboxCleanupIndexName);
+                outboxCollection.Indexes.DropOne(OutboxCleanupIndexName);
                 createIndex = true;
             }
 
@@ -78,7 +78,7 @@
                 var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(record => record.Dispatched), new CreateIndexOptions
                 {
                     ExpireAfter = timeToKeepOutboxDeduplicationData,
-                    Name = outboxCleanupIndexName,
+                    Name = OutboxCleanupIndexName,
                     Background = true
                 });
 
@@ -86,6 +86,6 @@
             }
         }
 
-        const string outboxCleanupIndexName = "OutboxCleanup";
+        internal const string OutboxCleanupIndexName = "OutboxCleanup";
     }
 }

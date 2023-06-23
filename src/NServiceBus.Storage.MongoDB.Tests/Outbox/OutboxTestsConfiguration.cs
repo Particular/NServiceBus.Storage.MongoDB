@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using Extensibility;
     using global::MongoDB.Driver;
-    using MongoDB;
     using NServiceBus.Outbox;
 
     public class OutboxTestsConfiguration

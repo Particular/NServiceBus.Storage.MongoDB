@@ -1,6 +1,6 @@
-## NServiceBus.Storage.MongoDB ![MyGet (with prereleases)](https://img.shields.io/myget/particular/vpre/NServiceBus.Storage.MongoDB.svg)
+## NServiceBus.Storage.MongoDB
 
-This package includes [MongoDB](https://www.mongodb.com/) persistence implementations for NServiceBus v7:
+This package includes [MongoDB](https://www.mongodb.com/) persistence implementations for NServiceBus:
 
 - Sagas
 - Outbox

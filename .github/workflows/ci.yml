@@ -46,6 +46,6 @@ jobs:
           connection-string-name: NServiceBusStorageMongoDB_ConnectionString
           mongodb-port: 27018
           mongodb-replica-set: tr0
-          mongodb-version: "5.3.2"
+          mongodb-version: "5.0.20"
       - name: Run tests
         uses: Particular/run-tests-action@v1.6.0

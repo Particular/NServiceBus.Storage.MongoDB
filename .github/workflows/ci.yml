@@ -41,7 +41,7 @@ jobs:
           path: nugets/
           retention-days: 7
       - name: Setup MongoDB Server
-        uses: Particular/setup-mongodb-action@37895a21a451f539f615b0805af5977c26bdc352
+        uses: Particular/setup-mongodb-action@v1.2.0
         with:
           mongodb-port: 27018
           mongodb-replica-set: tr0

@@ -43,6 +43,8 @@ jobs:
       - name: Setup MongoDB Server
         uses: Particular/setup-mongodb-action@v1.2.0
         with:
+          connection-string-name: NServiceBusStorageMongoDB_ConnectionString
+          mongodb-port: 27018
           mongodb-replica-set: tr0
       - name: Run tests
         uses: Particular/run-tests-action@v1.4.0

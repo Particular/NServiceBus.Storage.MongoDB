@@ -6,29 +6,17 @@ This package includes [MongoDB](https://www.mongodb.com/) persistence implementa
 - Outbox
 - Transactions
 
-
 ## Documentation
 
 Documentation, including configuration, usage, and samples can be found at http://docs.particular.net/persistence/mongodb
 
-
 ## Developing
-
-### Prerequisites
-
-- Projects in this solution require compatible SDKs for the following targets:
-   - .NET Framework 4.5.2
-   - .NET Standard 2.0
-- Projects in this solution use the new .NET csproj project format which requires .NET Core 2 or greater, which is included in Visual Studio versions 2017 and greater.
-- The projects also rely on NuGet for 3rd party dependencies.
-
 
 ### Running tests
 
 Both test projects utilize NUnit. The test projects can be executed using the test runner included in Visual Studio or using the [`dotnet test` command](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test) from the command line.
 
 The tests in the AcceptanceTesting project and many of the tests in the Testing project require an active MongoDB server in order for the test to pass.
-
 
 #### MongoDB
 

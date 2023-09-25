@@ -10,9 +10,7 @@
     {
         public SubscriptionStorage()
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            DependsOn<MessageDrivenSubscriptions>();
-#pragma warning restore CS0618 // Type or member is obsolete
+            DependsOn("NServiceBus.Features.MessageDrivenSubscriptions");
         }
 
         protected override void Setup(FeatureConfigurationContext context)

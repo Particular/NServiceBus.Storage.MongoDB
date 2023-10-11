@@ -11,7 +11,7 @@
         public StorageTransportOperation(Outbox.TransportOperation source)
         {
             MessageId = source.MessageId;
-            Options = source.Options != null ? new Dictionary<string, string>(source.Options) : new Dictionary<string, string>();
+            Options = source.Options != null ? new Dictionary<string, string>(source.Options) : [];
             Body = source.Body.ToArray();
             Headers = source.Headers;
         }

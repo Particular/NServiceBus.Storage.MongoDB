@@ -1,24 +1,18 @@
-## NServiceBus.Storage.MongoDB
+# NServiceBus.Storage.MongoDB
 
-This package includes [MongoDB](https://www.mongodb.com/) persistence implementations for NServiceBus:
+NServiceBus.Storage.MongoDB is the official NServiceBus persistence implementation for [MongoDB](https://www.mongodb.com/).
 
-- Sagas
-- Outbox
-- Transactions
+It is part of the [Particular Service Platform](https://particular.net/service-platform), which includes [NServiceBus](https://particular.net/nservicebus) and tools to build, monitor, and debug distributed systems.
 
-## Documentation
+See the [MongoDB Persistence documentation](https://docs.particular.net/persistence/mongodb/) for more details on how to use it.
 
-Documentation, including configuration, usage, and samples can be found at http://docs.particular.net/persistence/mongodb
-
-## Developing
-
-### Running tests
+## Running tests locally
 
 Both test projects utilize NUnit. The test projects can be executed using the test runner included in Visual Studio or using the [`dotnet test` command](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test) from the command line.
 
 The tests in the AcceptanceTesting project and many of the tests in the Testing project require an active MongoDB server in order for the test to pass.
 
-#### MongoDB
+### MongoDB
 
 By default, both the AcceptanceTests and Tests projects will connect to any MongoDB server running at the default address of `mongodb://localhost:27017`.
 
@@ -26,7 +20,7 @@ To use a different Mongo URL, you can set the `NServiceBusStorageMongoDB_Connect
 
 Instructions for installing MongoDB can be found on the [MongoDB website](https://docs.mongodb.com/manual/installation/).
 
-##### Docker
+#### Docker
 
 For developers using Docker containers, the following docker command will quickly setup a container configured to use the default port:
 
@@ -36,7 +30,7 @@ Once started, initialize the replication set (required for transaction support) 
 
 `docker exec -it TestMongoDB mongosh --eval 'rs.initiate()'`
 
-##### Local installation
+#### Local installation
 
 - Install the MongoDB server using the installer from the [MongoDB website](https://docs.mongodb.com/manual/installation/).
 - Install the MongoDB shell (`mongosh`) from the [MongoDB website](https://www.mongodb.com/try/download/shell?jmp=docs)

@@ -21,7 +21,7 @@
         /// </summary>
         public static IMongoSynchronizedStorageSession MongoPersistenceSession(this ISynchronizedStorageSession session)
         {
-            Guard.AgainstNull(nameof(session), session);
+            ArgumentNullException.ThrowIfNull(session);
 
             if (session is IMongoSynchronizedStorageSession mongoSession)
             {

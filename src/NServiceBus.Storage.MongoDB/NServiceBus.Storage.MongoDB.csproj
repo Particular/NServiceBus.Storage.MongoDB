@@ -5,14 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="[2.19.2, 3.0.0)" />
-    <PackageReference Include="NServiceBus" Version="9.0.0-alpha.6" />
+    <PackageReference Include="MongoDB.Driver" Version="[2.24.0, 3.0.0)" />
+    <PackageReference Include="NServiceBus" Version="[9.0.0, 10.0.0)" />
     <PackageReference Include="Particular.Packaging" Version="4.1.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.Tests" />
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.PersistenceTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Utils\" />
   </ItemGroup>
 
 </Project>

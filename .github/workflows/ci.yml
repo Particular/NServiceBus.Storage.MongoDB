@@ -45,7 +45,7 @@ jobs:
         uses: Particular/setup-mongodb-action@v1.3.1
         with:
           connection-string-name: NServiceBusStorageMongoDB_ConnectionString
-          mongodb-version: 7.2.1
+          mongodb-version: 7.0.5
           mongodb-port: 27018
           mongodb-replica-set: tr0
       - name: Run tests

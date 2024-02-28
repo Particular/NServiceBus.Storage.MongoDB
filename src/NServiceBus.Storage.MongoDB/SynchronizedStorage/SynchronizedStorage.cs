@@ -46,7 +46,7 @@
                         //      Without this check, exceptions will be thrown during message processing.
                         if (clusterType is not ClusterType.ReplicaSet and not ClusterType.Sharded)
                         {
-                            throw new Exception($"Transactions are only supported on replica sets or sharded clusters. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
+                            throw new Exception($"Cluster type in use is {clusterType}, transactions are only supported on replica sets or sharded clusters. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
                         }
 
                         try

@@ -26,7 +26,9 @@
 
             try
             {
-                client.GetDatabase(databaseName);
+                var database = client.GetDatabase(databaseName);
+
+                database.ListCollectionNames();
             }
             catch (ArgumentException ex)
             {
@@ -39,8 +41,6 @@
                 {
                     if (useTransactions)
                     {
-                        client.ListDatabases();
-
                         var clusterType = client.Cluster.Description.Type;
 
                         //HINT: cluster configuration check is needed as the built-in checks, executed during "StartTransaction() call,

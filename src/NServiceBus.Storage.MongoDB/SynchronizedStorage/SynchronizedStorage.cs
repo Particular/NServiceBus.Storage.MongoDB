@@ -28,41 +28,37 @@
             {
                 var database = client.GetDatabase(databaseName);
 
-                // perform a query to the server to make sure cluster details are loaded so we can check them later
+                // perform a query to the server to make sure cluster details are loaded
                 database.ListCollectionNames();
+
+                using var session = client.StartSession();
+
+                if (useTransactions)
+                {
+                    var clusterType = client.Cluster.Description.Type;
+
+                    //HINT: cluster configuration check is needed as the built-in checks, executed during "StartTransaction() call,
+                    //      do not detect if the cluster configuration is a supported one. Only the version ranges are validated.
+                    //      Without this check, exceptions will be thrown during message processing.
+                    if (clusterType is not ClusterType.ReplicaSet and not ClusterType.Sharded)
+                    {
+                        throw new Exception($"The cluster type in use is {clusterType}, but transactions are only supported on replica sets or sharded clusters. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
+                    }
+
+                    try
+                    {
+                        session.StartTransaction();
+                        session.AbortTransaction();
+                    }
+                    catch (NotSupportedException ex)
+                    {
+                        throw new Exception($"Transactions are not supported by the MongoDB server. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.", ex);
+                    }
+                }
             }
             catch (ArgumentException ex)
             {
                 throw new Exception($"The persistence database name '{databaseName}' is invalid. Configure a valid database name by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().DatabaseName(databaseName)'.", ex);
-            }
-
-            try
-            {
-                using (var session = client.StartSession())
-                {
-                    if (useTransactions)
-                    {
-                        var clusterType = client.Cluster.Description.Type;
-
-                        //HINT: cluster configuration check is needed as the built-in checks, executed during "StartTransaction() call,
-                        //      do not detect if the cluster configuration is a supported one. Only the version ranges are validated.
-                        //      Without this check, exceptions will be thrown during message processing.
-                        if (clusterType is not ClusterType.ReplicaSet and not ClusterType.Sharded)
-                        {
-                            throw new Exception($"Cluster type in use is {clusterType}, transactions are only supported on replica sets or sharded clusters. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
-                        }
-
-                        try
-                        {
-                            session.StartTransaction();
-                            session.AbortTransaction();
-                        }
-                        catch (NotSupportedException ex)
-                        {
-                            throw new Exception($"Transactions are not supported by the MongoDB server. Disable support for transactions by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.", ex);
-                        }
-                    }
-                }
             }
             catch (NotSupportedException ex)
             {

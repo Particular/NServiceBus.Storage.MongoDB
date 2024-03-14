@@ -39,6 +39,8 @@
                 {
                     if (useTransactions)
                     {
+                        client.ListDatabases();
+
                         var clusterType = client.Cluster.Description.Type;
 
                         //HINT: cluster configuration check is needed as the built-in checks, executed during "StartTransaction() call,

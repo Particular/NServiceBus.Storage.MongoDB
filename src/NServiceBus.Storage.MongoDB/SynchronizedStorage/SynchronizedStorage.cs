@@ -28,6 +28,7 @@
             {
                 var database = client.GetDatabase(databaseName);
 
+                // perform a query to the server to make sure cluster details are loaded so we can check them later
                 database.ListCollectionNames();
             }
             catch (ArgumentException ex)

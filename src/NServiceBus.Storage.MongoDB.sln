@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{204B96DD-7CDD-498E-B527-2CA09B17AD6D}"
 	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 		Custom.Build.props = Custom.Build.props
+		..\.github\workflows\release.yml = ..\.github\workflows\release.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB.AcceptanceTests", "NServiceBus.Storage.MongoDB.AcceptanceTests\NServiceBus.Storage.MongoDB.AcceptanceTests.csproj", "{6BCA8AC9-E4BC-4920-BA3F-C218708B8A6B}"
@@ -22,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB.TransactionalSession.AcceptanceTests", "NServiceBus.Storage.MongoDB.TransactionalSession.AcceptanceTests\NServiceBus.Storage.MongoDB.TransactionalSession.AcceptanceTests.csproj", "{704337C7-74B5-435A-88C7-AC0E10EA7795}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Storage.MongoDB.TransactionalSession.Tests", "NServiceBus.Storage.MongoDB.TransactionalSession.Tests\NServiceBus.Storage.MongoDB.TransactionalSession.Tests.csproj", "{C9FA6374-432B-4E58-AC5C-7C86FEAA9256}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Storage.MongoDB.TransactionalSession.Tests", "NServiceBus.Storage.MongoDB.TransactionalSession.Tests\NServiceBus.Storage.MongoDB.TransactionalSession.Tests.csproj", "{C9FA6374-432B-4E58-AC5C-7C86FEAA9256}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

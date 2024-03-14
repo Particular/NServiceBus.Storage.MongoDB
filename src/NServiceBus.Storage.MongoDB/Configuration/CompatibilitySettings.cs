@@ -19,7 +19,7 @@
         /// </summary>
         public CompatibilitySettings VersionElementName(string versionElementName)
         {
-            Guard.AgainstNullAndEmpty(nameof(versionElementName), versionElementName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(versionElementName);
 
             this.GetSettings().Set(SettingsKeys.VersionElementName, versionElementName);
             return this;
@@ -30,7 +30,7 @@
         /// </summary>
         public CompatibilitySettings CollectionNamingConvention(Func<Type, string> collectionNamingConvention)
         {
-            Guard.AgainstNull(nameof(collectionNamingConvention), collectionNamingConvention);
+            ArgumentNullException.ThrowIfNull(collectionNamingConvention);
 
             this.GetSettings().Set(SettingsKeys.CollectionNamingConvention, collectionNamingConvention);
             return this;

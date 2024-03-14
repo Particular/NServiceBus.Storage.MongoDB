@@ -10,38 +10,39 @@
 
     public class TransactionSessionDefaultServer : IEndpointSetupTemplate
     {
-        public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration,
+        public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointCustomizations,
             Func<EndpointConfiguration, Task> configurationBuilderCustomization)
         {
-            var builder = new EndpointConfiguration(endpointConfiguration.EndpointName);
-            builder.EnableInstallers();
+            var endpointConfiguration = new EndpointConfiguration(endpointCustomizations.EndpointName);
 
-            builder.Recoverability()
+            endpointConfiguration.EnableInstallers();
+            endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+            endpointConfiguration.Recoverability()
                 .Delayed(delayed => delayed.NumberOfRetries(0))
                 .Immediate(immediate => immediate.NumberOfRetries(0));
-            builder.SendFailedMessagesTo("error");
+            endpointConfiguration.SendFailedMessagesTo("error");
 
             var storageDir = Path.Combine(Path.GetTempPath(), "learn", TestContext.CurrentContext.Test.ID);
 
-            builder.UseTransport(new AcceptanceTestingTransport
+            endpointConfiguration.UseTransport(new AcceptanceTestingTransport
             {
                 StorageLocation = storageDir
             });
 
-            var mongoSettings = builder.UsePersistence<MongoPersistence>();
+            var mongoSettings = endpointConfiguration.UsePersistence<MongoPersistence>();
             mongoSettings.EnableTransactionalSession();
             mongoSettings.MongoClient(SetupFixture.MongoClient);
             mongoSettings.DatabaseName(SetupFixture.DatabaseName);
             mongoSettings.UseTransactions(true);
 
-            builder.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, runDescriptor.ScenarioContext));
+            endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, runDescriptor.ScenarioContext));
 
-            await configurationBuilderCustomization(builder).ConfigureAwait(false);
+            await configurationBuilderCustomization(endpointConfiguration).ConfigureAwait(false);
 
             // scan types at the end so that all types used by the configuration have been loaded into the AppDomain
-            builder.TypesToIncludeInScan(endpointConfiguration.GetTypesScopedByTestClass());
+            endpointConfiguration.TypesToIncludeInScan(endpointCustomizations.GetTypesScopedByTestClass());
 
-            return builder;
+            return endpointConfiguration;
         }
     }
 }

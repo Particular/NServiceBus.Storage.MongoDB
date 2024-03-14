@@ -15,8 +15,8 @@
         /// </summary>
         public static PersistenceExtensions<MongoPersistence> MongoClient(this PersistenceExtensions<MongoPersistence> persistenceExtensions, IMongoClient mongoClient)
         {
-            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
-            Guard.AgainstNull(nameof(mongoClient), mongoClient);
+            ArgumentNullException.ThrowIfNull(persistenceExtensions);
+            ArgumentNullException.ThrowIfNull(mongoClient);
 
             persistenceExtensions.GetSettings().Set(SettingsKeys.MongoClient, () => mongoClient);
             return persistenceExtensions;
@@ -27,8 +27,8 @@
         /// </summary>
         public static PersistenceExtensions<MongoPersistence> DatabaseName(this PersistenceExtensions<MongoPersistence> persistenceExtensions, string databaseName)
         {
-            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
-            Guard.AgainstNullAndEmpty(nameof(databaseName), databaseName);
+            ArgumentNullException.ThrowIfNull(persistenceExtensions);
+            ArgumentException.ThrowIfNullOrWhiteSpace(databaseName);
 
             persistenceExtensions.GetSettings().Set(SettingsKeys.DatabaseName, databaseName);
             return persistenceExtensions;
@@ -39,7 +39,7 @@
         /// </summary>
         public static PersistenceExtensions<MongoPersistence> UseTransactions(this PersistenceExtensions<MongoPersistence> persistenceExtensions, bool useTransactions)
         {
-            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
+            ArgumentNullException.ThrowIfNull(persistenceExtensions);
 
             persistenceExtensions.GetSettings().Set(SettingsKeys.UseTransactions, useTransactions);
             return persistenceExtensions;
@@ -50,8 +50,8 @@
         /// </summary>
         public static PersistenceExtensions<MongoPersistence> TimeToKeepOutboxDeduplicationData(this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToKeepOutboxDeduplicationData)
         {
-            Guard.AgainstNull(nameof(persistenceExtensions), persistenceExtensions);
-            Guard.AgainstNegativeAndZero(nameof(timeToKeepOutboxDeduplicationData), timeToKeepOutboxDeduplicationData);
+            ArgumentNullException.ThrowIfNull(persistenceExtensions);
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeToKeepOutboxDeduplicationData, TimeSpan.Zero);
 
             var seconds = Math.Ceiling(timeToKeepOutboxDeduplicationData.TotalSeconds);
 

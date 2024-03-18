@@ -26,15 +26,11 @@
 
             try
             {
-                client.GetDatabase(databaseName);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new Exception($"The persistence database name '{databaseName}' is invalid. Configure a valid database name by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().DatabaseName(databaseName)'.", ex);
-            }
+                var database = client.GetDatabase(databaseName);
 
-            try
-            {
+                // perform a query to the server to make sure cluster details are loaded
+                database.ListCollectionNames();
+
                 using (var session = client.StartSession())
                 {
                     if (useTransactions)
@@ -60,6 +56,10 @@
                         }
                     }
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                throw new Exception($"The persistence database name '{databaseName}' is invalid. Configure a valid database name by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().DatabaseName(databaseName)'.", ex);
             }
             catch (NotSupportedException ex)
             {

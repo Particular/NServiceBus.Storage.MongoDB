@@ -1,4 +1,0 @@
-ComponentType: Persistence
-ComponentPackages:
-  - Name: NServiceBus.Storage.MongoDB
-  - Name: NServiceBus.Storage.MongoDB.TransactionalSession

@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
     <PackageReference Include="NServiceBus" Version="9.1.0" />
-    <PackageReference Include="NServiceBus.TransactionalSession" Version="3.0.0" />
+    <PackageReference Include="NServiceBus.TransactionalSession" Version="3.1.0" />
     <PackageReference Include="Particular.Approvals" Version="1.0.0" />
     <PackageReference Include="PublicApiGenerator" Version="11.1.0" />
   </ItemGroup>

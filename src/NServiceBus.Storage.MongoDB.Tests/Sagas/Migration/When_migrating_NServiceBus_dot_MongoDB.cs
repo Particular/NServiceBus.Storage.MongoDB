@@ -33,7 +33,7 @@
 
             var retrievedSagaData = await GetById<NServiceBusMongoDBLegacySagaData>(legacySagaData.Id);
 
-            Assert.IsNotNull(retrievedSagaData, "Saga was not retrieved");
+            Assert.That(retrievedSagaData, Is.Not.Null, "Saga was not retrieved");
             Assert.That(retrievedSagaData.OriginalMessageId, Is.EqualTo(legacySagaData.OriginalMessageId), "OriginalMessageId does not match");
             Assert.That(retrievedSagaData.Originator, Is.EqualTo(legacySagaData.Originator), "Originator does not match");
             Assert.That(retrievedSagaData.SomeCorrelationPropertyId, Is.EqualTo(legacySagaData.SomeCorrelationPropertyId), "SomeCorrelationPropertyId does not match");

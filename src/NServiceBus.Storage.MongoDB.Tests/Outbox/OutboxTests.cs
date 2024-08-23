@@ -25,7 +25,7 @@
 
             var context = new ContextBag();
             var empty = await configuration.OutboxStorage.Get(msgId, context);
-            Assert.IsNull(empty);
+            Assert.That(empty, Is.Null);
 
             using (var transaction = await configuration.CreateTransaction(context))
             {

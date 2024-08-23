@@ -149,7 +149,7 @@
             Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscriber = subscribers.Single();
             Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
-            Assert.IsNull(subscriber.Endpoint);
+            Assert.That(subscriber.Endpoint, Is.Null);
         }
 
         [Test]

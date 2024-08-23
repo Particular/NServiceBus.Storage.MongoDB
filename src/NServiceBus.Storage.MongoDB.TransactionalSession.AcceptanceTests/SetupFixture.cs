@@ -29,7 +29,7 @@
             }
             catch (Exception e)
             {
-                TestContext.WriteLine($"Error during MongoDB test cleanup: {e}");
+                TestContext.Out.WriteLine($"Error during MongoDB test cleanup: {e}");
             }
         }
     }

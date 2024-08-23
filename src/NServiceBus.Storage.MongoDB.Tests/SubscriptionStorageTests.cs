@@ -43,10 +43,10 @@
                 eventType
             }, new ContextBag());
 
-            Assert.AreEqual(1, subscribers.Count());
+            Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscription = subscribers.Single();
-            Assert.AreEqual("endpoint1", subscription.Endpoint);
-            Assert.AreEqual("address1", subscription.TransportAddress);
+            Assert.That(subscription.Endpoint, Is.EqualTo("endpoint1"));
+            Assert.That(subscription.TransportAddress, Is.EqualTo("address1"));
         }
 
         [Test]
@@ -62,7 +62,7 @@
                 eventType
             }, new ContextBag());
 
-            Assert.AreEqual(2, subscribers.Count());
+            Assert.That(subscribers.Count(), Is.EqualTo(2));
             CollectionAssert.AreEquivalent(new[] { "address1", "address2" }, subscribers.Select(s => s.TransportAddress));
         }
 
@@ -79,8 +79,8 @@
                 eventType
             }, new ContextBag());
 
-            Assert.AreEqual(1, subscribers.Count());
-            Assert.AreEqual("endpointB", subscribers.Single().Endpoint);
+            Assert.That(subscribers.Count(), Is.EqualTo(1));
+            Assert.That(subscribers.Single().Endpoint, Is.EqualTo("endpointB"));
         }
 
         [Test]
@@ -97,7 +97,7 @@
                 eventType1, eventType2
             }, new ContextBag());
 
-            Assert.AreEqual(2, subscribers.Count());
+            Assert.That(subscribers.Count(), Is.EqualTo(2));
             CollectionAssert.AreEquivalent(new[] { "address", "address" }, subscribers.Select(s => s.TransportAddress));
         }
 
@@ -114,7 +114,7 @@
                 eventType1
             }, new ContextBag());
 
-            Assert.AreEqual("address", subscribers.Single().TransportAddress);
+            Assert.That(subscribers.Single().TransportAddress, Is.EqualTo("address"));
         }
 
         [Test]
@@ -131,7 +131,7 @@
                 eventType1
             }, new ContextBag());
 
-            Assert.AreEqual(0, subscribers.Count());
+            Assert.That(subscribers.Count(), Is.EqualTo(0));
         }
 
         [Test]
@@ -146,9 +146,9 @@
                 eventType
             }, new ContextBag());
 
-            Assert.AreEqual(1, subscribers.Count());
+            Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscriber = subscribers.Single();
-            Assert.AreEqual("address", subscriber.TransportAddress);
+            Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
             Assert.IsNull(subscriber.Endpoint);
         }
 
@@ -165,10 +165,10 @@
                 eventType
             }, new ContextBag());
 
-            Assert.AreEqual(1, subscribers.Count());
+            Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscriber = subscribers.Single();
-            Assert.AreEqual("address", subscriber.TransportAddress);
-            Assert.AreEqual("endpoint", subscriber.Endpoint);
+            Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
+            Assert.That(subscriber.Endpoint, Is.EqualTo("endpoint"));
         }
 
         [Test]
@@ -184,10 +184,10 @@
                 eventType
             }, new ContextBag());
 
-            Assert.AreEqual(1, subscribers.Count());
+            Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscriber = subscribers.Single();
-            Assert.AreEqual("address", subscriber.TransportAddress);
-            Assert.AreEqual("endpoint", subscriber.Endpoint);
+            Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
+            Assert.That(subscriber.Endpoint, Is.EqualTo("endpoint"));
         }
 
         [Test]
@@ -200,7 +200,7 @@
                 new MessageType("SomeMessage", "2.0.0")
             }, new ContextBag());
 
-            Assert.AreEqual("subscriberA", subscribers.Single().Endpoint);
+            Assert.That(subscribers.Single().Endpoint, Is.EqualTo("subscriberA"));
         }
 
         static MessageType CreateUniqueMessageType()

@@ -34,10 +34,10 @@
             var retrievedSagaData = await GetById<NServiceBusMongoDBLegacySagaData>(legacySagaData.Id);
 
             Assert.IsNotNull(retrievedSagaData, "Saga was not retrieved");
-            Assert.AreEqual(legacySagaData.OriginalMessageId, retrievedSagaData.OriginalMessageId, "OriginalMessageId does not match");
-            Assert.AreEqual(legacySagaData.Originator, retrievedSagaData.Originator, "Originator does not match");
-            Assert.AreEqual(legacySagaData.SomeCorrelationPropertyId, retrievedSagaData.SomeCorrelationPropertyId, "SomeCorrelationPropertyId does not match");
-            Assert.AreEqual(legacySagaData.SomeUpdatableSagaData, retrievedSagaData.SomeUpdatableSagaData, "SomeUpdatableSagaData does not match");
+            Assert.That(retrievedSagaData.OriginalMessageId, Is.EqualTo(legacySagaData.OriginalMessageId), "OriginalMessageId does not match");
+            Assert.That(retrievedSagaData.Originator, Is.EqualTo(legacySagaData.Originator), "Originator does not match");
+            Assert.That(retrievedSagaData.SomeCorrelationPropertyId, Is.EqualTo(legacySagaData.SomeCorrelationPropertyId), "SomeCorrelationPropertyId does not match");
+            Assert.That(retrievedSagaData.SomeUpdatableSagaData, Is.EqualTo(legacySagaData.SomeUpdatableSagaData), "SomeUpdatableSagaData does not match");
         }
 
         readonly Func<Type, string> collectionNamingConvention = t => t.Name;

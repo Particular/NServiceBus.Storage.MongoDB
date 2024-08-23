@@ -66,7 +66,7 @@
             }, new ContextBag());
 
             Assert.That(subscribers.Count(), Is.EqualTo(2));
-            CollectionAssert.AreEquivalent(new[] { "address1", "address2" }, subscribers.Select(s => s.TransportAddress));
+            Assert.That(subscribers.Select(s => s.TransportAddress), Is.EquivalentTo(new[] { "address1", "address2" }));
         }
 
         [Test]
@@ -104,7 +104,7 @@
             }, new ContextBag());
 
             Assert.That(subscribers.Count(), Is.EqualTo(2));
-            CollectionAssert.AreEquivalent(new[] { "address", "address" }, subscribers.Select(s => s.TransportAddress));
+            Assert.That(subscribers.Select(s => s.TransportAddress), Is.EquivalentTo(new[] { "address", "address" }));
         }
 
         [Test]

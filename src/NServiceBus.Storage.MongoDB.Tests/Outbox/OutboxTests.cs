@@ -38,7 +38,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(received.MessageId, Is.EqualTo(msgId));
-                Assert.That(received.TransportOperations.Length, Is.EqualTo(operations.Length));
+                Assert.That(received.TransportOperations, Has.Length.EqualTo(operations.Length));
             });
 
             for (var op = 0; op < operations.Length; op++)

@@ -35,16 +35,22 @@
 
             var received = await configuration.OutboxStorage.Get(msgId, context);
 
-            Assert.That(received.MessageId, Is.EqualTo(msgId));
-            Assert.That(received.TransportOperations.Length, Is.EqualTo(operations.Length));
+            Assert.Multiple(() =>
+            {
+                Assert.That(received.MessageId, Is.EqualTo(msgId));
+                Assert.That(received.TransportOperations.Length, Is.EqualTo(operations.Length));
+            });
 
             for (var op = 0; op < operations.Length; op++)
             {
                 var expectedOp = operations[op];
                 var receivedOp = received.TransportOperations[op];
 
-                Assert.That(receivedOp.MessageId, Is.EqualTo(expectedOp.MessageId));
-                Assert.That(Convert.ToBase64String(receivedOp.Body.ToArray()), Is.EqualTo(Convert.ToBase64String(expectedOp.Body.ToArray())));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(receivedOp.MessageId, Is.EqualTo(expectedOp.MessageId));
+                    Assert.That(Convert.ToBase64String(receivedOp.Body.ToArray()), Is.EqualTo(Convert.ToBase64String(expectedOp.Body.ToArray())));
+                });
                 foreach (var header in expectedOp.Headers.Keys)
                 {
                     Assert.That(receivedOp.Headers[header], Is.EqualTo(expectedOp.Headers[header]));

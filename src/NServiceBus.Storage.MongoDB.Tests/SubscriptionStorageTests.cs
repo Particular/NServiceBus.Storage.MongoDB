@@ -45,8 +45,11 @@
 
             Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscription = subscribers.Single();
-            Assert.That(subscription.Endpoint, Is.EqualTo("endpoint1"));
-            Assert.That(subscription.TransportAddress, Is.EqualTo("address1"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(subscription.Endpoint, Is.EqualTo("endpoint1"));
+                Assert.That(subscription.TransportAddress, Is.EqualTo("address1"));
+            });
         }
 
         [Test]
@@ -79,8 +82,11 @@
                 eventType
             }, new ContextBag());
 
-            Assert.That(subscribers.Count(), Is.EqualTo(1));
-            Assert.That(subscribers.Single().Endpoint, Is.EqualTo("endpointB"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(subscribers.Count(), Is.EqualTo(1));
+                Assert.That(subscribers.Single().Endpoint, Is.EqualTo("endpointB"));
+            });
         }
 
         [Test]
@@ -148,8 +154,11 @@
 
             Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscriber = subscribers.Single();
-            Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
-            Assert.That(subscriber.Endpoint, Is.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
+                Assert.That(subscriber.Endpoint, Is.Null);
+            });
         }
 
         [Test]
@@ -167,8 +176,11 @@
 
             Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscriber = subscribers.Single();
-            Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
-            Assert.That(subscriber.Endpoint, Is.EqualTo("endpoint"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
+                Assert.That(subscriber.Endpoint, Is.EqualTo("endpoint"));
+            });
         }
 
         [Test]
@@ -186,8 +198,11 @@
 
             Assert.That(subscribers.Count(), Is.EqualTo(1));
             var subscriber = subscribers.Single();
-            Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
-            Assert.That(subscriber.Endpoint, Is.EqualTo("endpoint"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(subscriber.TransportAddress, Is.EqualTo("address"));
+                Assert.That(subscriber.Endpoint, Is.EqualTo("endpoint"));
+            });
         }
 
         [Test]

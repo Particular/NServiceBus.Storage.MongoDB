@@ -80,7 +80,7 @@ namespace NServiceBus.Storage.MongoDB.Tests
             Assert.IsNotNull(outboxCleanupIndex);
 
             BsonElement bsonElement = outboxCleanupIndex.GetElement("expireAfterSeconds");
-            Assert.NotNull(bsonElement);
+            Assert.That(bsonElement, Is.Not.Null);
 
             Assert.That(TimeSpan.FromSeconds(bsonElement.Value.ToInt32()), Is.EqualTo(expiry));
         }

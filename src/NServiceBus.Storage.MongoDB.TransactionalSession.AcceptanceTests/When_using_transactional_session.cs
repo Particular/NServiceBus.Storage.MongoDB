@@ -40,7 +40,7 @@
             var documents = await SetupFixture.MongoClient.GetDatabase(SetupFixture.DatabaseName)
                 .GetCollection<SampleDocument>(CollectionName)
                 .FindAsync<SampleDocument>(Builders<SampleDocument>.Filter.Where(d => d.Id == context.SessionId));
-            Assert.AreEqual(1, documents.ToList().Count);
+            Assert.That(documents.ToList().Count, Is.EqualTo(1));
         }
 
         [TestCase(true)]
@@ -70,7 +70,7 @@
             var documents = await SetupFixture.MongoClient.GetDatabase(SetupFixture.DatabaseName)
                 .GetCollection<SampleDocument>(CollectionName)
                 .FindAsync<SampleDocument>(Builders<SampleDocument>.Filter.Where(d => d.Id == context.SessionId));
-            Assert.AreEqual(1, documents.ToList().Count);
+            Assert.That(documents.ToList().Count, Is.EqualTo(1));
         }
 
         [TestCase(true)]

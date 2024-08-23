@@ -18,7 +18,7 @@ namespace NServiceBus.AcceptanceTests
                 .Run()
                 .ConfigureAwait(false);
 
-            Assert.True(context.HandlerHasMongoSession);
+            Assert.That(context.HandlerHasMongoSession, Is.True);
         }
 
         public class Context : ScenarioContext

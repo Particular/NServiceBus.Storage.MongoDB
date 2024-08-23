@@ -77,12 +77,10 @@ namespace NServiceBus.Storage.MongoDB.Tests
         {
             var outboxCleanupIndex = (await outboxCollection.Indexes.ListAsync()).ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxStorage.OutboxCleanupIndexName);
 
-            Assert.IsNotNull(outboxCleanupIndex);
+            Assert.That(outboxCleanupIndex, Is.Not.Null);
 
             BsonElement bsonElement = outboxCleanupIndex.GetElement("expireAfterSeconds");
-            Assert.NotNull(bsonElement);
-
-            Assert.AreEqual(expiry, TimeSpan.FromSeconds(bsonElement.Value.ToInt32()));
+            Assert.That(TimeSpan.FromSeconds(bsonElement.Value.ToInt32()), Is.EqualTo(expiry));
         }
 
         [OneTimeTearDown]

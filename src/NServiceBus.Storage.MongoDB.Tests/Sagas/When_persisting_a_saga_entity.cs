@@ -37,31 +37,31 @@
         [Test]
         public void Public_setters_and_getters_of_concrete_classes_should_be_persisted()
         {
-            Assert.AreEqual(entity.TestComponent, savedEntity.TestComponent);
+            Assert.That(savedEntity.TestComponent, Is.EqualTo(entity.TestComponent));
         }
 
         [Test]
         public void Datetime_properties_should_be_persisted()
         {
-            Assert.AreEqual(entity.DateTimeProperty, savedEntity.DateTimeProperty);
+            Assert.That(savedEntity.DateTimeProperty, Is.EqualTo(entity.DateTimeProperty));
         }
 
         [Test]
         public void Enums_should_be_persisted()
         {
-            Assert.AreEqual(entity.Status, savedEntity.Status);
+            Assert.That(savedEntity.Status, Is.EqualTo(entity.Status));
         }
 
         [Test]
         public void Inherited_property_classes_should_be_persisted()
         {
-            Assert.AreEqual(entity.PolymorphicRelatedProperty, savedEntity.PolymorphicRelatedProperty);
+            Assert.That(savedEntity.PolymorphicRelatedProperty, Is.EqualTo(entity.PolymorphicRelatedProperty));
         }
 
         [Test]
         public void Related_entities_should_be_persisted()
         {
-            Assert.AreEqual(relatedClass.Id, savedEntity.RelatedClass.Id);
+            Assert.That(savedEntity.RelatedClass.Id, Is.EqualTo(relatedClass.Id));
         }
 
         PropertyTypesTestSagaData entity;

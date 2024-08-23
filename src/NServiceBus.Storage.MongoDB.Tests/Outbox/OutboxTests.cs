@@ -25,7 +25,7 @@
 
             var context = new ContextBag();
             var empty = await configuration.OutboxStorage.Get(msgId, context);
-            Assert.IsNull(empty);
+            Assert.That(empty, Is.Null);
 
             using (var transaction = await configuration.CreateTransaction(context))
             {
@@ -35,23 +35,29 @@
 
             var received = await configuration.OutboxStorage.Get(msgId, context);
 
-            Assert.AreEqual(msgId, received.MessageId);
-            Assert.AreEqual(operations.Length, received.TransportOperations.Length);
+            Assert.Multiple(() =>
+            {
+                Assert.That(received.MessageId, Is.EqualTo(msgId));
+                Assert.That(received.TransportOperations, Has.Length.EqualTo(operations.Length));
+            });
 
             for (var op = 0; op < operations.Length; op++)
             {
                 var expectedOp = operations[op];
                 var receivedOp = received.TransportOperations[op];
 
-                Assert.AreEqual(expectedOp.MessageId, receivedOp.MessageId);
-                Assert.AreEqual(Convert.ToBase64String(expectedOp.Body.ToArray()), Convert.ToBase64String(receivedOp.Body.ToArray()));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(receivedOp.MessageId, Is.EqualTo(expectedOp.MessageId));
+                    Assert.That(Convert.ToBase64String(receivedOp.Body.ToArray()), Is.EqualTo(Convert.ToBase64String(expectedOp.Body.ToArray())));
+                });
                 foreach (var header in expectedOp.Headers.Keys)
                 {
-                    Assert.AreEqual(expectedOp.Headers[header], receivedOp.Headers[header]);
+                    Assert.That(receivedOp.Headers[header], Is.EqualTo(expectedOp.Headers[header]));
                 }
                 foreach (var property in expectedOp.Options.Keys)
                 {
-                    Assert.AreEqual(expectedOp.Options[property], receivedOp.Options[property]);
+                    Assert.That(receivedOp.Options[property], Is.EqualTo(expectedOp.Options[property]));
                 }
             }
         }

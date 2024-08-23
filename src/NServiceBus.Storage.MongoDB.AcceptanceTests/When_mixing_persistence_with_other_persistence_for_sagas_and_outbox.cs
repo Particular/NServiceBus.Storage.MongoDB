@@ -21,7 +21,7 @@ namespace NServiceBus.Storage.MongoDB.AcceptanceTests
                 .Done(c => c.Done)
                 .Run();
 
-            Assert.True(context.Done);
+            Assert.That(context.Done, Is.True);
         }
 
         public class Context : ScenarioContext

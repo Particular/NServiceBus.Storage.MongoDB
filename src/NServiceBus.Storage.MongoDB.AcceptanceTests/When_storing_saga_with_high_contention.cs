@@ -21,9 +21,12 @@
                 .Done(c => c.Done)
                 .Run();
 
-            Assert.AreEqual(0, context.NumberOfRetries);
-            Assert.IsTrue(context.MessagesSent);
-            Assert.IsTrue(context.SagaStarted);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.NumberOfRetries, Is.EqualTo(0));
+                Assert.That(context.MessagesSent, Is.True);
+                Assert.That(context.SagaStarted, Is.True);
+            });
         }
 
         public class Context : ScenarioContext

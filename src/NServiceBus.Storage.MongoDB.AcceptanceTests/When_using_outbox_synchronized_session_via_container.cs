@@ -19,7 +19,7 @@ namespace NServiceBus.AcceptanceTests
                 .Run()
                 .ConfigureAwait(false);
 
-            Assert.True(context.RepositoryHasMongoSession);
+            Assert.That(context.RepositoryHasMongoSession, Is.True);
             AssertPartitionPart(context);
         }
 

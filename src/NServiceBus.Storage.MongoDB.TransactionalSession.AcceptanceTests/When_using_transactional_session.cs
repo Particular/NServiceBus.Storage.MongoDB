@@ -100,13 +100,13 @@
                 .Done(c => c.CompleteMessageReceived)
                 .Run();
 
-            Assert.True(context.CompleteMessageReceived);
-            Assert.False(context.MessageReceived);
+            Assert.That(context.CompleteMessageReceived, Is.True);
+            Assert.That(context.MessageReceived, Is.False);
 
             var documents = await SetupFixture.MongoClient.GetDatabase(SetupFixture.DatabaseName)
                 .GetCollection<SampleDocument>(CollectionName)
                 .FindAsync<SampleDocument>(Builders<SampleDocument>.Filter.Where(d => d.Id == context.SessionId));
-            Assert.IsFalse(documents.Any());
+            Assert.That(documents.Any(), Is.False);
         }
 
         [TestCase(true)]
@@ -130,7 +130,7 @@
                 .Run()
                 ;
 
-            Assert.True(result.MessageReceived);
+            Assert.That(result.MessageReceived, Is.True);
         }
 
         class Context : ScenarioContext, IInjectServiceProvider

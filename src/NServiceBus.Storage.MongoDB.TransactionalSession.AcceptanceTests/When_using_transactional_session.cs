@@ -30,9 +30,9 @@
                         .GetCollection<SampleDocument>(CollectionName)
                         .InsertOneAsync(mongoSession, new SampleDocument { Id = transactionalSession.SessionId });
 
-                    await transactionalSession.SendLocal(new SampleMessage(), CancellationToken.None);
+                    await transactionalSession.SendLocal(new SampleMessage());
 
-                    await transactionalSession.Commit(CancellationToken.None).ConfigureAwait(false);
+                    await transactionalSession.Commit().ConfigureAwait(false);
                 }))
                 .Done(c => c.MessageReceived)
                 .Run();
@@ -60,9 +60,9 @@
                         .GetCollection<SampleDocument>(CollectionName)
                         .InsertOneAsync(mongoSession.MongoSession, new SampleDocument { Id = transactionalSession.SessionId });
 
-                    await transactionalSession.SendLocal(new SampleMessage(), CancellationToken.None);
+                    await transactionalSession.SendLocal(new SampleMessage());
 
-                    await transactionalSession.Commit(CancellationToken.None).ConfigureAwait(false);
+                    await transactionalSession.Commit();
                 }))
                 .Done(c => c.MessageReceived)
                 .Run();
@@ -124,13 +124,46 @@
                     var sendOptions = new SendOptions();
                     sendOptions.RequireImmediateDispatch();
                     sendOptions.RouteToThisEndpoint();
-                    await transactionalSession.Send(new SampleMessage(), sendOptions, CancellationToken.None);
+                    await transactionalSession.Send(new SampleMessage(), sendOptions);
                 }))
                 .Done(c => c.MessageReceived)
-                .Run()
-                ;
+                .Run();
 
             Assert.That(result.MessageReceived, Is.True);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_allow_using_synchronized_storage_even_when_there_are_no_outgoing_operations(bool outboxEnabled)
+        {
+            var context = await Scenario.Define<Context>()
+                .WithEndpoint<AnEndpoint>(s => s.When(async (statelessSession, ctx) =>
+                {
+                    using (var scope = ctx.ServiceProvider.CreateScope())
+                    using (var transactionalSession = scope.ServiceProvider.GetRequiredService<ITransactionalSession>())
+                    {
+                        await transactionalSession.Open();
+                        ctx.SessionId = transactionalSession.SessionId;
+
+                        var mongoSession = transactionalSession.SynchronizedStorageSession.GetClientSession();
+                        await mongoSession.Client.GetDatabase(SetupFixture.DatabaseName)
+                            .GetCollection<SampleDocument>(CollectionName)
+                            .InsertOneAsync(mongoSession, new SampleDocument { Id = transactionalSession.SessionId });
+
+                        // Deliberately not sending any messages via the transactional session before committing
+                        await transactionalSession.Commit();
+                    }
+
+                    //Send immediately dispatched message to finish the test
+                    await statelessSession.SendLocal(new CompleteTestMessage());
+                }))
+                .Done(c => c.CompleteMessageReceived)
+                .Run();
+
+            var documents = await SetupFixture.MongoClient.GetDatabase(SetupFixture.DatabaseName)
+                .GetCollection<SampleDocument>(CollectionName)
+                .FindAsync<SampleDocument>(Builders<SampleDocument>.Filter.Where(d => d.Id == context.SessionId));
+            Assert.That(documents.ToList().Count, Is.EqualTo(1));
         }
 
         class Context : ScenarioContext, IInjectServiceProvider

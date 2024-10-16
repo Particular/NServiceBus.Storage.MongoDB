@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
     <PackageReference Include="NServiceBus" Version="9.2.2" />
     <PackageReference Include="NServiceBus.TransactionalSession" Version="3.2.0" />
     <PackageReference Include="Particular.Approvals" Version="1.0.0" />

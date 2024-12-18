@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,22 +11,10 @@
   <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
-    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="9.2.2" GeneratePathProperty="true" />
+    <PackageReference Include="NServiceBus.AcceptanceTests.Sources" Version="9.2.3" GeneratePathProperty="true" />
     <PackageReference Include="NUnit" Version="4.2.2" />
     <PackageReference Include="NUnit.Analyzers" Version="4.4.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(PkgNServiceBus_AcceptanceTests_Sources)' != ''">
-    <!--
-    TODO: The following two tests were not meant to be included in the sources. A fix has been merged to Core master and release-9.1 in:
-    - https://github.com/Particular/NServiceBus/pull/7121
-    - https://github.com/Particular/NServiceBus/pull/7122
-    The following two MSBuild elements can be removed once a version of the ATT source package is released
-    -->
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Core\DependencyInjection\When_resolving_address_translator.cs" />
-    <Compile Remove="$(PkgNServiceBus_AcceptanceTests_Sources)\**\Core\OpenTelemetry\Metrics\When_retrying_messages.cs" />
-  </ItemGroup>
-
-</Project>
+ </Project>

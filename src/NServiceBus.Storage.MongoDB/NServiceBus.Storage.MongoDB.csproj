@@ -11,4 +11,9 @@
     <PackageReference Include="Particular.Packaging" Version="4.2.0" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.PersistenceTests" />
+    <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.Tests" />
+  </ItemGroup>
+
 </Project>

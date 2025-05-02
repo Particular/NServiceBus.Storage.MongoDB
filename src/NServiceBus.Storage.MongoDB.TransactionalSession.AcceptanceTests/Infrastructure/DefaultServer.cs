@@ -35,7 +35,7 @@ public class DefaultServer : IEndpointSetupTemplate
 
         endpointConfiguration.GetSettings().Set(persistence);
 
-        if (this is not IDoNotCaptureServiceProvider)
+        if (!typeof(IDoNotCaptureServiceProvider).IsAssignableFrom(endpointCustomizations.BuilderType))
         {
             endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, runDescriptor.ScenarioContext));
         }

@@ -2,6 +2,7 @@ namespace NServiceBus.TransactionalSession.AcceptanceTests;
 
 using System;
 using System.Collections.Concurrent;
+using System.Reflection;
 using AcceptanceTesting;
 
 public class TransactionalSessionTestContext : ScenarioContext
@@ -10,7 +11,10 @@ public class TransactionalSessionTestContext : ScenarioContext
     {
         get
         {
-            var endpointName = GetType().GetProperty("CurrentEndpoint")!.GetValue(this, null) as string;
+            var property = typeof(ScenarioContext).GetProperty("CurrentEndpoint", BindingFlags.NonPublic | BindingFlags.Static);
+            var endpointName = property!.GetValue(this) as string;
+
+            ArgumentException.ThrowIfNullOrEmpty(endpointName);
 
             if (!serviceProviders.TryGetValue(endpointName, out var serviceProvider))
             {

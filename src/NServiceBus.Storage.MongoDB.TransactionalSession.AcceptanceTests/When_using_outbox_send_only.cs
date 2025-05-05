@@ -57,7 +57,7 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
         });
     }
 
-    class AnotherEndpoint : EndpointConfigurationBuilder, IDoNotCaptureServiceProvider
+    class AnotherEndpoint : EndpointConfigurationBuilder
     {
         public AnotherEndpoint() => EndpointSetup<DefaultServer>();
 
@@ -72,7 +72,7 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
         }
     }
 
-    class ProcessorEndpoint : EndpointConfigurationBuilder, IDoNotCaptureServiceProvider
+    class ProcessorEndpoint : EndpointConfigurationBuilder
     {
         public ProcessorEndpoint() => EndpointSetup<TransactionSessionWithOutboxEndpoint>();
     }

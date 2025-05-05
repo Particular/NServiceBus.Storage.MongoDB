@@ -10,7 +10,7 @@ public class TransactionalSessionTestContext : ScenarioContext
     {
         get
         {
-            var endpointName = GetCurrentEndpoint();
+            var endpointName = GetType().GetProperty("CurrentEndpoint")!.GetValue(this, null) as string;
 
             if (!serviceProviders.TryGetValue(endpointName, out var serviceProvider))
             {
@@ -21,19 +21,7 @@ public class TransactionalSessionTestContext : ScenarioContext
         }
     }
 
-    public void RegisterServiceProvider(IServiceProvider serviceProvider)
-    {
-        var endpointName = GetCurrentEndpoint();
-
-        serviceProviders[endpointName] = serviceProvider;
-    }
-
-    string GetCurrentEndpoint()
-    {
-        var endpointName = GetType().GetProperty("CurrentEndpoint")!.GetValue(this, null) as string;
-
-        return endpointName;
-    }
+    public void RegisterServiceProvider(IServiceProvider serviceProvider, string endpointName) => serviceProviders[endpointName] = serviceProvider;
 
     readonly ConcurrentDictionary<string, IServiceProvider> serviceProviders = new();
 }

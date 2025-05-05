@@ -37,7 +37,7 @@ public class DefaultServer : IEndpointSetupTemplate
 
         if (runDescriptor.ScenarioContext is TransactionalSessionTestContext testContext)
         {
-            endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, testContext));
+            endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, testContext, endpointCustomizations.EndpointName));
         }
 
         await configurationBuilderCustomization(endpointConfiguration).ConfigureAwait(false);

@@ -7,7 +7,7 @@
 
     public class CaptureServiceProviderStartupTask : FeatureStartupTask
     {
-        public CaptureServiceProviderStartupTask(IServiceProvider serviceProvider, TransactionalSessionTestContext context) => context.RegisterServiceProvider(serviceProvider);
+        public CaptureServiceProviderStartupTask(IServiceProvider serviceProvider, TransactionalSessionTestContext context, string endpointName) => context.RegisterServiceProvider(serviceProvider, endpointName);
 
         protected override Task OnStart(IMessageSession session, CancellationToken cancellationToken = default) => Task.CompletedTask;
 

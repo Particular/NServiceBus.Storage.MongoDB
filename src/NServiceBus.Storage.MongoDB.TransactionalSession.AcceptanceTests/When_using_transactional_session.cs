@@ -1,7 +1,5 @@
 ﻿namespace NServiceBus.TransactionalSession.AcceptanceTests
 {
-    using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using Microsoft.Extensions.DependencyInjection;
@@ -166,12 +164,11 @@
             Assert.That(documents.ToList().Count, Is.EqualTo(1));
         }
 
-        class Context : ScenarioContext, IInjectServiceProvider
+        class Context : TransactionalSessionTestContext
         {
             public bool MessageReceived { get; set; }
             public bool CompleteMessageReceived { get; set; }
             public string SessionId { get; set; }
-            public IServiceProvider ServiceProvider { get; set; }
         }
 
         class AnEndpoint : EndpointConfigurationBuilder

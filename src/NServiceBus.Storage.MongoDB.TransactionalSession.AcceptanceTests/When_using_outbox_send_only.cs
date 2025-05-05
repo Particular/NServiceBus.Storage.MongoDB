@@ -1,6 +1,5 @@
 namespace NServiceBus.TransactionalSession.AcceptanceTests;
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,11 +36,9 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
         Assert.That(context.MessageReceived, Is.True);
     }
 
-    class Context : ScenarioContext, IInjectServiceProvider
+    class Context : TransactionalSessionTestContext
     {
         public bool MessageReceived { get; set; }
-
-        public IServiceProvider ServiceProvider { get; set; }
     }
 
     class SendOnlyEndpoint : EndpointConfigurationBuilder
@@ -59,7 +56,7 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
         });
     }
 
-    class AnotherEndpoint : EndpointConfigurationBuilder, IDoNotCaptureServiceProvider
+    class AnotherEndpoint : EndpointConfigurationBuilder
     {
         public AnotherEndpoint() => EndpointSetup<DefaultServer>();
 
@@ -74,7 +71,7 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
         }
     }
 
-    class ProcessorEndpoint : EndpointConfigurationBuilder, IDoNotCaptureServiceProvider
+    class ProcessorEndpoint : EndpointConfigurationBuilder
     {
         public ProcessorEndpoint() => EndpointSetup<TransactionSessionWithOutboxEndpoint>();
     }

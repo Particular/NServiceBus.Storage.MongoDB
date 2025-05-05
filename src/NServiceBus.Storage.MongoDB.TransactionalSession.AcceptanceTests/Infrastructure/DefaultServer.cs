@@ -35,9 +35,9 @@ public class DefaultServer : IEndpointSetupTemplate
 
         endpointConfiguration.GetSettings().Set(persistence);
 
-        if (!typeof(IDoNotCaptureServiceProvider).IsAssignableFrom(endpointCustomizations.BuilderType))
+        if (runDescriptor.ScenarioContext is TransactionalSessionTestContext testContext)
         {
-            endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, runDescriptor.ScenarioContext));
+            endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, testContext, endpointCustomizations.EndpointName));
         }
 
         await configurationBuilderCustomization(endpointConfiguration).ConfigureAwait(false);

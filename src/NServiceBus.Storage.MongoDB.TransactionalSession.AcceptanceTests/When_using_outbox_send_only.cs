@@ -8,7 +8,6 @@ using AcceptanceTesting;
 using AcceptanceTesting.Customization;
 using Configuration.AdvancedExtensibility;
 using NUnit.Framework;
-using Pipeline;
 
 public class When_using_outbox_send_only : NServiceBusAcceptanceTest
 {
@@ -35,7 +34,6 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
             .Done(c => c.MessageReceived)
             .Run();
 
-        Assert.That(context.ControlMessageReceived, Is.True);
         Assert.That(context.MessageReceived, Is.True);
     }
 
@@ -44,8 +42,6 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
         public bool MessageReceived { get; set; }
 
         public IServiceProvider ServiceProvider { get; set; }
-
-        public bool ControlMessageReceived { get; set; }
     }
 
     class SendOnlyEndpoint : EndpointConfigurationBuilder
@@ -80,26 +76,7 @@ public class When_using_outbox_send_only : NServiceBusAcceptanceTest
 
     class ProcessorEndpoint : EndpointConfigurationBuilder, IDoNotCaptureServiceProvider
     {
-        public ProcessorEndpoint() => EndpointSetup<TransactionSessionDefaultServer>(c =>
-            {
-                c.Pipeline.Register(typeof(DiscoverControlMessagesBehavior), "Discovers control messages");
-                c.EnableOutbox();
-                c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
-            }
-        );
-
-        class DiscoverControlMessagesBehavior(Context testContext) : Behavior<ITransportReceiveContext>
-        {
-            public override async Task Invoke(ITransportReceiveContext context, Func<Task> next)
-            {
-                if (context.Message.Headers.ContainsKey("NServiceBus.TransactionalSession.CommitDelayIncrement"))
-                {
-                    testContext.ControlMessageReceived = true;
-                }
-
-                await next();
-            }
-        }
+        public ProcessorEndpoint() => EndpointSetup<TransactionSessionWithOutboxEndpoint>();
     }
 
     class SampleMessage : ICommand

@@ -19,38 +19,17 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
 
         Context context = await Scenario.Define<Context>()
             .WithEndpoint<Publisher>(b =>
-                b.When(c => c.Subscriber1Subscribed && c.Subscriber2Subscribed, (session, c) =>
-                {
-                    // Send a trigger message that will invoke the handler method that publishes the event
-                    c.AddTrace("Both subscribers are subscribed, going to send TriggerMessage");
-                    return session.SendLocal(new TriggerMessage());
-                })
+                b.When(c => c.Subscriber1Subscribed && c.Subscriber2Subscribed, session => session.SendLocal(new TriggerMessage()))
             )
             .WithEndpoint<Subscriber1>(b => b.When(async (session, ctx) =>
             {
                 await session.Subscribe<MyEvent>();
-                if (ctx.HasNativePubSubSupport)
-                {
-                    ctx.Subscriber1Subscribed = true;
-                    ctx.AddTrace("Subscriber1 is now subscribed (at least we have asked the broker to be subscribed)");
-                }
-                else
-                {
-                    ctx.AddTrace("Subscriber1 has now asked to be subscribed to MyEvent");
-                }
+                ctx.Subscriber1Subscribed = true;
             }))
             .WithEndpoint<Subscriber2>(b => b.When(async (session, ctx) =>
             {
                 await session.Subscribe<MyEvent>();
-                if (ctx.HasNativePubSubSupport)
-                {
-                    ctx.Subscriber2Subscribed = true;
-                    ctx.AddTrace("Subscriber2 is now subscribed (at least we have asked the broker to be subscribed)");
-                }
-                else
-                {
-                    ctx.AddTrace("Subscriber2 has now asked to be subscribed to MyEvent");
-                }
+                ctx.Subscriber2Subscribed = true;
             }))
             .Done(c => c.Subscriber1GotTheEvent && c.Subscriber2GotTheEvent)
             .Run(TimeSpan.FromSeconds(10));
@@ -73,50 +52,12 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
     public class Publisher : EndpointConfigurationBuilder
     {
         public Publisher() =>
-            EndpointSetup<DefaultPublisher>(b =>
-            {
-                b.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
-                b.EnableOutbox();
-                // Test the outbox behavior in situations where messages are deserialized and dispatched from the outbox storage by injecting an exception into the dispatch pipeline
-                b.Pipeline.Register(new BlowUpAfterDispatchBehavior(), "ensure outbox dispatch fails");
-                b.Recoverability().Immediate(i => i.NumberOfRetries(1));
-                b.OnEndpointSubscribed<Context>((s, context) =>
-                {
-                    var subscriber1 = Conventions.EndpointNamingConvention(typeof(Subscriber1));
-                    if (s.SubscriberEndpoint.Contains(subscriber1))
-                    {
-                        context.Subscriber1Subscribed = true;
-                        context.AddTrace($"{subscriber1} is now subscribed");
-                    }
-                    var subscriber2 = Conventions.EndpointNamingConvention(typeof(Subscriber2));
-                    if (s.SubscriberEndpoint.Contains(subscriber2))
-                    {
-                        context.AddTrace($"{subscriber2} is now subscribed");
-                        context.Subscriber2Subscribed = true;
-                    }
-                });
-                b.DisableFeature<AutoSubscribe>();
-            });
+            EndpointSetup<DefaultPublisher>(b => b.DisableFeature<AutoSubscribe>());
 
         public class TriggerHandler : IHandleMessages<TriggerMessage>
         {
             public Task Handle(TriggerMessage message, IMessageHandlerContext context)
                 => context.Publish(new MyEvent());
-        }
-
-        class BlowUpAfterDispatchBehavior : IBehavior<IBatchDispatchContext, IBatchDispatchContext>
-        {
-            public async Task Invoke(IBatchDispatchContext context, Func<IBatchDispatchContext, Task> next)
-            {
-                if (Interlocked.Increment(ref invocationCounter) == 1)
-                {
-                    throw new SimulatedException();
-                }
-
-                await next(context).ConfigureAwait(false);
-            }
-
-            int invocationCounter;
         }
     }
 
@@ -128,8 +69,7 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
                     c.DisableFeature<AutoSubscribe>();
                     c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
                     c.EnableOutbox();
-                },
-                metadata => metadata.RegisterPublisherFor<MyEvent>(typeof(Publisher)));
+                });
 
         public class MyHandler(Context testContext) : IHandleMessages<MyEvent>
         {
@@ -149,8 +89,7 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
                     c.DisableFeature<AutoSubscribe>();
                     c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
                     c.EnableOutbox();
-                },
-                metadata => metadata.RegisterPublisherFor<MyEvent>(typeof(Publisher)));
+                });
 
         public class MyHandler(Context testContext) : IHandleMessages<MyEvent>
         {

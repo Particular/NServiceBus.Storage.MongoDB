@@ -8,7 +8,8 @@
 
         public bool SupportsCrossQueueTransactions => true;
 
-        public bool SupportsNativePubSub => true;
+        //The persister has a subscription storage so we set this to false to make sure it will be used in the tests
+        public bool SupportsNativePubSub => false;
 
         public bool SupportsNativeDeferral => true;
 

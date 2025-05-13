@@ -1,13 +1,10 @@
 namespace NServiceBus.AcceptanceTests.Outbox;
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using AcceptanceTesting;
 using AcceptanceTesting.Customization;
 using EndpointTemplates;
-using Features;
-using NServiceBus.Pipeline;
 using NUnit.Framework;
 
 public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
@@ -19,7 +16,7 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
 
         Context context = await Scenario.Define<Context>()
             .WithEndpoint<Publisher>(b =>
-                b.When(session => session.SendLocal(new TriggerMessage()))
+                b.When(c => c.Subscriber1Subscribed && c.Subscriber2Subscribed, session => session.Publish(new MyEvent()))
             )
             .WithEndpoint<Subscriber1>()
             .WithEndpoint<Subscriber2>()
@@ -35,19 +32,32 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
 
     public class Context : ScenarioContext
     {
+        public bool Subscriber1Subscribed { get; set; }
+        public bool Subscriber2Subscribed { get; set; }
+
         public bool Subscriber1GotTheEvent { get; set; }
         public bool Subscriber2GotTheEvent { get; set; }
     }
 
     public class Publisher : EndpointConfigurationBuilder
     {
-        public Publisher() => EndpointSetup<DefaultPublisher>();
-
-        public class TriggerHandler : IHandleMessages<TriggerMessage>
+        public Publisher() => EndpointSetup<DefaultPublisher>(c =>
         {
-            public Task Handle(TriggerMessage message, IMessageHandlerContext context)
-                => context.Publish(new MyEvent());
-        }
+            c.OnEndpointSubscribed<Context>((s, context) =>
+            {
+                var subscriber1 = Conventions.EndpointNamingConvention(typeof(Subscriber1));
+                if (s.SubscriberEndpoint.Contains(subscriber1))
+                {
+                    context.Subscriber1Subscribed = true;
+                }
+
+                var subscriber2 = Conventions.EndpointNamingConvention(typeof(Subscriber2));
+                if (s.SubscriberEndpoint.Contains(subscriber2))
+                {
+                    context.Subscriber2Subscribed = true;
+                }
+            });
+        });
     }
 
     public class Subscriber1 : EndpointConfigurationBuilder
@@ -57,7 +67,7 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
             {
                 c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
                 c.EnableOutbox();
-            });
+            }, metadata => metadata.RegisterPublisherFor<MyEvent>(typeof(Publisher)));
 
         public class MyHandler(Context testContext) : IHandleMessages<MyEvent>
         {
@@ -76,7 +86,7 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
             {
                 c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
                 c.EnableOutbox();
-            });
+            }, metadata => metadata.RegisterPublisherFor<MyEvent>(typeof(Publisher)));
 
         public class MyHandler(Context testContext) : IHandleMessages<MyEvent>
         {

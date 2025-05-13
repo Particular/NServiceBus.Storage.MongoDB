@@ -8,7 +8,7 @@
 
         public bool SupportsCrossQueueTransactions => true;
 
-        public bool SupportsNativePubSub => false;
+        public bool SupportsNativePubSub => true;
 
         public bool SupportsNativeDeferral => true;
 

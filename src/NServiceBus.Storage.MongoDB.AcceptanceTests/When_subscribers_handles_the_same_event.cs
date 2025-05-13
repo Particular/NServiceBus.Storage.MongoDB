@@ -19,18 +19,10 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
 
         Context context = await Scenario.Define<Context>()
             .WithEndpoint<Publisher>(b =>
-                b.When(c => c.Subscriber1Subscribed && c.Subscriber2Subscribed, session => session.SendLocal(new TriggerMessage()))
+                b.When(session => session.SendLocal(new TriggerMessage()))
             )
-            .WithEndpoint<Subscriber1>(b => b.When(async (session, ctx) =>
-            {
-                await session.Subscribe<MyEvent>();
-                ctx.Subscriber1Subscribed = true;
-            }))
-            .WithEndpoint<Subscriber2>(b => b.When(async (session, ctx) =>
-            {
-                await session.Subscribe<MyEvent>();
-                ctx.Subscriber2Subscribed = true;
-            }))
+            .WithEndpoint<Subscriber1>()
+            .WithEndpoint<Subscriber2>()
             .Done(c => c.Subscriber1GotTheEvent && c.Subscriber2GotTheEvent)
             .Run(TimeSpan.FromSeconds(10));
 
@@ -45,14 +37,11 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
     {
         public bool Subscriber1GotTheEvent { get; set; }
         public bool Subscriber2GotTheEvent { get; set; }
-        public bool Subscriber1Subscribed { get; set; }
-        public bool Subscriber2Subscribed { get; set; }
     }
 
     public class Publisher : EndpointConfigurationBuilder
     {
-        public Publisher() =>
-            EndpointSetup<DefaultPublisher>(b => b.DisableFeature<AutoSubscribe>());
+        public Publisher() => EndpointSetup<DefaultPublisher>();
 
         public class TriggerHandler : IHandleMessages<TriggerMessage>
         {
@@ -65,11 +54,10 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
     {
         public Subscriber1() =>
             EndpointSetup<DefaultServer>(c =>
-                {
-                    c.DisableFeature<AutoSubscribe>();
-                    c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
-                    c.EnableOutbox();
-                });
+            {
+                c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
+                c.EnableOutbox();
+            });
 
         public class MyHandler(Context testContext) : IHandleMessages<MyEvent>
         {
@@ -85,11 +73,10 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
     {
         public Subscriber2() =>
             EndpointSetup<DefaultServer>(c =>
-                {
-                    c.DisableFeature<AutoSubscribe>();
-                    c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
-                    c.EnableOutbox();
-                });
+            {
+                c.ConfigureTransport().TransportTransactionMode = TransportTransactionMode.ReceiveOnly;
+                c.EnableOutbox();
+            });
 
         public class MyHandler(Context testContext) : IHandleMessages<MyEvent>
         {

@@ -12,9 +12,7 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
     [Test]
     public async Task Should_be_processed_by_all_subscribers()
     {
-        Requires.OutboxPersistence();
-
-        Context context = await Scenario.Define<Context>()
+        var context = await Scenario.Define<Context>()
             .WithEndpoint<Publisher>(b =>
                 b.When(c => c.Subscriber1Subscribed && c.Subscriber2Subscribed, session => session.Publish(new MyEvent()))
             )

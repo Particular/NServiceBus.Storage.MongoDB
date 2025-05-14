@@ -99,8 +99,4 @@ public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
     public class MyEvent : IEvent
     {
     }
-
-    public class TriggerMessage : ICommand
-    {
-    }
 }

@@ -2,6 +2,9 @@
 {
     using System;
     using Features;
+    using MongoDB.Bson;
+    using MongoDB.Bson.Serialization;
+    using MongoDB.Bson.Serialization.Serializers;
     using MongoDB.Driver;
     using Persistence;
     using Storage.MongoDB;
@@ -16,6 +19,8 @@
         /// </summary>
         public MongoPersistence()
         {
+            BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
             Defaults(s =>
             {
                 s.SetDefault(SettingsKeys.MongoClient, () =>

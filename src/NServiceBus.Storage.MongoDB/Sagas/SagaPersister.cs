@@ -68,8 +68,11 @@
         async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, ISynchronizedStorageSession session, CancellationToken cancellationToken)
         {
             var storageSession = ((SynchronizedStorageSession)session).Session;
+            var elementValueBsonRepresentation = elementValue is Guid guid
+                ? new BsonBinaryData(guid, GuidRepresentation.Standard)
+                : BsonValue.Create(elementValue);
 
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue)), cancellationToken).ConfigureAwait(false);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, elementValueBsonRepresentation), cancellationToken).ConfigureAwait(false);
 
             if (document != null)
             {

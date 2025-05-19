@@ -4,6 +4,9 @@
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
+    using MongoDB.Bson;
+    using MongoDB.Bson.Serialization;
+    using MongoDB.Bson.Serialization.Serializers;
     using MongoDB.Driver;
     using NServiceBus.Outbox;
     using NServiceBus.Sagas;
@@ -31,6 +34,8 @@
 
         public async Task Configure(CancellationToken cancellationToken = default)
         {
+            BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
             var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
             client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
 

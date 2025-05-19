@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.2.1" />
     <PackageReference Include="NServiceBus" Version="9.2.3" />
     <PackageReference Include="Particular.Packaging" Version="4.2.2" PrivateAssets="All" />
   </ItemGroup>

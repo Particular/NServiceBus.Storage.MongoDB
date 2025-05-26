@@ -69,7 +69,8 @@
         {
             var storageSession = ((SynchronizedStorageSession)session).Session;
 
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue)), cancellationToken).ConfigureAwait(false);
+            var filter = Builders<TSagaData>.Filter.Eq(elementName, elementValue);
+            var document = await storageSession.Find(filter, cancellationToken).ConfigureAwait(false);
 
             if (document != null)
             {

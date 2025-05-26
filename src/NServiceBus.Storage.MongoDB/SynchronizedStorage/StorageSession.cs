@@ -57,7 +57,7 @@
                     catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                     {
                         await AbortTransaction(combinedTokenSource.Token).ConfigureAwait(false);
-                        await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), combinedTokenSource.Token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(5, 20)), combinedTokenSource.Token).ConfigureAwait(false);
                         StartTransaction();
                     }
                 }
@@ -146,7 +146,6 @@
 
         readonly TimeSpan transactionTimeout;
 
-        static readonly Random random = new Random();
         static readonly TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();

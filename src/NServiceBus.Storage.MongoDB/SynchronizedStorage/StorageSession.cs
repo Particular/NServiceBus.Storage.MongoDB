@@ -154,7 +154,7 @@
 
     static class OptionsCache<T>
     {
-        public static FindOneAndUpdateOptions<T, BsonDocument> Default => new()
+        public static FindOneAndUpdateOptions<T, BsonDocument> Default { get; } = new()
         {
             ReturnDocument = ReturnDocument.After
         };

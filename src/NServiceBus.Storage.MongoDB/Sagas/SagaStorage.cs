@@ -4,6 +4,7 @@ namespace NServiceBus.Storage.MongoDB
     using Features;
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization;
+    using global::MongoDB.Bson.Serialization.Serializers;
     using global::MongoDB.Driver;
     using Microsoft.Extensions.DependencyInjection;
     using Sagas;
@@ -37,6 +38,9 @@ namespace NServiceBus.Storage.MongoDB
 
         internal static void InitializeSagaDataTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
         {
+            BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+            BsonSerializer.TryRegisterSerializer(new ObjectSerializer(BsonSerializer.LookupDiscriminatorConvention(typeof(object)), GuidRepresentation.Standard));
+
             var databaseSettings = new MongoDatabaseSettings
             {
                 ReadConcern = ReadConcern.Majority,

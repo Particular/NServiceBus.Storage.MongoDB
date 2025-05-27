@@ -35,6 +35,7 @@
         public async Task Configure(CancellationToken cancellationToken = default)
         {
             BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+            BsonSerializer.TryRegisterSerializer(new ObjectSerializer(BsonSerializer.LookupDiscriminatorConvention(typeof(object)), GuidRepresentation.Standard));
 
             var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
             client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);

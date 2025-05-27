@@ -31,7 +31,7 @@
             var version = storageSession.RetrieveVersion(sagaDataType);
             var document = sagaData.ToBsonDocument(sagaDataType).SetElement(new BsonElement(versionElementName, version + 1));
 
-            var memberMap = sagaDataType.GetMemberMap(nameof(sagaData.Id));
+            var memberMap = sagaDataType.GetMemberMap(nameof(IContainSagaData.Id));
             var serializer = memberMap.GetSerializer();
             var serializedElementValue = serializer.ToBsonValue(sagaData.Id);
 
@@ -56,7 +56,7 @@
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
-            var memberMap = sagaDataType.GetMemberMap(nameof(sagaData.Id));
+            var memberMap = sagaDataType.GetMemberMap(nameof(IContainSagaData.Id));
             var serializer = memberMap.GetSerializer();
             var serializedElementValue = serializer.ToBsonValue(sagaData.Id);
 

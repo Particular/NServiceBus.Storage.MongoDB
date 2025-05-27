@@ -20,7 +20,6 @@
         public MongoPersistence()
         {
             BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
-            BsonSerializer.TryRegisterSerializer(new ObjectSerializer(BsonSerializer.LookupDiscriminatorConvention(typeof(object)), GuidRepresentation.Standard));
 
             Defaults(s =>
             {

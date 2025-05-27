@@ -14,9 +14,11 @@
         public async Task Should_support_full_saga_lifecycle()
         {
             var classMap = new BsonClassMap(typeof(CustomSagaData));
-            classMap.AutoMap();
             classMap.MapIdProperty(nameof(CustomSagaData.Id))
+                .SetElementName("_id")
                 .SetSerializer(new GuidSerializer(GuidRepresentation.CSharpLegacy));
+            classMap.MapProperty(nameof(CustomSagaData.Originator));
+            classMap.MapProperty(nameof(CustomSagaData.OriginalMessageId));
             classMap.SetIgnoreExtraElements(true);
 
             BsonClassMap.RegisterClassMap(classMap);
@@ -45,8 +47,9 @@
             {
                 await updateSession.Open(updateContextBag);
 
-                _ = await configuration.SagaStorage.Get<CustomSagaData>("Id", entity.Id, updateSession, updateContextBag)
-                    .ConfigureAwait(false);
+                _ = await configuration.SagaStorage.Get<CustomSagaData>("Id", entity.Id, updateSession, updateContextBag);
+
+                entity.Originator += "Updated";
 
                 await configuration.SagaStorage.Update(entity, updateSession, updateContextBag);
                 await updateSession.CompleteAsync();
@@ -59,19 +62,19 @@
             {
                 await completeSession.Open(completeContextBag);
 
-                _ = await configuration.SagaStorage.Get<CustomSagaData>(entity.Id, completeSession, completeContextBag)
-                    .ConfigureAwait(false);
+                _ = await configuration.SagaStorage.Get<CustomSagaData>(entity.Id, completeSession, completeContextBag);
 
                 await configuration.SagaStorage.Complete(entity, completeSession, completeContextBag);
                 await completeSession.CompleteAsync();
             }
 
-            var completedEntity = await GetById<CustomSagaData>(entity.Id).ConfigureAwait(false);
+            var completedEntity = await GetById<CustomSagaData>(entity.Id);
 
             Assert.Multiple(() =>
             {
                 Assert.That(savedEntity, Is.Not.Null);
                 Assert.That(updatedEntity, Is.Not.Null);
+                Assert.That(updatedEntity.Originator, Is.EqualTo("SomeOriginatorUpdated"));
                 Assert.That(completedEntity, Is.Null);
             });
         }

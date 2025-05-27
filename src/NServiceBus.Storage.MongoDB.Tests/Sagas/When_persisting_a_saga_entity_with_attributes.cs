@@ -4,21 +4,17 @@
     using System.Threading.Tasks;
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization;
-    using global::MongoDB.Bson.Serialization.Serializers;
+    using global::MongoDB.Bson.Serialization.Attributes;
     using NUnit.Framework;
     using Sagas;
 
-    public class When_persisting_a_saga_entity_with_class_map : SagaPersisterTests
+    public class When_persisting_a_saga_entity_with_attributes : SagaPersisterTests
     {
         [Test]
         public async Task Should_support_full_saga_lifecycle()
         {
             var classMap = new BsonClassMap(typeof(CustomSagaData));
-            classMap.MapIdProperty(nameof(CustomSagaData.Id))
-                .SetElementName("_id")
-                .SetSerializer(new GuidSerializer(GuidRepresentation.CSharpLegacy));
-            classMap.MapProperty(nameof(CustomSagaData.Originator));
-            classMap.MapProperty(nameof(CustomSagaData.OriginalMessageId));
+            classMap.AutoMap();
             classMap.SetIgnoreExtraElements(true);
 
             BsonClassMap.RegisterClassMap(classMap);
@@ -78,8 +74,11 @@
                 Assert.That(completedEntity, Is.Null);
             });
         }
+
         class CustomSagaData : IContainSagaData
         {
+            [BsonGuidRepresentation(GuidRepresentation.CSharpLegacy)]
+            [BsonElement("_id")]
             public Guid Id { get; set; }
             public string Originator { get; set; }
             public string OriginalMessageId { get; set; }

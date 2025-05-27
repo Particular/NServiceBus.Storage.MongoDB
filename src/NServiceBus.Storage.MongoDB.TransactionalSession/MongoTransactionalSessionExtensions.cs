@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.TransactionalSession
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Features;
@@ -14,9 +15,22 @@
         /// Enables transactional session for this endpoint.
         /// </summary>
         public static PersistenceExtensions<MongoPersistence> EnableTransactionalSession(
-            this PersistenceExtensions<MongoPersistence> persistenceExtensions)
+            this PersistenceExtensions<MongoPersistence> persistenceExtensions) =>
+            EnableTransactionalSession(persistenceExtensions, new TransactionalSessionOptions());
+
+        /// <summary>
+        /// Enables the transactional session for this endpoint using the specified TransactionalSessionOptions.
+        /// </summary>
+        public static PersistenceExtensions<MongoPersistence> EnableTransactionalSession(this PersistenceExtensions<MongoPersistence> persistenceExtensions,
+            TransactionalSessionOptions transactionalSessionOptions)
         {
-            persistenceExtensions.GetSettings().EnableFeatureByDefault<MongoTransactionalSession>();
+            ArgumentNullException.ThrowIfNull(persistenceExtensions);
+            ArgumentNullException.ThrowIfNull(transactionalSessionOptions);
+
+            var settings = persistenceExtensions.GetSettings();
+
+            settings.Set(transactionalSessionOptions);
+            settings.EnableFeatureByDefault<MongoTransactionalSession>();
 
             return persistenceExtensions;
         }

@@ -7,6 +7,7 @@ namespace NServiceBus.TransactionalSession
     public static class MongoTransactionalSessionExtensions
     {
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> EnableTransactionalSession(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions) { }
+        public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> EnableTransactionalSession(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, NServiceBus.TransactionalSession.TransactionalSessionOptions transactionalSessionOptions) { }
         public static System.Threading.Tasks.Task Open(this NServiceBus.TransactionalSession.ITransactionalSession session, System.Threading.CancellationToken cancellationToken = default) { }
     }
 }

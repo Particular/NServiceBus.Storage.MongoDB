@@ -1,7 +1,5 @@
 ﻿namespace NServiceBus.TransactionalSession.AcceptanceTests
 {
-    using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using Microsoft.Extensions.DependencyInjection;
@@ -166,12 +164,11 @@
             Assert.That(documents.ToList().Count, Is.EqualTo(1));
         }
 
-        class Context : ScenarioContext, IInjectServiceProvider
+        class Context : TransactionalSessionTestContext
         {
             public bool MessageReceived { get; set; }
             public bool CompleteMessageReceived { get; set; }
             public string SessionId { get; set; }
-            public IServiceProvider ServiceProvider { get; set; }
         }
 
         class AnEndpoint : EndpointConfigurationBuilder
@@ -188,32 +185,24 @@
                 }
             }
 
-            class SampleHandler : IHandleMessages<SampleMessage>
+            class SampleHandler(Context testContext) : IHandleMessages<SampleMessage>
             {
-                public SampleHandler(Context testContext) => this.testContext = testContext;
-
                 public Task Handle(SampleMessage message, IMessageHandlerContext context)
                 {
                     testContext.MessageReceived = true;
 
                     return Task.CompletedTask;
                 }
-
-                readonly Context testContext;
             }
 
-            class CompleteTestMessageHandler : IHandleMessages<CompleteTestMessage>
+            class CompleteTestMessageHandler(Context testContext) : IHandleMessages<CompleteTestMessage>
             {
-                public CompleteTestMessageHandler(Context context) => testContext = context;
-
                 public Task Handle(CompleteTestMessage message, IMessageHandlerContext context)
                 {
                     testContext.CompleteMessageReceived = true;
 
                     return Task.CompletedTask;
                 }
-
-                readonly Context testContext;
             }
         }
 

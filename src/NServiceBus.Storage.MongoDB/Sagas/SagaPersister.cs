@@ -45,10 +45,10 @@
         }
 
         public Task<TSagaData> Get<TSagaData>(Guid sagaId, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(idElementName, sagaId, session, cancellationToken);
+            GetSagaData<TSagaData>(typeof(TSagaData).GetMemberMap(new Element(idElementName)), sagaId, session, cancellationToken);
 
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session, cancellationToken);
+            GetSagaData<TSagaData>(typeof(TSagaData).GetMemberMap(new Property(propertyName)), propertyValue, session, cancellationToken);
 
         public async Task Complete(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
@@ -65,14 +65,15 @@
             }
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, ISynchronizedStorageSession session, CancellationToken cancellationToken)
+        async Task<TSagaData> GetSagaData<TSagaData>(BsonMemberMap memberMap, object elementValue, ISynchronizedStorageSession session, CancellationToken cancellationToken)
         {
             var storageSession = ((SynchronizedStorageSession)session).Session;
 
-            // Looking up the serializer for the element value type to ensure globally registered serializers are always consistently used.
-            var serializer = BsonSerializer.LookupSerializer(elementValue.GetType());
+            // Looking up the serializer for the element value type to ensure globally registered serializers or class maps
+            // are always consistently used.
+            var serializer = memberMap.GetSerializer();
             var serializedElementValue = serializer.ToBsonValue(elementValue);
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, serializedElementValue), cancellationToken).ConfigureAwait(false);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(memberMap.ElementName, serializedElementValue), cancellationToken).ConfigureAwait(false);
 
             if (document != null)
             {

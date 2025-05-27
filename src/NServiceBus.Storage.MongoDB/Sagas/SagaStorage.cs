@@ -60,7 +60,7 @@ namespace NServiceBus.Storage.MongoDB
 
                 if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
                 {
-                    var propertyElementName = sagaMetadata.SagaEntityType.GetElementName(property.Name);
+                    var propertyElementName = sagaMetadata.SagaEntityType.GetMemberMap(property).ElementName;
 
                     var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions
                     { Unique = true });

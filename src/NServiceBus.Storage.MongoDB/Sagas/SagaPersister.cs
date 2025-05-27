@@ -69,8 +69,10 @@
         {
             var storageSession = ((SynchronizedStorageSession)session).Session;
 
-            var filter = Builders<TSagaData>.Filter.Eq(elementName, elementValue);
-            var document = await storageSession.Find(filter, cancellationToken).ConfigureAwait(false);
+            // Looking up the serializer for the element value type to ensure globally registered serializers are always consistently used.
+            var serializer = BsonSerializer.LookupSerializer(elementValue.GetType());
+            var serializedElementValue = serializer.ToBsonValue(elementValue);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, serializedElementValue), cancellationToken).ConfigureAwait(false);
 
             if (document != null)
             {

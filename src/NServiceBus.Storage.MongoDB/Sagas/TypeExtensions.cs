@@ -1,45 +1,33 @@
 ﻿namespace NServiceBus.Storage.MongoDB
 {
     using System;
+    using System.Collections.Concurrent;
     using global::MongoDB.Bson.Serialization;
     using Sagas;
 
     static class TypeExtensions
     {
         public static BsonMemberMap GetMemberMap(this Type t, SagaMetadata.CorrelationPropertyMetadata metadata)
-            => t.GetMemberMap(new Property(metadata.Name));
+            => t.GetMemberMap(metadata.Name);
 
-        public static BsonMemberMap GetMemberMap(this Type type, Property property)
-        {
-            var classMap = BsonClassMap.LookupClassMap(type);
-
-            foreach (var memberMap in classMap.AllMemberMaps)
+        public static BsonMemberMap GetMemberMap(this Type type, string propertyName) =>
+            typeAndPropertyToMemberMapCache.GetOrAdd((type, propertyName), static key =>
             {
-                if (memberMap.MemberName == property.Name)
+                (Type type, string propertyName) = key;
+
+                var classMap = BsonClassMap.LookupClassMap(type);
+
+                foreach (var memberMap in classMap.AllMemberMaps)
                 {
-                    return memberMap;
+                    if (memberMap.MemberName == propertyName)
+                    {
+                        return memberMap;
+                    }
                 }
-            }
 
-            throw new InvalidOperationException($"Property '{property.Name}' not found in '{type}' class map.");
-        }
+                throw new InvalidOperationException($"Property '{propertyName}' not found in '{type}' class map.");
+            });
 
-        public static BsonMemberMap GetMemberMap(this Type type, Element element)
-        {
-            var classMap = BsonClassMap.LookupClassMap(type);
-
-            foreach (var memberMap in classMap.AllMemberMaps)
-            {
-                if (memberMap.ElementName == element.Name)
-                {
-                    return memberMap;
-                }
-            }
-
-            throw new InvalidOperationException($"Element '{element.Name}' not found in '{type}' class map.");
-        }
+        static readonly ConcurrentDictionary<(Type, string), BsonMemberMap> typeAndPropertyToMemberMapCache = new();
     }
-
-    readonly record struct Property(string Name);
-    readonly record struct Element(string Name);
 }

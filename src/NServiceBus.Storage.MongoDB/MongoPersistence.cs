@@ -21,6 +21,9 @@
         {
             Defaults(s =>
             {
+                // Deferred to feature default activation to give users a chance to register their own mappings before defaults apply.
+                // This ensures user configs take precedence, despite being slightly counter to the idea of feature defaults.
+                // Can't do much earlier due to static nature of class mappings and serialization extensions.
                 SafeRegisterDefaultGuidSerializer();
 
                 s.SetDefault(SettingsKeys.MongoClient, static () =>

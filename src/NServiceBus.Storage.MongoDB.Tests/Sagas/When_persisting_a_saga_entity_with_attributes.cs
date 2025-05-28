@@ -30,7 +30,7 @@
             using (var insertSession = configuration.SessionFactory())
             {
                 await insertSession.Open(insertContextBag);
-                var correlationProperty = new SagaCorrelationProperty(nameof(entity.Id), entity.Id);
+                var correlationProperty = new SagaCorrelationProperty(nameof(IContainSagaData.Id), entity.Id);
 
                 await configuration.SagaStorage.Save(entity, correlationProperty, insertSession, insertContextBag);
                 await insertSession.CompleteAsync();
@@ -43,7 +43,7 @@
             {
                 await updateSession.Open(updateContextBag);
 
-                _ = await configuration.SagaStorage.Get<CustomSagaData>("Id", entity.Id, updateSession, updateContextBag);
+                _ = await configuration.SagaStorage.Get<CustomSagaData>(nameof(IContainSagaData.Id), entity.Id, updateSession, updateContextBag);
 
                 entity.Originator += "Updated";
 
@@ -51,7 +51,7 @@
                 await updateSession.CompleteAsync();
             }
 
-            var updatedEntity = await GetByProperty<CustomSagaData>("Id", entity.Id).ConfigureAwait(false);
+            var updatedEntity = await GetByProperty<CustomSagaData>(nameof(IContainSagaData.Id), entity.Id).ConfigureAwait(false);
 
             var completeContextBag = configuration.GetContextBagForSagaStorage();
             using (var completeSession = configuration.SessionFactory())

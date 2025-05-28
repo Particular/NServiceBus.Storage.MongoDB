@@ -25,7 +25,7 @@
             using (var insertSession = configuration.SessionFactory())
             {
                 await insertSession.Open(insertContextBag);
-                var correlationProperty = new SagaCorrelationProperty(nameof(entity.Id), entity.Id);
+                var correlationProperty = new SagaCorrelationProperty(nameof(IContainSagaData.Id), entity.Id);
 
                 await configuration.SagaStorage.Save(entity, correlationProperty, insertSession, insertContextBag);
                 await insertSession.CompleteAsync();

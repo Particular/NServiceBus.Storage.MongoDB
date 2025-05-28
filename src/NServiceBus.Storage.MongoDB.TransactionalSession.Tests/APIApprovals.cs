@@ -13,11 +13,11 @@ public class APIApprovals
     {
         var publicApi = typeof(MongoOpenSessionOptions).Assembly.GeneratePublicApi(new ApiGeneratorOptions
         {
-            ExcludeAttributes = new[]
-            {
+            ExcludeAttributes =
+            [
                 "System.Runtime.Versioning.TargetFrameworkAttribute",
                 "System.Reflection.AssemblyMetadataAttribute"
-            }
+            ]
         });
         Approver.Verify(publicApi);
     }

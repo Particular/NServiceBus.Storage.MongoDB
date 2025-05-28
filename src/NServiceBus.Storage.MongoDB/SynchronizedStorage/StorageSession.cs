@@ -43,37 +43,35 @@
             var sagaCollection = database.GetCollection<BsonDocument>(collectionName);
             var update = Builders<BsonDocument>.Update.Set("_lockToken", ObjectId.GenerateNewId());
 
-            using (var timedTokenSource = new CancellationTokenSource(transactionTimeout))
-            using (var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedTokenSource.Token, cancellationToken))
+            using var timedTokenSource = new CancellationTokenSource(transactionTimeout);
+            using var combinedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timedTokenSource.Token, cancellationToken);
+            while (!timedTokenSource.IsCancellationRequested)
             {
-                while (!timedTokenSource.IsCancellationRequested)
+                try
                 {
                     try
                     {
-                        try
-                        {
-                            return await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedTokenSource.Token).ConfigureAwait(false);
-                        }
-                        catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
-                        {
-                            await AbortTransaction(combinedTokenSource.Token).ConfigureAwait(false);
-                            await Task.Delay(TimeSpan.FromMilliseconds(random.Next(5, 20)), combinedTokenSource.Token).ConfigureAwait(false);
-                            StartTransaction();
-                        }
+                        return await sagaCollection.FindOneAndUpdateAsync(MongoSession, filter, update, FindOneAndUpdateOptions, combinedTokenSource.Token).ConfigureAwait(false);
                     }
-#pragma warning disable PS0019 // When catching System.Exception, cancellation needs to be properly accounted for - justification:
-                    // Cancellation is properly accounted for. In this case, we only want to catch cancellation by one of the tokens used to create the combined token.
-                    catch (Exception ex) when (ex.IsCausedBy(timedTokenSource.Token))
-#pragma warning restore PS0019 // When catching System.Exception, cancellation needs to be properly accounted for
+                    catch (MongoCommandException e) when (WriteConflictUnderTransaction(e))
                     {
-                        // log the exception in case the stack trace will ever be useful for debugging
-                        Log.Debug("Operation canceled when time out exhausted for acquiring exclusive write lock.", ex);
-                        break;
+                        await AbortTransaction(combinedTokenSource.Token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(5, 20)), combinedTokenSource.Token).ConfigureAwait(false);
+                        StartTransaction();
                     }
                 }
-
-                throw new TimeoutException($"Unable to acquire exclusive write lock for saga on collection '{collectionName}'.");
+#pragma warning disable PS0019 // When catching System.Exception, cancellation needs to be properly accounted for - justification:
+                // Cancellation is properly accounted for. In this case, we only want to catch cancellation by one of the tokens used to create the combined token.
+                catch (Exception ex) when (ex.IsCausedBy(timedTokenSource.Token))
+#pragma warning restore PS0019 // When catching System.Exception, cancellation needs to be properly accounted for
+                {
+                    // log the exception in case the stack trace will ever be useful for debugging
+                    Log.Debug("Operation canceled when time out exhausted for acquiring exclusive write lock.", ex);
+                    break;
+                }
             }
+
+            throw new TimeoutException($"Unable to acquire exclusive write lock for saga on collection '{collectionName}'.");
         }
 
         bool WriteConflictUnderTransaction(MongoCommandException e)
@@ -147,7 +145,6 @@
 
         readonly TimeSpan transactionTimeout;
 
-        static readonly Random random = new Random();
         static readonly TransactionOptions transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
         static readonly ILog Log = LogManager.GetLogger<StorageSession>();

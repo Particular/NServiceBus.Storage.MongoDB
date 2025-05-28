@@ -14,22 +14,28 @@
         }
 
         [OneTimeTearDown]
-        public virtual async Task OneTimeTearDown()
-        {
-            await configuration.Cleanup();
-        }
+        public virtual async Task OneTimeTearDown() => await configuration.Cleanup();
 
         protected async Task<TSagaData> GetById<TSagaData>(Guid sagaId) where TSagaData : class, IContainSagaData, new()
         {
             var readContextBag = configuration.GetContextBagForSagaStorage();
-            TSagaData sagaData;
-            using (var readSession = configuration.SessionFactory())
-            {
-                await readSession.Open(readContextBag);
-                sagaData = await configuration.SagaStorage.Get<TSagaData>(sagaId, readSession, readContextBag);
+            using var readSession = configuration.SessionFactory();
+            await readSession.Open(readContextBag);
+            TSagaData sagaData = await configuration.SagaStorage.Get<TSagaData>(sagaId, readSession, readContextBag);
 
-                await readSession.CompleteAsync();
-            }
+            await readSession.CompleteAsync();
+
+            return sagaData;
+        }
+
+        protected async Task<TSagaData> GetByProperty<TSagaData>(string propertyName, object propertyValue) where TSagaData : class, IContainSagaData, new()
+        {
+            var readContextBag = configuration.GetContextBagForSagaStorage();
+            using var readSession = configuration.SessionFactory();
+            await readSession.Open(readContextBag);
+            TSagaData sagaData = await configuration.SagaStorage.Get<TSagaData>(propertyName, propertyValue, readSession, readContextBag);
+
+            await readSession.CompleteAsync();
 
             return sagaData;
         }

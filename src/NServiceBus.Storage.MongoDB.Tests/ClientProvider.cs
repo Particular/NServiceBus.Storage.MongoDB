@@ -11,6 +11,8 @@
             {
                 if (client == null)
                 {
+                    MongoPersistence.SafeRegisterDefaultGuidSerializer();
+
                     var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
 
                     client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);

@@ -10,13 +10,8 @@
     using Persistence;
     using Sagas;
 
-    class SagaPersister : ISagaPersister
+    class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : ISagaPersister
     {
-        public SagaPersister(string versionElementName)
-        {
-            this.versionElementName = versionElementName;
-        }
-
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
             var storageSession = ((SynchronizedStorageSession)session).Session;
@@ -36,7 +31,11 @@
             var version = storageSession.RetrieveVersion(sagaDataType);
             var document = sagaData.ToBsonDocument(sagaDataType).SetElement(new BsonElement(versionElementName, version + 1));
 
-            var result = await storageSession.ReplaceOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), document, cancellationToken).ConfigureAwait(false);
+            var memberMap = memberMapCache.GetOrAdd(sagaDataType, nameof(IContainSagaData.Id));
+            var serializer = memberMap.GetSerializer();
+            var serializedElementValue = serializer.ToBsonValue(sagaData.Id);
+
+            var result = await storageSession.ReplaceOneAsync(sagaDataType, new BsonDocument(memberMap.ElementName, serializedElementValue) & filterBuilder.Eq(versionElementName, version), document, cancellationToken).ConfigureAwait(false);
 
             if (result.ModifiedCount != 1)
             {
@@ -45,10 +44,10 @@
         }
 
         public Task<TSagaData> Get<TSagaData>(Guid sagaId, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(idElementName, sagaId, session, cancellationToken);
+            GetSagaData<TSagaData>(memberMapCache.GetOrAdd<TSagaData>(nameof(IContainSagaData.Id)), sagaId, session, cancellationToken);
 
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(typeof(TSagaData).GetElementName(propertyName), propertyValue, session, cancellationToken);
+            GetSagaData<TSagaData>(memberMapCache.GetOrAdd<TSagaData>(propertyName), propertyValue, session, cancellationToken);
 
         public async Task Complete(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
@@ -57,7 +56,11 @@
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
-            var result = await storageSession.DeleteOneAsync(sagaDataType, filterBuilder.Eq(idElementName, sagaData.Id) & filterBuilder.Eq(versionElementName, version), cancellationToken).ConfigureAwait(false);
+            var memberMap = memberMapCache.GetOrAdd(sagaDataType, nameof(IContainSagaData.Id));
+            var serializer = memberMap.GetSerializer();
+            var serializedElementValue = serializer.ToBsonValue(sagaData.Id);
+
+            var result = await storageSession.DeleteOneAsync(sagaDataType, new BsonDocument(memberMap.ElementName, serializedElementValue) & filterBuilder.Eq(versionElementName, version), cancellationToken).ConfigureAwait(false);
 
             if (result.DeletedCount != 1)
             {
@@ -65,11 +68,13 @@
             }
         }
 
-        async Task<TSagaData> GetSagaData<TSagaData>(string elementName, object elementValue, ISynchronizedStorageSession session, CancellationToken cancellationToken)
+        async Task<TSagaData> GetSagaData<TSagaData>(BsonMemberMap memberMap, object elementValue, ISynchronizedStorageSession session, CancellationToken cancellationToken)
         {
             var storageSession = ((SynchronizedStorageSession)session).Session;
 
-            var document = await storageSession.Find<TSagaData>(new BsonDocument(elementName, BsonValue.Create(elementValue)), cancellationToken).ConfigureAwait(false);
+            var serializer = memberMap.GetSerializer();
+            var serializedElementValue = serializer.ToBsonValue(elementValue);
+            var document = await storageSession.Find<TSagaData>(new BsonDocument(memberMap.ElementName, serializedElementValue), cancellationToken).ConfigureAwait(false);
 
             if (document != null)
             {
@@ -82,10 +87,8 @@
             return default;
         }
 
-        readonly string versionElementName;
         readonly FilterDefinitionBuilder<BsonDocument> filterBuilder = Builders<BsonDocument>.Filter;
 
-        const string idElementName = "_id";
         internal const string DefaultVersionElementName = "_version";
     }
 }

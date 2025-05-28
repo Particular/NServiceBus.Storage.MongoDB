@@ -17,4 +17,10 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\NServiceBus.Storage.MongoDB.Tests\ClientProvider.cs">
+      <Link>ClientProvider.cs</Link>
+    </Compile>
+  </ItemGroup>
+
 </Project>

@@ -63,7 +63,7 @@
                 if (BsonSerializer.LookupSerializer<Guid>() is GuidSerializer { GuidRepresentation: GuidRepresentation.Unspecified, Representation: BsonType.Binary })
                 {
                     throw new Exception("A GuidSerializer using the Unspecified representation is already registered which" +
-                                        " indicates the default serializer has already been used. Ensure to register the GuidSerializer" +
+                                        " indicates the default serializer has already been used. Register the GuidSerializer" +
                                         " with the preferred representation before using the mongodb client as early as possible.", ex);
                 }
             }

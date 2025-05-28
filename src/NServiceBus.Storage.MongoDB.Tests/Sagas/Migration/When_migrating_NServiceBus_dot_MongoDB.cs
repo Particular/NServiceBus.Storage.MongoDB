@@ -20,7 +20,8 @@
                 SomeUpdatableSagaData = GetHashCode()
             };
 
-            configuration = new SagaTestsConfiguration(nameof(legacySagaData.DocumentVersion), collectionNamingConvention);
+            configuration =
+                new SagaTestsConfiguration(nameof(legacySagaData.DocumentVersion), collectionNamingConvention);
 
             await PrepareSagaCollection(legacySagaData, nameof(legacySagaData.SomeCorrelationPropertyId), d =>
             {
@@ -36,16 +37,21 @@
             Assert.That(retrievedSagaData, Is.Not.Null, "Saga was not retrieved");
             Assert.Multiple(() =>
             {
-                Assert.That(retrievedSagaData.OriginalMessageId, Is.EqualTo(legacySagaData.OriginalMessageId), "OriginalMessageId does not match");
-                Assert.That(retrievedSagaData.Originator, Is.EqualTo(legacySagaData.Originator), "Originator does not match");
-                Assert.That(retrievedSagaData.SomeCorrelationPropertyId, Is.EqualTo(legacySagaData.SomeCorrelationPropertyId), "SomeCorrelationPropertyId does not match");
-                Assert.That(retrievedSagaData.SomeUpdatableSagaData, Is.EqualTo(legacySagaData.SomeUpdatableSagaData), "SomeUpdatableSagaData does not match");
+                Assert.That(retrievedSagaData.OriginalMessageId, Is.EqualTo(legacySagaData.OriginalMessageId),
+                    "OriginalMessageId does not match");
+                Assert.That(retrievedSagaData.Originator, Is.EqualTo(legacySagaData.Originator),
+                    "Originator does not match");
+                Assert.That(retrievedSagaData.SomeCorrelationPropertyId,
+                    Is.EqualTo(legacySagaData.SomeCorrelationPropertyId), "SomeCorrelationPropertyId does not match");
+                Assert.That(retrievedSagaData.SomeUpdatableSagaData, Is.EqualTo(legacySagaData.SomeUpdatableSagaData),
+                    "SomeUpdatableSagaData does not match");
             });
         }
 
         readonly Func<Type, string> collectionNamingConvention = t => t.Name;
 
-        class NServiceBusMongoDBLegacySaga : Saga<NServiceBusMongoDBLegacySagaData>, IAmStartedByMessages<MigrationStartMessage>
+        class NServiceBusMongoDBLegacySaga : Saga<NServiceBusMongoDBLegacySagaData>,
+            IAmStartedByMessages<MigrationStartMessage>
         {
             public Task Handle(MigrationStartMessage message, IMessageHandlerContext context)
             {

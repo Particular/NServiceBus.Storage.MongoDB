@@ -29,7 +29,7 @@ namespace NServiceBus.Storage.MongoDB
 {
     public interface IMongoSynchronizedStorageSession
     {
-        MongoDB.Driver.IClientSessionHandle MongoSession { get; }
+        MongoDB.Driver.IClientSessionHandle? MongoSession { get; }
     }
 }
 namespace NServiceBus.Testing

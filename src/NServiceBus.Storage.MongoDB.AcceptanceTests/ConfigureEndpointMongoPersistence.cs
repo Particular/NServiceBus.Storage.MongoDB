@@ -13,9 +13,11 @@ class ConfigureEndpointMongoPersistence : IConfigureEndpointTestExecution
     public const string InterceptedCommands = "MongoDB.AcceptanceTests.InterceptedCommands";
     IMongoClient client;
 
-    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
+    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings,
+        PublisherMetadata publisherMetadata)
     {
-        var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
+        var containerConnectionString =
+            Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
 
         var commands = new ConcurrentQueue<string>();
         configuration.GetSettings().Set(InterceptedCommands, commands);
@@ -45,6 +47,7 @@ class ConfigureEndpointMongoPersistence : IConfigureEndpointTestExecution
             await client.DropDatabaseAsync(DatabaseName);
         }
         catch (Exception)
-        { }
+        {
+        }
     }
 }

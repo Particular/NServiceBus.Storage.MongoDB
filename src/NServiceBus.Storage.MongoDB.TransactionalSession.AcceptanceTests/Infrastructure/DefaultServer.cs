@@ -11,7 +11,8 @@ using NUnit.Framework;
 
 public class DefaultServer : IEndpointSetupTemplate
 {
-    public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointCustomizations,
+    public virtual async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor,
+        EndpointCustomizationConfiguration endpointCustomizations,
         Func<EndpointConfiguration, Task> configurationBuilderCustomization)
     {
         var endpointConfiguration = new EndpointConfiguration(endpointCustomizations.EndpointName);
@@ -37,7 +38,8 @@ public class DefaultServer : IEndpointSetupTemplate
 
         if (runDescriptor.ScenarioContext is TransactionalSessionTestContext testContext)
         {
-            endpointConfiguration.RegisterStartupTask(sp => new CaptureServiceProviderStartupTask(sp, testContext, endpointCustomizations.EndpointName));
+            endpointConfiguration.RegisterStartupTask(sp =>
+                new CaptureServiceProviderStartupTask(sp, testContext, endpointCustomizations.EndpointName));
         }
 
         await configurationBuilderCustomization(endpointConfiguration).ConfigureAwait(false);

@@ -86,5 +86,5 @@ public class MongoPersistence : PersistenceDefinition
     internal static readonly TimeSpan DefaultTransactionTimeout = TimeSpan.FromSeconds(60);
     internal static readonly Func<Type, string> DefaultCollectionNamingConvention = type => type.Name.ToLower();
 
-    static IMongoClient defaultClient;
+    static IMongoClient? defaultClient;
 }

@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Extensibility;
@@ -8,13 +9,14 @@ using Outbox;
 using Persistence;
 using Transport;
 
-class SynchronizedStorageSession : ICompletableSynchronizedStorageSession, IMongoSynchronizedStorageSession
+class SynchronizedStorageSession(StorageSessionFactory sessionFactory)
+    : ICompletableSynchronizedStorageSession, IMongoSynchronizedStorageSession
 {
-    public StorageSession Session { get; private set; }
-    public IClientSessionHandle MongoSession => Session.MongoSession;
+    [MemberNotNull(nameof(MongoSession))]
+    public StorageSession? Session { get; private set; }
+    public IClientSessionHandle? MongoSession => Session?.MongoSession;
 
-    public SynchronizedStorageSession(StorageSessionFactory sessionFactory) => this.sessionFactory = sessionFactory;
-
+    [MemberNotNullWhen(true, nameof(Session))]
     public ValueTask<bool> TryOpen(IOutboxTransaction transaction, ContextBag context,
         CancellationToken cancellationToken = default)
     {
@@ -39,16 +41,16 @@ class SynchronizedStorageSession : ICompletableSynchronizedStorageSession, IMong
 
     public void Dispose()
     {
-        if (ownsMongoSession && Session != null)
+        if (ownsMongoSession && Session is not null)
         {
             Session.Dispose();
             Session = null;
         }
     }
 
-    public Task CompleteAsync(CancellationToken cancellationToken = new CancellationToken())
+    public Task CompleteAsync(CancellationToken cancellationToken = default)
     {
-        if (ownsMongoSession)
+        if (ownsMongoSession && Session is not null)
         {
             return Session.CommitTransaction(cancellationToken);
         }
@@ -56,6 +58,5 @@ class SynchronizedStorageSession : ICompletableSynchronizedStorageSession, IMong
         return Task.CompletedTask;
     }
 
-    readonly StorageSessionFactory sessionFactory;
     bool ownsMongoSession;
 }

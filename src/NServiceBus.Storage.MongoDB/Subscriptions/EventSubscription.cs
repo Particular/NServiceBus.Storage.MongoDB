@@ -1,4 +1,6 @@
-﻿namespace NServiceBus.Storage.MongoDB;
+﻿#nullable disable
+
+namespace NServiceBus.Storage.MongoDB;
 
 class EventSubscription
 {

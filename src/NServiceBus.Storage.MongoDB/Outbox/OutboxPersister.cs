@@ -35,7 +35,7 @@ class OutboxPersister : IOutboxStorage
         return outboxRecord != null
             ? new OutboxMessage(outboxRecord.Id,
                 outboxRecord.TransportOperations?.Select(op => op.ToTransportType()).ToArray())
-            : null;
+            : null!;
     }
 
     public Task<IOutboxTransaction>

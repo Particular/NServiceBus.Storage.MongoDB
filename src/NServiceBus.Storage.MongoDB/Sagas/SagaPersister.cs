@@ -15,7 +15,7 @@ class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : 
     public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty,
         ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
     {
-        var storageSession = ((SynchronizedStorageSession)session).Session;
+        var storageSession = ((SynchronizedStorageSession)session).Session!;
         var sagaDataType = sagaData.GetType();
 
         var document = sagaData.ToBsonDocument(sagaDataType);
@@ -27,7 +27,7 @@ class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : 
     public async Task Update(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        var storageSession = ((SynchronizedStorageSession)session).Session;
+        var storageSession = ((SynchronizedStorageSession)session).Session!;
         var sagaDataType = sagaData.GetType();
 
         var version = storageSession.RetrieveVersion(sagaDataType);
@@ -63,7 +63,7 @@ class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : 
     public async Task Complete(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        var storageSession = ((SynchronizedStorageSession)session).Session;
+        var storageSession = ((SynchronizedStorageSession)session).Session!;
         var sagaDataType = sagaData.GetType();
 
         var version = storageSession.RetrieveVersion(sagaDataType);
@@ -85,7 +85,7 @@ class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : 
     async Task<TSagaData> GetSagaData<TSagaData>(BsonMemberMap memberMap, object elementValue,
         ISynchronizedStorageSession session, CancellationToken cancellationToken)
     {
-        var storageSession = ((SynchronizedStorageSession)session).Session;
+        var storageSession = ((SynchronizedStorageSession)session).Session!;
 
         var serializer = memberMap.GetSerializer();
         var serializedElementValue = serializer.ToBsonValue(elementValue);
@@ -93,7 +93,7 @@ class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : 
             .Find<TSagaData>(new BsonDocument(memberMap.ElementName, serializedElementValue), cancellationToken)
             .ConfigureAwait(false);
 
-        if (document != null)
+        if (document is not null)
         {
             var version = document.GetValue(versionElementName);
             storageSession.StoreVersion<TSagaData>(version.AsInt32);
@@ -101,7 +101,7 @@ class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : 
             return BsonSerializer.Deserialize<TSagaData>(document);
         }
 
-        return default;
+        return default!;
     }
 
     readonly FilterDefinitionBuilder<BsonDocument> filterBuilder = Builders<BsonDocument>.Filter;

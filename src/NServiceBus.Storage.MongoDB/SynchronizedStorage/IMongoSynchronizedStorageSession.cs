@@ -10,5 +10,5 @@ public interface IMongoSynchronizedStorageSession
     /// <summary>
     /// Provides access to the <see cref="IClientSessionHandle"/>
     /// </summary>
-    IClientSessionHandle MongoSession { get; }
+    IClientSessionHandle? MongoSession { get; }
 }

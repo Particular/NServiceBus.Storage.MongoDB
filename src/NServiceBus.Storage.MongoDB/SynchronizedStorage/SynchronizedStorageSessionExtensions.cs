@@ -14,7 +14,7 @@ public static class SynchronizedStorageSessionExtensions
     /// Retrieves the current MongoDB client session from the context.
     /// </summary>
     public static IClientSessionHandle GetClientSession(this ISynchronizedStorageSession session) =>
-        session.MongoPersistenceSession().MongoSession;
+        session.MongoPersistenceSession().MongoSession!;
 
     /// <summary>
     /// Retrieves the shared <see cref="IMongoSynchronizedStorageSession"/> from the <see cref="SynchronizedStorageSession"/>.

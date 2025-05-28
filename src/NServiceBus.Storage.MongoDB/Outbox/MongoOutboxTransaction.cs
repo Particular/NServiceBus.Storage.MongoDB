@@ -19,13 +19,7 @@ class MongoOutboxTransaction : IOutboxTransaction
 
     public StorageSession StorageSession { get; }
 
-    public Task Commit(CancellationToken cancellationToken = default)
-    {
-        return StorageSession.CommitTransaction(cancellationToken);
-    }
+    public Task Commit(CancellationToken cancellationToken = default) => StorageSession.CommitTransaction(cancellationToken);
 
-    public void Dispose()
-    {
-        StorageSession.Dispose();
-    }
+    public void Dispose() => StorageSession.Dispose();
 }

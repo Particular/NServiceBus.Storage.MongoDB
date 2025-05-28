@@ -7,17 +7,12 @@ using Extensibility;
 using global::MongoDB.Driver;
 using Outbox;
 
-class MongoOutboxTransactionFactory
+sealed class MongoOutboxTransactionFactory(
+    IMongoClient client,
+    string databaseName,
+    Func<Type, string> collectionNamingConvention,
+    TimeSpan transactionTimeout)
 {
-    public MongoOutboxTransactionFactory(IMongoClient client, string databaseName,
-        Func<Type, string> collectionNamingConvention, TimeSpan transactionTimeout)
-    {
-        this.transactionTimeout = transactionTimeout;
-        this.client = client;
-        this.databaseName = databaseName;
-        this.collectionNamingConvention = collectionNamingConvention;
-    }
-
     public async Task<IOutboxTransaction> BeginTransaction(ContextBag context,
         CancellationToken cancellationToken = default)
     {
@@ -26,9 +21,4 @@ class MongoOutboxTransactionFactory
         return new MongoOutboxTransaction(mongoSession, databaseName, context, collectionNamingConvention,
             transactionTimeout);
     }
-
-    readonly IMongoClient client;
-    readonly string databaseName;
-    readonly Func<Type, string> collectionNamingConvention;
-    readonly TimeSpan transactionTimeout;
 }

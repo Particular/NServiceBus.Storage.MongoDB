@@ -8,10 +8,7 @@ using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 class SubscriptionStorage : Feature
 {
-    public SubscriptionStorage()
-    {
-        DependsOn("NServiceBus.Features.MessageDrivenSubscriptions");
-    }
+    public SubscriptionStorage() => DependsOn("NServiceBus.Features.MessageDrivenSubscriptions");
 
     protected override void Setup(FeatureConfigurationContext context)
     {

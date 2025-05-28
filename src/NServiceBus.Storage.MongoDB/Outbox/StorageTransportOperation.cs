@@ -25,5 +25,5 @@ class StorageTransportOperation
 
 
     public Outbox.TransportOperation ToTransportType() =>
-        new Outbox.TransportOperation(MessageId, new Transport.DispatchProperties(Options), Body, Headers);
+        new(MessageId, new Transport.DispatchProperties(Options), Body, Headers);
 }

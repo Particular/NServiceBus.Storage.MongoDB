@@ -9,11 +9,15 @@ class ConfigureEndpointMongoPersistence : IConfigureEndpointTestExecution
     const string databaseName = "AcceptanceTests";
     IMongoClient client;
 
-    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings, PublisherMetadata publisherMetadata)
+    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings,
+        PublisherMetadata publisherMetadata)
     {
-        var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
+        var containerConnectionString =
+            Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
 
-        client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
+        client = string.IsNullOrWhiteSpace(containerConnectionString)
+            ? new MongoClient()
+            : new MongoClient(containerConnectionString);
 
         configuration.UsePersistence<MongoPersistence>()
             .MongoClient(client)
@@ -30,6 +34,7 @@ class ConfigureEndpointMongoPersistence : IConfigureEndpointTestExecution
             await client.DropDatabaseAsync(databaseName);
         }
         catch (Exception)
-        { }
+        {
+        }
     }
 }

@@ -1,21 +1,24 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests
-{
-    using NUnit.Framework;
-    using Particular.Approvals;
-    using PublicApiGenerator;
-    using TransactionalSession;
+﻿namespace NServiceBus.Storage.MongoDB.Tests;
 
-    [TestFixture]
-    public class APIApprovals
+using NUnit.Framework;
+using Particular.Approvals;
+using PublicApiGenerator;
+using TransactionalSession;
+
+[TestFixture]
+public class APIApprovals
+{
+    [Test]
+    public void Approve()
     {
-        [Test]
-        public void Approve()
+        var publicApi = typeof(MongoOpenSessionOptions).Assembly.GeneratePublicApi(new ApiGeneratorOptions
         {
-            var publicApi = typeof(MongoOpenSessionOptions).Assembly.GeneratePublicApi(new ApiGeneratorOptions
+            ExcludeAttributes = new[]
             {
-                ExcludeAttributes = new[] { "System.Runtime.Versioning.TargetFrameworkAttribute", "System.Reflection.AssemblyMetadataAttribute" }
-            });
-            Approver.Verify(publicApi);
-        }
+                "System.Runtime.Versioning.TargetFrameworkAttribute",
+                "System.Reflection.AssemblyMetadataAttribute"
+            }
+        });
+        Approver.Verify(publicApi);
     }
 }

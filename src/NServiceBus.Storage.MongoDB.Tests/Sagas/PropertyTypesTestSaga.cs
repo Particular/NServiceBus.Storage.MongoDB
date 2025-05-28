@@ -1,111 +1,111 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests
+﻿namespace NServiceBus.Storage.MongoDB.Tests;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+public class PropertyTypesTestSaga : Saga<PropertyTypesTestSagaData>,
+    IAmStartedByMessages<PropertyTypesTestSagaDataStartMessage>
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
-    public class PropertyTypesTestSaga : Saga<PropertyTypesTestSagaData>, IAmStartedByMessages<PropertyTypesTestSagaDataStartMessage>
+    public Task Handle(PropertyTypesTestSagaDataStartMessage message, IMessageHandlerContext context)
     {
-        public Task Handle(PropertyTypesTestSagaDataStartMessage message, IMessageHandlerContext context)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<PropertyTypesTestSagaData> mapper)
-        {
-            mapper.ConfigureMapping<PropertyTypesTestSagaDataStartMessage>(msg => msg.Id).ToSaga(saga => saga.Id);
-        }
+        throw new NotImplementedException();
     }
 
-    public class PropertyTypesTestSagaData : IContainSagaData
+    protected override void ConfigureHowToFindSaga(SagaPropertyMapper<PropertyTypesTestSagaData> mapper)
     {
-        public virtual RelatedClass RelatedClass { get; set; }
+        mapper.ConfigureMapping<PropertyTypesTestSagaDataStartMessage>(msg => msg.Id).ToSaga(saga => saga.Id);
+    }
+}
 
-        public virtual IList<OrderLine> OrderLines { get; set; }
+public class PropertyTypesTestSagaData : IContainSagaData
+{
+    public virtual RelatedClass RelatedClass { get; set; }
 
-        public virtual Statuses Status { get; set; }
+    public virtual IList<OrderLine> OrderLines { get; set; }
 
-        public virtual DateTime DateTimeProperty { get; set; }
+    public virtual Statuses Status { get; set; }
 
-        public virtual TestComponent TestComponent { get; set; }
+    public virtual DateTime DateTimeProperty { get; set; }
 
-        public virtual PolymorphicPropertyBase PolymorphicRelatedProperty { get; set; }
-        public virtual Guid Id { get; set; }
+    public virtual TestComponent TestComponent { get; set; }
 
-        public virtual string Originator { get; set; }
+    public virtual PolymorphicPropertyBase PolymorphicRelatedProperty { get; set; }
+    public virtual Guid Id { get; set; }
 
-        public virtual string OriginalMessageId { get; set; }
+    public virtual string Originator { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            return this.EqualTo(obj, (x, y) => x.Id == y.Id);
-        }
+    public virtual string OriginalMessageId { get; set; }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+    public override bool Equals(object obj)
+    {
+        return this.EqualTo(obj, (x, y) => x.Id == y.Id);
     }
 
-    public class PolymorphicProperty : PolymorphicPropertyBase
+    public override int GetHashCode()
     {
-        public virtual int SomeInt { get; set; }
+        return base.GetHashCode();
+    }
+}
 
-        public override bool Equals(object obj)
-        {
-            return this.EqualTo(obj, (x, y) => x.Id == y.Id && x.SomeInt == y.SomeInt);
-        }
+public class PolymorphicProperty : PolymorphicPropertyBase
+{
+    public virtual int SomeInt { get; set; }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+    public override bool Equals(object obj)
+    {
+        return this.EqualTo(obj, (x, y) => x.Id == y.Id && x.SomeInt == y.SomeInt);
     }
 
-    public class PolymorphicPropertyBase
+    public override int GetHashCode()
     {
-        public virtual Guid Id { get; set; }
+        return base.GetHashCode();
+    }
+}
+
+public class PolymorphicPropertyBase
+{
+    public virtual Guid Id { get; set; }
+}
+
+public enum Statuses
+{
+    SomeStatus,
+    AnotherStatus
+}
+
+public class TestComponent
+{
+    public string Property { get; set; }
+
+    public string AnotherProperty { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        return this.EqualTo(obj, (x, y) =>
+            x.Property == y.Property &&
+            x.AnotherProperty == y.AnotherProperty);
     }
 
-    public enum Statuses
+    public override int GetHashCode()
     {
-        SomeStatus,
-        AnotherStatus
+        return base.GetHashCode();
     }
+}
 
-    public class TestComponent
-    {
-        public string Property { get; set; }
+public class OrderLine
+{
+    public virtual Guid Id { get; set; }
 
-        public string AnotherProperty { get; set; }
+    public virtual Guid ProductId { get; set; }
+}
 
-        public override bool Equals(object obj)
-        {
-            return this.EqualTo(obj, (x, y) =>
-                x.Property == y.Property &&
-                x.AnotherProperty == y.AnotherProperty);
-        }
+public class RelatedClass
+{
+    public virtual Guid Id { get; set; }
+}
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
-
-    public class OrderLine
-    {
-        public virtual Guid Id { get; set; }
-
-        public virtual Guid ProductId { get; set; }
-    }
-
-    public class RelatedClass
-    {
-        public virtual Guid Id { get; set; }
-    }
-
-    public class PropertyTypesTestSagaDataStartMessage : ICommand
-    {
-        public Guid Id { get; set; }
-    }
+public class PropertyTypesTestSagaDataStartMessage : ICommand
+{
+    public Guid Id { get; set; }
 }

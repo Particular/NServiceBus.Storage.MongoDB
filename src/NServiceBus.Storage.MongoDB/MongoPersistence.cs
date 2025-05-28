@@ -52,7 +52,7 @@
                 // By default, we are using the Standard representation for Guids which is the Guid representation
                 // that should be used moving forward as of version 2.19 of the MongoDB .NET Driver
                 // https://www.mongodb.com/docs/drivers/csharp/v2.19/fundamentals/serialization/guid-serialization/
-                BsonSerializer.TryRegisterSerializer(GuidSerializer.StandardInstance);
+                _ = BsonSerializer.TryRegisterSerializer(GuidSerializer.StandardInstance);
             }
             catch (BsonSerializationException ex)
             {

@@ -30,12 +30,13 @@ namespace NServiceBus.Storage.MongoDB
             var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
             var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 
-            InitializeSagaDataTypes(client, databaseName, collectionNamingConvention, sagaMetadataCollection);
+            var memberMapCache = new MemberMapCache();
+            InitializeSagaDataTypes(client, memberMapCache, databaseName, collectionNamingConvention, sagaMetadataCollection);
 
-            context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName));
+            context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName, memberMapCache));
         }
 
-        internal static void InitializeSagaDataTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
+        internal static void InitializeSagaDataTypes(IMongoClient client, MemberMapCache memberMapCache, string databaseName, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
         {
             var databaseSettings = new MongoDatabaseSettings
             {
@@ -60,7 +61,8 @@ namespace NServiceBus.Storage.MongoDB
 
                 if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
                 {
-                    var propertyElementName = sagaMetadata.SagaEntityType.GetMemberMap(property).ElementName;
+                    var memberMap = memberMapCache.GetOrAdd(sagaMetadata.SagaEntityType, property);
+                    var propertyElementName = memberMap.ElementName;
 
                     var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions
                     { Unique = true });

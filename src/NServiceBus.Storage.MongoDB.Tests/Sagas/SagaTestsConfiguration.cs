@@ -35,6 +35,7 @@
         }
 
         SagaMetadataCollection sagaMetadataCollection;
+        readonly MemberMapCache memberMapCache;
 
         public SagaTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention, TimeSpan? transactionTimeout = null)
         {
@@ -43,7 +44,8 @@
 
             var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, collectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
             SessionFactory = () => new SynchronizedStorageSession(synchronizedStorage);
-            SagaStorage = new SagaPersister(versionElementName);
+            memberMapCache = new MemberMapCache();
+            SagaStorage = new SagaPersister(versionElementName, memberMapCache);
         }
 
         public SagaTestsConfiguration(TimeSpan? transactionTimeout = null) : this("_version", t => t.Name.ToLower(), transactionTimeout)
@@ -75,12 +77,9 @@
 
             await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-            MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
+            MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
         }
 
-        public async Task Cleanup()
-        {
-            await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
-        }
+        public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
     }
 }

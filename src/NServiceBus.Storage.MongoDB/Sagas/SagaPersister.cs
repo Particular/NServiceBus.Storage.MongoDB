@@ -10,7 +10,7 @@
     using Persistence;
     using Sagas;
 
-    class SagaPersister(string versionElementName) : ISagaPersister
+    class SagaPersister(string versionElementName, MemberMapCache memberMapCache) : ISagaPersister
     {
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
@@ -31,7 +31,7 @@
             var version = storageSession.RetrieveVersion(sagaDataType);
             var document = sagaData.ToBsonDocument(sagaDataType).SetElement(new BsonElement(versionElementName, version + 1));
 
-            var memberMap = sagaDataType.GetMemberMap(nameof(IContainSagaData.Id));
+            var memberMap = memberMapCache.GetOrAdd(sagaDataType, nameof(IContainSagaData.Id));
             var serializer = memberMap.GetSerializer();
             var serializedElementValue = serializer.ToBsonValue(sagaData.Id);
 
@@ -44,10 +44,10 @@
         }
 
         public Task<TSagaData> Get<TSagaData>(Guid sagaId, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(typeof(TSagaData).GetMemberMap(nameof(IContainSagaData.Id)), sagaId, session, cancellationToken);
+            GetSagaData<TSagaData>(memberMapCache.GetOrAdd<TSagaData>(nameof(IContainSagaData.Id)), sagaId, session, cancellationToken);
 
         public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default) where TSagaData : class, IContainSagaData =>
-            GetSagaData<TSagaData>(typeof(TSagaData).GetMemberMap(propertyName), propertyValue, session, cancellationToken);
+            GetSagaData<TSagaData>(memberMapCache.GetOrAdd<TSagaData>(propertyName), propertyValue, session, cancellationToken);
 
         public async Task Complete(IContainSagaData sagaData, ISynchronizedStorageSession session, ContextBag context, CancellationToken cancellationToken = default)
         {
@@ -56,7 +56,7 @@
 
             var version = storageSession.RetrieveVersion(sagaDataType);
 
-            var memberMap = sagaDataType.GetMemberMap(nameof(IContainSagaData.Id));
+            var memberMap = memberMapCache.GetOrAdd(sagaDataType, nameof(IContainSagaData.Id));
             var serializer = memberMap.GetSerializer();
             var serializedElementValue = serializer.ToBsonValue(sagaData.Id);
 

@@ -37,8 +37,9 @@
         {
             BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
-            Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
-            SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName);
+            var memberMapCache = new MemberMapCache();
+            Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
+            SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
             var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName, MongoPersistence.DefaultCollectionNamingConvention, SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
             CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);
 

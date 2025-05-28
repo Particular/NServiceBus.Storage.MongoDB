@@ -59,7 +59,7 @@ class OutboxPersister : IOutboxStorage
         CancellationToken cancellationToken = default)
     {
         var update = Builders<OutboxRecord>.Update
-            .Set(record => record.TransportOperations, Array.Empty<StorageTransportOperation>())
+            .Set(record => record.TransportOperations, [])
             .CurrentDate(record => record.Dispatched);
 
         await outboxRecordCollection

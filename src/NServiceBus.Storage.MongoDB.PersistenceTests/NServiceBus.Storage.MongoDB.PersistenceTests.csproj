@@ -18,9 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\NServiceBus.Storage.MongoDB.Tests\ClientProvider.cs">
-      <Link>ClientProvider.cs</Link>
-    </Compile>
+    <Compile Include="..\NServiceBus.Storage.MongoDB.Tests\ClientProvider.cs" />
   </ItemGroup>
 
 </Project>

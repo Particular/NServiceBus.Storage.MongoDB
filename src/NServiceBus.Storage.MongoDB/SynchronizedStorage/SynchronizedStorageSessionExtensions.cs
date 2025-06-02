@@ -1,34 +1,34 @@
-﻿namespace NServiceBus
+﻿namespace NServiceBus;
+
+using System;
+using MongoDB.Driver;
+using Persistence;
+using Storage.MongoDB;
+
+/// <summary>
+/// MongoDB persistence specific extension methods for the <see cref="ISynchronizedStorageSession"/>.
+/// </summary>
+public static class SynchronizedStorageSessionExtensions
 {
-    using System;
-    using MongoDB.Driver;
-    using Persistence;
-    using Storage.MongoDB;
+    /// <summary>
+    /// Retrieves the current MongoDB client session from the context.
+    /// </summary>
+    public static IClientSessionHandle GetClientSession(this ISynchronizedStorageSession session) =>
+        session.MongoPersistenceSession().MongoSession!;
 
     /// <summary>
-    /// MongoDB persistence specific extension methods for the <see cref="ISynchronizedStorageSession"/>.
+    /// Retrieves the shared <see cref="IMongoSynchronizedStorageSession"/> from the <see cref="SynchronizedStorageSession"/>.
     /// </summary>
-    public static class SynchronizedStorageSessionExtensions
+    public static IMongoSynchronizedStorageSession MongoPersistenceSession(this ISynchronizedStorageSession session)
     {
-        /// <summary>
-        /// Retrieves the current MongoDB client session from the context.
-        /// </summary>
-        public static IClientSessionHandle GetClientSession(this ISynchronizedStorageSession session) =>
-            session.MongoPersistenceSession().MongoSession;
+        ArgumentNullException.ThrowIfNull(session);
 
-        /// <summary>
-        /// Retrieves the shared <see cref="IMongoSynchronizedStorageSession"/> from the <see cref="SynchronizedStorageSession"/>.
-        /// </summary>
-        public static IMongoSynchronizedStorageSession MongoPersistenceSession(this ISynchronizedStorageSession session)
+        if (session is IMongoSynchronizedStorageSession mongoSession)
         {
-            ArgumentNullException.ThrowIfNull(session);
-
-            if (session is IMongoSynchronizedStorageSession mongoSession)
-            {
-                return mongoSession;
-            }
-
-            throw new Exception($"Cannot access the synchronized storage session. Ensure that 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>()' has been called.");
+            return mongoSession;
         }
+
+        throw new Exception(
+            $"Cannot access the synchronized storage session. Ensure that 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>()' has been called.");
     }
 }

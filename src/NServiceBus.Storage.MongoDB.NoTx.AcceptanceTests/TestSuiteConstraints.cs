@@ -1,25 +1,25 @@
-﻿namespace NServiceBus.AcceptanceTests
+﻿namespace NServiceBus.AcceptanceTests;
+
+using NServiceBus.AcceptanceTesting.Support;
+
+public partial class TestSuiteConstraints
 {
-    using NServiceBus.AcceptanceTesting.Support;
+    public bool SupportsDtc => false;
 
-    public partial class TestSuiteConstraints
-    {
-        public bool SupportsDtc => false;
+    public bool SupportsCrossQueueTransactions => true;
 
-        public bool SupportsCrossQueueTransactions => true;
+    public bool SupportsNativePubSub => false;
 
-        public bool SupportsNativePubSub => false;
+    public bool SupportsNativeDeferral => true;
 
-        public bool SupportsNativeDeferral => true;
+    public bool SupportsOutbox => false;
 
-        public bool SupportsOutbox => false;
+    public bool SupportsPurgeOnStartup => true;
 
-        public bool SupportsPurgeOnStartup => true;
+    public bool SupportsDelayedDelivery => true;
 
-        public bool SupportsDelayedDelivery => true;
+    public IConfigureEndpointTestExecution CreateTransportConfiguration() =>
+        new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsNativeDeferral);
 
-        public IConfigureEndpointTestExecution CreateTransportConfiguration() => new ConfigureEndpointAcceptanceTestingTransport(SupportsNativePubSub, SupportsNativeDeferral);
-
-        public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointMongoPersistence();
-    }
+    public IConfigureEndpointTestExecution CreatePersistenceConfiguration() => new ConfigureEndpointMongoPersistence();
 }

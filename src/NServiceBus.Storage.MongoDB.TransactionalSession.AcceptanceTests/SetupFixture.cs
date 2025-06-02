@@ -1,36 +1,38 @@
-﻿namespace NServiceBus.TransactionalSession.AcceptanceTests
+﻿namespace NServiceBus.TransactionalSession.AcceptanceTests;
+
+using System;
+using System.Threading.Tasks;
+using MongoDB.Driver;
+using NUnit.Framework;
+
+[SetUpFixture]
+public class SetupFixture
 {
-    using System;
-    using System.Threading.Tasks;
-    using MongoDB.Driver;
-    using NUnit.Framework;
+    public const string DatabaseName = "TransactionalSessionAcceptanceTests";
 
-    [SetUpFixture]
-    public class SetupFixture
+    public static MongoClient MongoClient { get; private set; }
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
     {
-        public const string DatabaseName = "TransactionalSessionAcceptanceTests";
+        var containerConnectionString =
+            Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
 
-        public static MongoClient MongoClient { get; private set; }
+        MongoClient = string.IsNullOrWhiteSpace(containerConnectionString)
+            ? new MongoClient()
+            : new MongoClient(containerConnectionString);
+    }
 
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
+    [OneTimeTearDown]
+    public async Task Cleanup()
+    {
+        try
         {
-            var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
-
-            MongoClient = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
+            await MongoClient.DropDatabaseAsync(DatabaseName);
         }
-
-        [OneTimeTearDown]
-        public async Task Cleanup()
+        catch (Exception e)
         {
-            try
-            {
-                await MongoClient.DropDatabaseAsync(DatabaseName);
-            }
-            catch (Exception e)
-            {
-                TestContext.Out.WriteLine($"Error during MongoDB test cleanup: {e}");
-            }
+            TestContext.Out.WriteLine($"Error during MongoDB test cleanup: {e}");
         }
     }
 }

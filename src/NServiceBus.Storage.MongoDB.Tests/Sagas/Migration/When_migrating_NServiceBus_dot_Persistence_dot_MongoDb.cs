@@ -28,21 +28,27 @@
             Assert.That(retrievedSagaData, Is.Not.Null, "Saga was not retrieved");
             Assert.Multiple(() =>
             {
-                Assert.That(retrievedSagaData.OriginalMessageId, Is.EqualTo(legacySagaData.OriginalMessageId), "OriginalMessageId does not match");
-                Assert.That(retrievedSagaData.Originator, Is.EqualTo(legacySagaData.Originator), "Originator does not match");
-                Assert.That(retrievedSagaData.SomeCorrelationPropertyId, Is.EqualTo(legacySagaData.SomeCorrelationPropertyId), "SomeCorrelationPropertyId does not match");
-                Assert.That(retrievedSagaData.SomeUpdatableSagaData, Is.EqualTo(legacySagaData.SomeUpdatableSagaData), "SomeUpdatableSagaData does not match");
+                Assert.That(retrievedSagaData.OriginalMessageId, Is.EqualTo(legacySagaData.OriginalMessageId),
+                    "OriginalMessageId does not match");
+                Assert.That(retrievedSagaData.Originator, Is.EqualTo(legacySagaData.Originator),
+                    "Originator does not match");
+                Assert.That(retrievedSagaData.SomeCorrelationPropertyId,
+                    Is.EqualTo(legacySagaData.SomeCorrelationPropertyId), "SomeCorrelationPropertyId does not match");
+                Assert.That(retrievedSagaData.SomeUpdatableSagaData, Is.EqualTo(legacySagaData.SomeUpdatableSagaData),
+                    "SomeUpdatableSagaData does not match");
             });
         }
 
-        class NServiceBusPersistenceMongoDBLegacySaga : Saga<NServiceBusPersistenceMongoDBLegacySagaData>, IAmStartedByMessages<MigrationStartMessage>
+        class NServiceBusPersistenceMongoDBLegacySaga : Saga<NServiceBusPersistenceMongoDBLegacySagaData>,
+            IAmStartedByMessages<MigrationStartMessage>
         {
             public Task Handle(MigrationStartMessage message, IMessageHandlerContext context)
             {
                 throw new NotImplementedException();
             }
 
-            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<NServiceBusPersistenceMongoDBLegacySagaData> mapper)
+            protected override void ConfigureHowToFindSaga(
+                SagaPropertyMapper<NServiceBusPersistenceMongoDBLegacySagaData> mapper)
             {
                 mapper.ConfigureMapping<MigrationStartMessage>(msg => msg.Id).ToSaga(saga => saga.Id);
             }

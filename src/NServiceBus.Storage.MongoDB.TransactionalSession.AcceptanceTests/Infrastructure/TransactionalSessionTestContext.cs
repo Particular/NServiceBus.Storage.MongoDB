@@ -11,11 +11,13 @@ public class TransactionalSessionTestContext : ScenarioContext
     {
         get
         {
-            var property = typeof(ScenarioContext).GetProperty("CurrentEndpoint", BindingFlags.NonPublic | BindingFlags.Static);
+            var property =
+                typeof(ScenarioContext).GetProperty("CurrentEndpoint", BindingFlags.NonPublic | BindingFlags.Static);
 
             if (property!.GetValue(this) is not string endpointName)
             {
-                throw new InvalidOperationException("Access to the service provider of the endpoint is only possible with in a When statement.");
+                throw new InvalidOperationException(
+                    "Access to the service provider of the endpoint is only possible with in a When statement.");
             }
 
             if (!serviceProviders.TryGetValue(endpointName, out var serviceProvider))
@@ -27,7 +29,8 @@ public class TransactionalSessionTestContext : ScenarioContext
         }
     }
 
-    public void RegisterServiceProvider(IServiceProvider serviceProvider, string endpointName) => serviceProviders[endpointName] = serviceProvider;
+    public void RegisterServiceProvider(IServiceProvider serviceProvider, string endpointName) =>
+        serviceProviders[endpointName] = serviceProvider;
 
     readonly ConcurrentDictionary<string, IServiceProvider> serviceProviders = new();
 }

@@ -1,11 +1,12 @@
-﻿namespace NServiceBus.Storage.MongoDB
+﻿#nullable disable
+
+namespace NServiceBus.Storage.MongoDB;
+
+class EventSubscription
 {
-    class EventSubscription
-    {
-        public string MessageTypeName { get; set; }
+    public string MessageTypeName { get; set; }
 
-        public string TransportAddress { get; set; }
+    public string TransportAddress { get; set; }
 
-        public string Endpoint { get; set; }
-    }
+    public string Endpoint { get; set; }
 }

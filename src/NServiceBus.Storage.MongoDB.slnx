@@ -4,12 +4,14 @@
     <File Path="../.github/workflows/release.yml" />
     <File Path="Custom.Build.props" />
   </Folder>
-  <Project Path="NServiceBus.Storage.MongoDB.AcceptanceTests/NServiceBus.Storage.MongoDB.AcceptanceTests.csproj" />
-  <Project Path="NServiceBus.Storage.MongoDB.NoTx.AcceptanceTests/NServiceBus.Storage.MongoDB.NoTx.AcceptanceTests.csproj" />
-  <Project Path="NServiceBus.Storage.MongoDB.PersistenceTests/NServiceBus.Storage.MongoDB.PersistenceTests.csproj" />
-  <Project Path="NServiceBus.Storage.MongoDB.Tests/NServiceBus.Storage.MongoDB.Tests.csproj" />
-  <Project Path="NServiceBus.Storage.MongoDB.TransactionalSession.AcceptanceTests/NServiceBus.Storage.MongoDB.TransactionalSession.AcceptanceTests.csproj" />
-  <Project Path="NServiceBus.Storage.MongoDB.TransactionalSession.Tests/NServiceBus.Storage.MongoDB.TransactionalSession.Tests.csproj" />
+  <Folder Name="/Tests/">
+    <Project Path="NServiceBus.Storage.MongoDB.AcceptanceTests/NServiceBus.Storage.MongoDB.AcceptanceTests.csproj" />
+    <Project Path="NServiceBus.Storage.MongoDB.NoTx.AcceptanceTests/NServiceBus.Storage.MongoDB.NoTx.AcceptanceTests.csproj" />
+    <Project Path="NServiceBus.Storage.MongoDB.PersistenceTests/NServiceBus.Storage.MongoDB.PersistenceTests.csproj" />
+    <Project Path="NServiceBus.Storage.MongoDB.Tests/NServiceBus.Storage.MongoDB.Tests.csproj" />
+    <Project Path="NServiceBus.Storage.MongoDB.TransactionalSession.AcceptanceTests/NServiceBus.Storage.MongoDB.TransactionalSession.AcceptanceTests.csproj" />
+    <Project Path="NServiceBus.Storage.MongoDB.TransactionalSession.Tests/NServiceBus.Storage.MongoDB.TransactionalSession.Tests.csproj" />
+  </Folder>
   <Project Path="NServiceBus.Storage.MongoDB.TransactionalSession/NServiceBus.Storage.MongoDB.TransactionalSession.csproj" />
   <Project Path="NServiceBus.Storage.MongoDB/NServiceBus.Storage.MongoDB.csproj" />
 </Solution>

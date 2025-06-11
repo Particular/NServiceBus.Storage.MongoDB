@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-public class SagaPersisterTests
+public abstract class SagaPersisterTests
 {
     [OneTimeSetUp]
     public virtual async Task OneTimeSetUp()

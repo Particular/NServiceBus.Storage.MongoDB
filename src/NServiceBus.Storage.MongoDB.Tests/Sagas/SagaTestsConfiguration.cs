@@ -82,7 +82,7 @@ public class SagaTestsConfiguration
 
         await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-        MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, DatabaseName,
+        MongoDB.SagaInstaller.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, DatabaseName,
             CollectionNamingConvention, SagaMetadataCollection);
     }
 

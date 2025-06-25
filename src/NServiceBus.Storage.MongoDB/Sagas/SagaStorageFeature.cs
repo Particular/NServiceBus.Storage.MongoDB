@@ -1,7 +1,9 @@
-﻿namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB;
 
 using System;
 using Features;
+using global::MongoDB.Bson;
+using global::MongoDB.Bson.Serialization;
 using global::MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection;
 using Sagas;
@@ -29,8 +31,9 @@ class SagaStorageFeature : Feature
 		}
 		var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
 		var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+        var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
 
-		var collectionSettings = new MongoCollectionSettings
+        var collectionSettings = new MongoCollectionSettings
 		{
 			ReadConcern = ReadConcern.Majority,
 			ReadPreference = ReadPreference.Primary,
@@ -43,7 +46,9 @@ class SagaStorageFeature : Feature
 			throw new ArgumentNullException($"Collection {outboxCollection} should be created in the database : {databaseName}");
 		}
 
-		context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName));
-	}
+        var memberMapCache = new MemberMapCache();
+
+        context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName, memberMapCache));
+    }
 }
 

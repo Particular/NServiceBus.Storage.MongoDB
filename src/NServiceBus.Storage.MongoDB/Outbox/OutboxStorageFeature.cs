@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB;
 
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Storage.MongoDB
+﻿namespace NServiceBus.Storage.MongoDB;
 
 using System;
 using System.Threading;
@@ -27,53 +27,59 @@ class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
 		var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 		var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();
 
-		InitializeSagaDataTypes(client(), databaseName, collectionNamingConvention, sagaMetadataCollection);
+        var memberMapCache = new MemberMapCache();
+        InitializeSagaDataTypes(client(), memberMapCache, databaseName, collectionNamingConvention,
+            sagaMetadataCollection);
+
 		return Task.CompletedTask;
 	}
+    internal static void InitializeSagaDataTypes(IMongoClient client, MemberMapCache memberMapCache,
+        string databaseName, Func<Type, string> collectionNamingConvention,
+        SagaMetadataCollection sagaMetadataCollection)
+    {
+        var databaseSettings = new MongoDatabaseSettings
+        {
+            ReadConcern = ReadConcern.Majority,
+            ReadPreference = ReadPreference.Primary,
+            WriteConcern = WriteConcern.WMajority
+        };
+        var database = client.GetDatabase(databaseName, databaseSettings);
 
-	internal static void InitializeSagaDataTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, SagaMetadataCollection sagaMetadataCollection)
-	{
-		var databaseSettings = new MongoDatabaseSettings
-		{
-			ReadConcern = ReadConcern.Majority,
-			ReadPreference = ReadPreference.Primary,
-			WriteConcern = WriteConcern.WMajority
-		};
-		var database = client.GetDatabase(databaseName, databaseSettings);
+        foreach (var sagaMetadata in sagaMetadataCollection)
+        {
+            if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
+            {
+                var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
+                classMap.AutoMap();
+                classMap.SetIgnoreExtraElements(true);
 
-		foreach (var sagaMetadata in sagaMetadataCollection)
-		{
-			if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
-			{
-				var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
-				classMap.AutoMap();
-				classMap.SetIgnoreExtraElements(true);
+                BsonClassMap.RegisterClassMap(classMap);
+            }
 
-				BsonClassMap.RegisterClassMap(classMap);
-			}
+            var collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
 
-			var collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
+            if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
+            {
+                var memberMap = memberMapCache.GetOrAdd(sagaMetadata.SagaEntityType, property);
+                var propertyElementName = memberMap.ElementName;
 
-			if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
-			{
-				var propertyElementName = sagaMetadata.SagaEntityType.GetElementName(property.Name);
-
-				var indexModel = new CreateIndexModel<BsonDocument>(new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)), new CreateIndexOptions
-				{ Unique = true });
-				database.GetCollection<BsonDocument>(collectionName).Indexes.CreateOne(indexModel);
-			}
-			else
-			{
-				try
-				{
-					database.CreateCollection(collectionName);
-				}
-				catch (MongoCommandException ex) when (ex.Code == 48 && ex.CodeName == "NamespaceExists")
-				{
-					//Collection already exists, so swallow the exception
-				}
-			}
-		}
-	}
+                var indexModel = new CreateIndexModel<BsonDocument>(
+                    new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)),
+                    new CreateIndexOptions { Unique = true });
+                database.GetCollection<BsonDocument>(collectionName).Indexes.CreateOne(indexModel);
+            }
+            else
+            {
+                try
+                {
+                    database.CreateCollection(collectionName);
+                }
+                catch (MongoCommandException ex) when (ex.Code == 48 && ex.CodeName == "NamespaceExists")
+                {
+                    //Collection already exists, so swallow the exception
+                }
+            }
+        }
+    }
 }
 

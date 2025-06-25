@@ -40,8 +40,8 @@ public class MongoPersistence : PersistenceDefinition
             s.SetDefault(DefaultDatabaseSettings);
         });
 
-        Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
-        Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<OutboxStorage>());
+        Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorageFeature>());
+        Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<OutboxStorageFeature>());
         Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<SubscriptionStorage>());
     }
 

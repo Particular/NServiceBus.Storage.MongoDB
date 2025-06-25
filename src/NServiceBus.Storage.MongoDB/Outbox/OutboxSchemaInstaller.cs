@@ -1,0 +1,74 @@
+﻿namespace NServiceBus.Storage.MongoDB;
+
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using global::MongoDB.Driver;
+using NServiceBus.Installation;
+using NServiceBus.Settings;
+
+public class OutboxSchemaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+{
+
+	public Task Install(string identity, CancellationToken cancellationToken = default)
+	{
+		if (!settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out var client))
+		{
+			return Task.CompletedTask;
+		}
+
+		var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
+		var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+
+		if (!settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData, out TimeSpan timeToKeepOutboxDeduplicationData))
+		{
+			timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
+		}
+
+		InitializeOutboxTypes(client(), databaseName, collectionNamingConvention, timeToKeepOutboxDeduplicationData);
+
+		return Task.CompletedTask;
+	}
+
+	internal static void InitializeOutboxTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, TimeSpan timeToKeepOutboxDeduplicationData)
+	{
+		var collectionSettings = new MongoCollectionSettings
+		{
+			ReadConcern = ReadConcern.Majority,
+			ReadPreference = ReadPreference.Primary,
+			WriteConcern = WriteConcern.WMajority
+		};
+
+		var outboxCollection = client.GetDatabase(databaseName).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
+		var outboxCleanupIndex = outboxCollection.Indexes.List().ToList().SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
+		var createIndex = false;
+
+		if (outboxCleanupIndex is null)
+		{
+			createIndex = true;
+		}
+		else if (!outboxCleanupIndex.TryGetElement("expireAfterSeconds", out var existingExpiration) || TimeSpan.FromSeconds(existingExpiration.Value.ToInt32()) != timeToKeepOutboxDeduplicationData)
+		{
+			outboxCollection.Indexes.DropOne(OutboxCleanupIndexName);
+			createIndex = true;
+		}
+
+		if (!createIndex)
+		{
+			return;
+		}
+
+		var indexModel = new CreateIndexModel<OutboxRecord>(Builders<OutboxRecord>.IndexKeys.Ascending(record => record.Dispatched), new CreateIndexOptions
+		{
+			ExpireAfter = timeToKeepOutboxDeduplicationData,
+			Name = OutboxCleanupIndexName,
+			Background = true
+		});
+
+		outboxCollection.Indexes.CreateOne(indexModel, null);
+	}
+
+	internal const string OutboxCleanupIndexName = "OutboxCleanup";
+}
+

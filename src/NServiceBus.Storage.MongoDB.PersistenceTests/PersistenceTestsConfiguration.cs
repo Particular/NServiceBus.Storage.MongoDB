@@ -38,7 +38,7 @@ public partial class PersistenceTestsConfiguration
         BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
         var memberMapCache = new MemberMapCache();
-        Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, databaseName,
+        Storage.MongoDB.SagaInstaller.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, databaseName,
             MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
         SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
         var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,

@@ -31,6 +31,11 @@ namespace NServiceBus.Storage.MongoDB
     {
         MongoDB.Driver.IClientSessionHandle? MongoSession { get; }
     }
+	public class OutboxSchemaInstaller : NServiceBus.Installation.INeedToInstallSomething
+    {
+        public OutboxSchemaInstaller(NServiceBus.Settings.IReadOnlySettings settings) { }
+        public System.Threading.Tasks.Task Install(string identity, System.Threading.CancellationToken cancellationToken = default) { }
+    }
 }
 namespace NServiceBus.Testing
 {

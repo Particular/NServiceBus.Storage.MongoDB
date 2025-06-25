@@ -49,7 +49,7 @@ public class OutboxTestsConfiguration
 
         await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-        MongoDB.OutboxStorage.InitializeOutboxTypes(ClientProvider.Client, DatabaseName, CollectionNamingConvention,
+        MongoDB.OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, DatabaseName, CollectionNamingConvention,
             TimeSpan.FromHours(1));
 
         OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, CollectionNamingConvention);

@@ -1,43 +1,38 @@
-namespace NServiceBus.Storage.MongoDB;
+﻿namespace NServiceBus.Storage.MongoDB;
 
 using System;
-using Features;
+using System.Threading;
+using System.Threading.Tasks;
 using global::MongoDB.Bson;
 using global::MongoDB.Bson.Serialization;
 using global::MongoDB.Driver;
-using Microsoft.Extensions.DependencyInjection;
-using Sagas;
+using NServiceBus.Installation;
+using NServiceBus.Sagas;
+using NServiceBus.Settings;
 
-class SagaStorage : Feature
+class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
 {
-    SagaStorage()
-    {
-        Defaults(s => s.EnableFeatureByDefault<SynchronizedStorage>());
+	public Task Install(string identity, CancellationToken cancellationToken = default)
+	{
+		if (!settings.TryGet(SettingsKeys.VersionElementName, out string versionElementName))
+		{
+			versionElementName = SagaPersister.DefaultVersionElementName;
+		}
 
-        DependsOn<Sagas>();
-        DependsOn<SynchronizedStorage>();
-    }
-
-    protected override void Setup(FeatureConfigurationContext context)
-    {
-        if (!context.Settings.TryGet(SettingsKeys.VersionElementName, out string versionElementName))
-        {
-            versionElementName = SagaPersister.DefaultVersionElementName;
-        }
-
-        var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
-        var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
-        var collectionNamingConvention =
-            context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
-        var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
+		if (!settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out var client))
+		{
+			return Task.CompletedTask;
+		}
+		var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
+		var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+		var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();
 
         var memberMapCache = new MemberMapCache();
-        InitializeSagaDataTypes(client, memberMapCache, databaseName, collectionNamingConvention,
+        InitializeSagaDataTypes(client(), memberMapCache, databaseName, collectionNamingConvention,
             sagaMetadataCollection);
 
-        context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName, memberMapCache));
-    }
-
+		return Task.CompletedTask;
+	}
     internal static void InitializeSagaDataTypes(IMongoClient client, MemberMapCache memberMapCache,
         string databaseName, Func<Type, string> collectionNamingConvention,
         SagaMetadataCollection sagaMetadataCollection)
@@ -87,3 +82,4 @@ class SagaStorage : Feature
         }
     }
 }
+

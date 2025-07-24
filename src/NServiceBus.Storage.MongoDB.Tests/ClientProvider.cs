@@ -9,21 +9,21 @@ static class ClientProvider
     {
         get
         {
-            if (client == null)
+            if (field != null)
             {
-                MongoPersistence.SafeRegisterDefaultGuidSerializer();
-
-                var containerConnectionString =
-                    Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
-
-                client = string.IsNullOrWhiteSpace(containerConnectionString)
-                    ? new MongoClient()
-                    : new MongoClient(containerConnectionString);
+                return field;
             }
 
-            return client;
+            MongoPersistence.SafeRegisterDefaultGuidSerializer();
+
+            var containerConnectionString =
+                Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
+
+            field = string.IsNullOrWhiteSpace(containerConnectionString)
+                ? new MongoClient()
+                : new MongoClient(containerConnectionString);
+
+            return field;
         }
     }
-
-    static IMongoClient client;
 }

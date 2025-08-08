@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
     <PackageReference Include="NServiceBus" Version="10.0.0-alpha.2" />
-    <PackageReference Include="Particular.Packaging" Version="4.4.0" PrivateAssets="All" />
+    <PackageReference Include="Particular.Packaging" Version="4.5.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

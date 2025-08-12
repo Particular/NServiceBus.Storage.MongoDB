@@ -38,6 +38,7 @@ class OutboxStorage : Feature
         var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
+        // TODO Discuss whether we want to keep this check or not and whether we want to have that in other places too
         var outboxCollection = client().GetDatabase(databaseName, databaseSettings).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
         if (outboxCollection == null)
         {

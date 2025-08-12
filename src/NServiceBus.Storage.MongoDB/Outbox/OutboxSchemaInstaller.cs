@@ -25,8 +25,7 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
-        if (!settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData,
-                out TimeSpan timeToKeepOutboxDeduplicationData))
+        if (!settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData, out TimeSpan timeToKeepOutboxDeduplicationData))
         {
             timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
         }

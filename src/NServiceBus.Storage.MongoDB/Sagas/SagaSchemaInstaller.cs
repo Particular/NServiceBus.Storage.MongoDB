@@ -6,33 +6,30 @@ using System.Threading.Tasks;
 using global::MongoDB.Bson;
 using global::MongoDB.Bson.Serialization;
 using global::MongoDB.Driver;
-using NServiceBus.Installation;
-using NServiceBus.Sagas;
-using NServiceBus.Settings;
+using Installation;
+using Sagas;
+using Settings;
 
-class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+sealed class SagaSchemaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
 {
-	public Task Install(string identity, CancellationToken cancellationToken = default)
-	{
-		if (!settings.TryGet(SettingsKeys.VersionElementName, out string versionElementName))
-		{
-			versionElementName = SagaPersister.DefaultVersionElementName;
-		}
+    public Task Install(string identity, CancellationToken cancellationToken = default)
+    {
+        if (!settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
+        {
+            return Task.CompletedTask;
+        }
 
-		if (!settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out var client))
-		{
-			return Task.CompletedTask;
-		}
-		var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
-		var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
-		var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();
+        var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
+        var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+        var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();
 
         var memberMapCache = new MemberMapCache();
         InitializeSagaDataTypes(client(), memberMapCache, databaseName, collectionNamingConvention,
             sagaMetadataCollection);
 
-		return Task.CompletedTask;
-	}
+        return Task.CompletedTask;
+    }
+
     internal static void InitializeSagaDataTypes(IMongoClient client, MemberMapCache memberMapCache,
         string databaseName, Func<Type, string> collectionNamingConvention,
         SagaMetadataCollection sagaMetadataCollection)
@@ -43,7 +40,7 @@ class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
             ReadPreference = ReadPreference.Primary,
             WriteConcern = WriteConcern.WMajority
         };
-        var database = client.GetDatabase(databaseName, databaseSettings);
+        IMongoDatabase? database = client.GetDatabase(databaseName, databaseSettings);
 
         foreach (var sagaMetadata in sagaMetadataCollection)
         {
@@ -56,9 +53,10 @@ class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
                 BsonClassMap.RegisterClassMap(classMap);
             }
 
-            var collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
+            string collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
 
-            if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
+            if (sagaMetadata.TryGetCorrelationProperty(out SagaMetadata.CorrelationPropertyMetadata? property) &&
+                property.Name != "Id")
             {
                 var memberMap = memberMapCache.GetOrAdd(sagaMetadata.SagaEntityType, property);
                 var propertyElementName = memberMap.ElementName;
@@ -82,4 +80,3 @@ class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
         }
     }
 }
-

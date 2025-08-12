@@ -58,6 +58,7 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
                 var indexModel = new CreateIndexModel<BsonDocument>(
                     new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)),
                     new CreateIndexOptions { Unique = true });
+                // TODO Should we use the collection settings from the saga metadata?
                 database.GetCollection<BsonDocument>(collectionName).Indexes.CreateOne(indexModel);
             }
             else

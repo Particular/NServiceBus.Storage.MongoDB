@@ -9,13 +9,13 @@ using global::MongoDB.Driver;
 using Installation;
 using Settings;
 
-sealed class OutboxSchemaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
 {
     internal const string OutboxCleanupIndexName = "OutboxCleanup";
 
     public Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        if (!settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
+        if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
         {
             return Task.CompletedTask;
         }
@@ -34,8 +34,7 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings) : INeedToInstallS
         return Task.CompletedTask;
     }
 
-    internal static void InitializeOutboxTypes(IMongoClient client, string databaseName,
-        Func<Type, string> collectionNamingConvention, TimeSpan timeToKeepOutboxDeduplicationData)
+    internal static void InitializeOutboxTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, TimeSpan timeToKeepOutboxDeduplicationData)
     {
         var collectionSettings = new MongoCollectionSettings
         {

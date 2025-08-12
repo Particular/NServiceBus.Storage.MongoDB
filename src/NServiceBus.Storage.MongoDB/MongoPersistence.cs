@@ -38,6 +38,7 @@ public class MongoPersistence : PersistenceDefinition
             s.SetDefault(SettingsKeys.CollectionNamingConvention, DefaultCollectionNamingConvention);
 
             s.SetDefault(DefaultDatabaseSettings);
+            s.EnableFeatureByDefault<InstallerFeature>();
         });
 
         Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());

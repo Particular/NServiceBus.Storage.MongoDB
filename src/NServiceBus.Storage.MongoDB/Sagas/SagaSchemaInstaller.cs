@@ -10,11 +10,11 @@ using Installation;
 using Sagas;
 using Settings;
 
-sealed class SagaSchemaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
 {
     public Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        if (!settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
+        if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
         {
             return Task.CompletedTask;
         }

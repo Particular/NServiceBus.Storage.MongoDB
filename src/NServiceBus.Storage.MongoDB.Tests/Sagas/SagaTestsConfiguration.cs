@@ -78,10 +78,10 @@ public class SagaTestsConfiguration
 
         var database = ClientProvider.Client.GetDatabase(DatabaseName, databaseSettings);
 
+        // TODO: Why are we not using the OutboxSchemaInstaller here?
         await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-        MongoDB.SagaSchemaInstaller.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, DatabaseName,
-            CollectionNamingConvention, SagaMetadataCollection);
+        SagaSchemaInstaller.InitializeSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
     }
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);

@@ -22,24 +22,18 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();
+        var databaseSettings = settings.Get<MongoDatabaseSettings>();
 
         var memberMapCache = new MemberMapCache();
-        InitializeSagaDataTypes(client(), memberMapCache, databaseName, collectionNamingConvention,
-            sagaMetadataCollection);
+        InitializeSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, sagaMetadataCollection);
 
         return Task.CompletedTask;
     }
 
-    internal static void InitializeSagaDataTypes(IMongoClient client, MemberMapCache memberMapCache,
+    internal static void InitializeSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings, MemberMapCache memberMapCache,
         string databaseName, Func<Type, string> collectionNamingConvention,
         SagaMetadataCollection sagaMetadataCollection)
     {
-        var databaseSettings = new MongoDatabaseSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
         IMongoDatabase? database = client.GetDatabase(databaseName, databaseSettings);
 
         foreach (var sagaMetadata in sagaMetadataCollection)

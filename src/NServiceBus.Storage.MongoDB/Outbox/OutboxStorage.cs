@@ -34,24 +34,17 @@ class OutboxStorage : Feature
         }
 
         var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
+        var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
+        var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
-        var collectionSettings = new MongoCollectionSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
-
-        var outboxCollection = client().GetDatabase(databaseName)
-            .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
+        var outboxCollection = client().GetDatabase(databaseName, databaseSettings).GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
         if (outboxCollection == null)
         {
             throw new ArgumentNullException($"Collection {outboxCollection} should be created in the database : {databaseName}");
         }
 
-        context.Services.AddSingleton<IOutboxStorage>(new OutboxPersister(client(), databaseName,
-            collectionNamingConvention));
+        context.Services.AddSingleton<IOutboxStorage>(new OutboxPersister(client(), databaseName, collectionNamingConvention));
 
         if (!BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
         {

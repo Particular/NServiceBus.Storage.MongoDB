@@ -38,7 +38,13 @@ public partial class PersistenceTestsConfiguration
         BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
         var memberMapCache = new MemberMapCache();
-        Storage.MongoDB.SagaSchemaInstaller.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, databaseName,
+        var databaseSettings = new MongoDatabaseSettings
+        {
+            ReadConcern = ReadConcern.Majority,
+            ReadPreference = ReadPreference.Primary,
+            WriteConcern = WriteConcern.WMajority
+        };
+        SagaSchemaInstaller.InitializeSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
             MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
         SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
         var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,
@@ -46,12 +52,6 @@ public partial class PersistenceTestsConfiguration
             SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
         CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);
 
-        var databaseSettings = new MongoDatabaseSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
         var database = ClientProvider.Client.GetDatabase(databaseName, databaseSettings);
         await database.CreateCollectionAsync(MongoPersistence.DefaultCollectionNamingConvention(typeof(OutboxRecord)),
             cancellationToken: cancellationToken);

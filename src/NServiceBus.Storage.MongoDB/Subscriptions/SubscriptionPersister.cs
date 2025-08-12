@@ -9,13 +9,8 @@ using Logging;
 using Unicast.Subscriptions;
 using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
-class SubscriptionPersister : ISubscriptionStorage
+class SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCollection) : ISubscriptionStorage
 {
-    public SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCollection)
-    {
-        this.subscriptionsCollection = subscriptionsCollection;
-    }
-
     public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context,
         CancellationToken cancellationToken = default)
     {
@@ -145,20 +140,6 @@ class SubscriptionPersister : ISubscriptionStorage
         }
     }
 
-    public void CreateIndexes()
-    {
-        var uniqueIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
-                .Ascending(x => x.MessageTypeName)
-                .Ascending(x => x.TransportAddress),
-            new CreateIndexOptions { Unique = true });
-        var searchIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
-            .Ascending(x => x.MessageTypeName)
-            .Ascending(x => x.TransportAddress)
-            .Ascending(x => x.Endpoint));
-        subscriptionsCollection.Indexes.CreateMany(new[] { uniqueIndex, searchIndex });
-    }
-
-    IMongoCollection<EventSubscription> subscriptionsCollection;
     const int DuplicateKeyErrorCode = 11000;
     static readonly ILog Log = LogManager.GetLogger<SubscriptionPersister>();
     static readonly FilterDefinitionBuilder<EventSubscription> filterBuilder = Builders<EventSubscription>.Filter;

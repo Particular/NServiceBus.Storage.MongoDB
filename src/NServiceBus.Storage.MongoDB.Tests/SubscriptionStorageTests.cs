@@ -22,7 +22,7 @@ class SubscriptionStorageTests
             .GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings)
             .GetCollection<EventSubscription>("eventsubscriptions");
         var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);
-        subscriptionPersister.CreateIndexes();
+        SubscriptionSchemaInstaller.InitializeSubscription(ClientProvider.Client, MongoPersistence.DefaultDatabaseSettings, DatabaseName, MongoPersistence.DefaultCollectionSettings, _ => "eventsubscriptions");
         storage = subscriptionPersister;
     }
 
@@ -92,7 +92,7 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType2, new ContextBag());
 
         var subscribers =
-            await storage.GetSubscriberAddressesForMessage(new[] { eventType1, eventType2 }, new ContextBag());
+            await storage.GetSubscriberAddressesForMessage([eventType1, eventType2], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(2));
         Assert.That(subscribers.Select(s => s.TransportAddress), Is.EquivalentTo(new[] { "address", "address" }));
@@ -188,7 +188,7 @@ class SubscriptionStorageTests
             new MessageType("SomeMessage", "1.0.0"), new ContextBag());
 
         var subscribers =
-            await storage.GetSubscriberAddressesForMessage(new[] { new MessageType("SomeMessage", "2.0.0") },
+            await storage.GetSubscriberAddressesForMessage([new MessageType("SomeMessage", "2.0.0")],
                 new ContextBag());
 
         Assert.That(subscribers.Single().Endpoint, Is.EqualTo("subscriberA"));

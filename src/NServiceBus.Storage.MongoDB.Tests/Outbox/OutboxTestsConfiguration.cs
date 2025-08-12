@@ -38,19 +38,12 @@ public class OutboxTestsConfiguration
 
     public async Task Configure()
     {
-        var databaseSettings = new MongoDatabaseSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
-
-        var database = ClientProvider.Client.GetDatabase(DatabaseName, databaseSettings);
+        var database = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings);
 
         await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-        MongoDB.OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, DatabaseName, CollectionNamingConvention,
-            TimeSpan.FromHours(1));
+        MongoDB.OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, TimeSpan.FromHours(1));
 
         OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, CollectionNamingConvention);
     }

@@ -21,6 +21,8 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
         }
 
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
+        var databaseSettings = settings.Get<MongoDatabaseSettings>();
+        var collectionSettings = settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
         if (!settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData,
@@ -29,21 +31,14 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
             timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
         }
 
-        InitializeOutboxTypes(client(), databaseName, collectionNamingConvention, timeToKeepOutboxDeduplicationData);
+        InitializeOutboxTypes(client(), databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData);
 
         return Task.CompletedTask;
     }
 
-    internal static void InitializeOutboxTypes(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention, TimeSpan timeToKeepOutboxDeduplicationData)
+    internal static void InitializeOutboxTypes(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings, TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        var collectionSettings = new MongoCollectionSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
-
-        var outboxCollection = client.GetDatabase(databaseName)
+        var outboxCollection = client.GetDatabase(databaseName, databaseSettings)
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
         var outboxCleanupIndex = outboxCollection.Indexes.List().ToList()
             .SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);

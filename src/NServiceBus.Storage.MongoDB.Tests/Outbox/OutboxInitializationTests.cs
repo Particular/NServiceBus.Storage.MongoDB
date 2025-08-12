@@ -16,19 +16,12 @@ public class OutboxInitializationTests
     {
         databaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
-        var databaseSettings = new MongoDatabaseSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
-
-        var database = ClientProvider.Client.GetDatabase(databaseName, databaseSettings);
+        var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
 
         await database.CreateCollectionAsync(CollectionNamingConvention<OutboxRecord>());
 
-        outboxCollection = ClientProvider.Client.GetDatabase(databaseName)
-            .GetCollection<OutboxRecord>(CollectionNamingConvention<OutboxRecord>());
+        outboxCollection = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings)
+            .GetCollection<OutboxRecord>(CollectionNamingConvention<OutboxRecord>(), MongoPersistence.DefaultCollectionSettings);
     }
 
     static string CollectionNamingConvention<T>() => CollectionNamingConvention(typeof(T));
@@ -41,8 +34,8 @@ public class OutboxInitializationTests
     [Theory]
     public async Task Should_create_index_when_it_doesnt_exist(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData);
+        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
     }
@@ -50,11 +43,11 @@ public class OutboxInitializationTests
     [Theory]
     public async Task Should_recreate_when_expiry_drifts(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData.Add(TimeSpan.FromSeconds(30)));
+        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData.Add(TimeSpan.FromSeconds(30)));
 
-        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData);
+        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
     }
@@ -67,14 +60,14 @@ public class OutboxInitializationTests
             new CreateIndexOptions { Name = OutboxSchemaInstaller.OutboxCleanupIndexName, Background = true });
         await outboxCollection.Indexes.CreateOneAsync(indexModel);
 
-        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData);
+        OutboxSchemaInstaller.InitializeOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
     }
 
     [DatapointSource]
-    public TimeSpan[] Expiry = new TimeSpan[] { TimeSpan.FromHours(1), TimeSpan.FromHours(3), TimeSpan.FromDays(1) };
+    public TimeSpan[] Expiry = [TimeSpan.FromHours(1), TimeSpan.FromHours(3), TimeSpan.FromDays(1)];
 
     static async Task AssertIndexCorrect(IMongoCollection<OutboxRecord> outboxCollection, TimeSpan expiry)
     {

@@ -38,6 +38,7 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
 
         foreach (var sagaMetadata in sagaMetadataCollection)
         {
+            // TODO Class map registration should be in feature setup, not here
             if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
             {
                 var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);

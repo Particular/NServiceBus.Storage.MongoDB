@@ -38,14 +38,6 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
     {
         var database = client.GetDatabase(databaseName, databaseSettings);
         var collectionName = collectionNamingConvention(typeof(OutboxRecord));
-        var outboxCollection = database.GetCollection<OutboxRecord>(collectionName, collectionSettings);
-
-        var outboxIndexesCursor = await outboxCollection.Indexes.ListAsync(cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-        var outboxIndexes = await outboxIndexesCursor.ToListAsync(cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-        var outboxCleanupIndex = outboxIndexes.SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
-        var createIndex = false;
 
         try
         {
@@ -56,6 +48,15 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
         {
             //Collection already exists, so swallow the exception
         }
+
+        var outboxCollection = database.GetCollection<OutboxRecord>(collectionName, collectionSettings);
+
+        var outboxIndexesCursor = await outboxCollection.Indexes.ListAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+        var outboxIndexes = await outboxIndexesCursor.ToListAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+        var outboxCleanupIndex = outboxIndexes.SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
+        var createIndex = false;
 
         if (outboxCleanupIndex is null)
         {

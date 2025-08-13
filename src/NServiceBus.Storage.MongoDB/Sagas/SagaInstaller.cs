@@ -9,10 +9,11 @@ using Installation;
 using Sagas;
 using Settings;
 
-sealed class SagaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
+sealed class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
+        var installerSettings = settings.Get<InstallerSettings>();
         if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
         {
             return;

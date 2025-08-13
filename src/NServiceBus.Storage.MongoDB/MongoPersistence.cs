@@ -42,7 +42,7 @@ public class MongoPersistence : PersistenceDefinition
 
             s.SetDefault(new MemberMapCache());
 
-            s.EnableFeatureByDefault<InstallerFeature>();
+            s.SetDefault(new InstallerSettings());
         });
 
         Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());

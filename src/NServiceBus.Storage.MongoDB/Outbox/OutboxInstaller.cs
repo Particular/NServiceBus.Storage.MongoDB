@@ -9,12 +9,13 @@ using global::MongoDB.Driver;
 using Installation;
 using Settings;
 
-sealed class OutboxInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
+sealed class OutboxInstaller(IReadOnlySettings settings) : INeedToInstallSomething
 {
     internal const string OutboxCleanupIndexName = "OutboxCleanup";
 
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
+        var installerSettings = settings.Get<InstallerSettings>();
         if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
         {
             return;

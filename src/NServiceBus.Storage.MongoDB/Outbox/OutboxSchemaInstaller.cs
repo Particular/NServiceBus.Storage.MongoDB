@@ -36,14 +36,26 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
 
     internal static async Task CreateInfrastructureForOutboxTypes(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings, TimeSpan timeToKeepOutboxDeduplicationData, CancellationToken cancellationToken = default)
     {
-        var outboxCollection = client.GetDatabase(databaseName, databaseSettings)
-            .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
+        var database = client.GetDatabase(databaseName, databaseSettings);
+        var collectionName = collectionNamingConvention(typeof(OutboxRecord));
+        var outboxCollection = database.GetCollection<OutboxRecord>(collectionName, collectionSettings);
+
         var outboxIndexesCursor = await outboxCollection.Indexes.ListAsync(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         var outboxIndexes = await outboxIndexesCursor.ToListAsync(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         var outboxCleanupIndex = outboxIndexes.SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
         var createIndex = false;
+
+        try
+        {
+            await database.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (MongoCommandException ex) when (ex is { Code: 48, CodeName: "NamespaceExists" })
+        {
+            //Collection already exists, so swallow the exception
+        }
 
         if (outboxCleanupIndex is null)
         {

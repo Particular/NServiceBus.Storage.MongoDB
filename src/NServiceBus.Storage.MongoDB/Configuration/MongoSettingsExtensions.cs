@@ -65,6 +65,16 @@ public static class MongoSettingsExtensions
     }
 
     /// <summary>
+    /// Disables the collection and index creation.
+    /// </summary>
+    public static void DisableInstaller(this PersistenceExtensions<MongoPersistence> persistenceExtensions)
+    {
+        ArgumentNullException.ThrowIfNull(persistenceExtensions);
+
+        persistenceExtensions.GetSettings().GetOrCreate<InstallerSettings>().Disabled = true;
+    }
+
+    /// <summary>
     /// Community persistence compatibility settings
     /// </summary>
     public static CompatibilitySettings CommunityPersistenceCompatibility(

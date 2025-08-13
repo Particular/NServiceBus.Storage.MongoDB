@@ -34,7 +34,7 @@ public class OutboxInitializationTests
     {
         await database.DropCollectionAsync(CollectionNamingConvention<OutboxRecord>());
 
-        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         var collections = await (await database
@@ -46,7 +46,7 @@ public class OutboxInitializationTests
     [Theory]
     public async Task Should_create_index_when_it_doesnt_exist(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
@@ -55,10 +55,10 @@ public class OutboxInitializationTests
     [Theory]
     public async Task Should_recreate_when_expiry_drifts(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData.Add(TimeSpan.FromSeconds(30)));
 
-        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
@@ -69,10 +69,10 @@ public class OutboxInitializationTests
     {
         var indexModel = new CreateIndexModel<OutboxRecord>(
             Builders<OutboxRecord>.IndexKeys.Ascending(record => record.Dispatched),
-            new CreateIndexOptions { Name = OutboxSchemaInstaller.OutboxCleanupIndexName, Background = true });
+            new CreateIndexOptions { Name = OutboxInstaller.OutboxCleanupIndexName, Background = true });
         await outboxCollection.Indexes.CreateOneAsync(indexModel);
 
-        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
@@ -84,7 +84,7 @@ public class OutboxInitializationTests
     static async Task AssertIndexCorrect(IMongoCollection<OutboxRecord> outboxCollection, TimeSpan expiry)
     {
         var outboxCleanupIndex = (await outboxCollection.Indexes.ListAsync()).ToList().SingleOrDefault(indexDocument =>
-            indexDocument.GetElement("name").Value == OutboxSchemaInstaller.OutboxCleanupIndexName);
+            indexDocument.GetElement("name").Value == OutboxInstaller.OutboxCleanupIndexName);
 
         Assert.That(outboxCleanupIndex, Is.Not.Null);
 

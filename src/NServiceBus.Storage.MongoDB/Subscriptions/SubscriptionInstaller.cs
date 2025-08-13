@@ -7,7 +7,7 @@ using global::MongoDB.Driver;
 using Installation;
 using Settings;
 
-sealed class SubscriptionSchemaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
+sealed class SubscriptionInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {

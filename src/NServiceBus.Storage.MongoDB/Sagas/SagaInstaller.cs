@@ -9,7 +9,7 @@ using Installation;
 using Sagas;
 using Settings;
 
-sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
+sealed class SagaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {

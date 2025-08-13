@@ -9,7 +9,7 @@ using global::MongoDB.Driver;
 using Installation;
 using Settings;
 
-sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
+sealed class OutboxInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
 {
     internal const string OutboxCleanupIndexName = "OutboxCleanup";
 

@@ -9,6 +9,7 @@ using Extensibility;
 using global::MongoDB.Driver;
 using MongoDB;
 using Sagas;
+using SagaStorageFeature = SagaStorage;
 using SynchronizedStorageSession = SynchronizedStorageSession;
 
 public class SagaTestsConfiguration
@@ -81,7 +82,8 @@ public class SagaTestsConfiguration
         // TODO: Why are we not using the OutboxSchemaInstaller here?
         await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
 
-        SagaSchemaInstaller.InitializeSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
+        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
+        SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
     }
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);

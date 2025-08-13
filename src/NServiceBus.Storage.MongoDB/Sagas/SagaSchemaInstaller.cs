@@ -4,7 +4,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using global::MongoDB.Bson;
-using global::MongoDB.Bson.Serialization;
 using global::MongoDB.Driver;
 using Installation;
 using Sagas;
@@ -25,29 +24,19 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
 
         var memberMapCache = new MemberMapCache();
-        InitializeSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, sagaMetadataCollection);
+        CreateIndexesForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, sagaMetadataCollection);
 
         return Task.CompletedTask;
     }
 
-    internal static void InitializeSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings, MemberMapCache memberMapCache,
+    internal static void CreateIndexesForSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings, MemberMapCache memberMapCache,
         string databaseName, Func<Type, string> collectionNamingConvention,
         SagaMetadataCollection sagaMetadataCollection)
     {
-        IMongoDatabase? database = client.GetDatabase(databaseName, databaseSettings);
+        var database = client.GetDatabase(databaseName, databaseSettings);
 
         foreach (var sagaMetadata in sagaMetadataCollection)
         {
-            // TODO Class map registration should be in feature setup, not here
-            if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
-            {
-                var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
-                classMap.AutoMap();
-                classMap.SetIgnoreExtraElements(true);
-
-                BsonClassMap.RegisterClassMap(classMap);
-            }
-
             string collectionName = collectionNamingConvention(sagaMetadata.SagaEntityType);
 
             if (sagaMetadata.TryGetCorrelationProperty(out SagaMetadata.CorrelationPropertyMetadata? property) &&
@@ -68,7 +57,7 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
                 {
                     database.CreateCollection(collectionName);
                 }
-                catch (MongoCommandException ex) when (ex.Code == 48 && ex.CodeName == "NamespaceExists")
+                catch (MongoCommandException ex) when (ex is { Code: 48, CodeName: "NamespaceExists" })
                 {
                     //Collection already exists, so swallow the exception
                 }

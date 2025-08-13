@@ -13,6 +13,7 @@ using NServiceBus.Sagas;
 using Persistence;
 using Storage.MongoDB;
 using Storage.MongoDB.Tests;
+using SagaStorageFeature = Storage.MongoDB.SagaStorage;
 using SynchronizedStorageSession = Storage.MongoDB.SynchronizedStorageSession;
 
 public partial class PersistenceTestsConfiguration
@@ -44,8 +45,11 @@ public partial class PersistenceTestsConfiguration
             ReadPreference = ReadPreference.Primary,
             WriteConcern = WriteConcern.WMajority
         };
-        SagaSchemaInstaller.InitializeSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
+
+        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
+        SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
             MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
+
         SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
         var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,
             MongoPersistence.DefaultCollectionNamingConvention,

@@ -29,8 +29,20 @@ sealed class SubscriptionInstaller(IReadOnlySettings settings) : INeedToInstallS
     internal static async Task CreateInfrastructureForSubscriptionTypes(IMongoClient client, MongoDatabaseSettings databaseSettings,
         string databaseName, MongoCollectionSettings collectionSettings, Func<Type, string> collectionNamingConvention, CancellationToken cancellationToken = default)
     {
-        var subscriptionCollectionName = collectionNamingConvention(typeof(EventSubscription));
-        var collection = client.GetDatabase(databaseName, databaseSettings).GetCollection<EventSubscription>(subscriptionCollectionName, collectionSettings);
+        var collectionName = collectionNamingConvention(typeof(EventSubscription));
+        var database = client.GetDatabase(databaseName, databaseSettings);
+
+        try
+        {
+            await database.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (MongoCommandException ex) when (ex is { Code: 48, CodeName: "NamespaceExists" })
+        {
+            //Collection already exists, so swallow the exception
+        }
+
+        var collection = database.GetCollection<EventSubscription>(collectionName, collectionSettings);
         var uniqueIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys
                 .Ascending(x => x.MessageTypeName)
                 .Ascending(x => x.TransportAddress),

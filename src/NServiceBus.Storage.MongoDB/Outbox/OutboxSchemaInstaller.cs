@@ -30,11 +30,11 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
             timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
         }
 
-        await InitializeOutboxTypes(client(), databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
+        await CreateIndexesForOutboxTypes(client(), databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
             .ConfigureAwait(false);
     }
 
-    internal static async Task InitializeOutboxTypes(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings, TimeSpan timeToKeepOutboxDeduplicationData, CancellationToken cancellationToken = default)
+    internal static async Task CreateIndexesForOutboxTypes(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings, TimeSpan timeToKeepOutboxDeduplicationData, CancellationToken cancellationToken = default)
     {
         var outboxCollection = client.GetDatabase(databaseName, databaseSettings)
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);

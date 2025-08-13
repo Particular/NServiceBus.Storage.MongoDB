@@ -13,11 +13,11 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
 {
     internal const string OutboxCleanupIndexName = "OutboxCleanup";
 
-    public Task Install(string identity, CancellationToken cancellationToken = default)
+    public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
@@ -30,17 +30,19 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
             timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
         }
 
-        InitializeOutboxTypes(client(), databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData);
-
-        return Task.CompletedTask;
+        await InitializeOutboxTypes(client(), databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
+            .ConfigureAwait(false);
     }
 
-    internal static void InitializeOutboxTypes(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings, TimeSpan timeToKeepOutboxDeduplicationData)
+    internal static async Task InitializeOutboxTypes(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings, TimeSpan timeToKeepOutboxDeduplicationData, CancellationToken cancellationToken = default)
     {
         var outboxCollection = client.GetDatabase(databaseName, databaseSettings)
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
-        var outboxCleanupIndex = outboxCollection.Indexes.List().ToList()
-            .SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
+        var outboxIndexesCursor = await outboxCollection.Indexes.ListAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+        var outboxIndexes = await outboxIndexesCursor.ToListAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+        var outboxCleanupIndex = outboxIndexes.SingleOrDefault(indexDocument => indexDocument.GetElement("name").Value == OutboxCleanupIndexName);
         var createIndex = false;
 
         if (outboxCleanupIndex is null)
@@ -50,7 +52,8 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
         else if (!outboxCleanupIndex.TryGetElement("expireAfterSeconds", out BsonElement existingExpiration) ||
                  TimeSpan.FromSeconds(existingExpiration.Value.ToInt32()) != timeToKeepOutboxDeduplicationData)
         {
-            outboxCollection.Indexes.DropOne(OutboxCleanupIndexName);
+            await outboxCollection.Indexes.DropOneAsync(OutboxCleanupIndexName, cancellationToken)
+                .ConfigureAwait(false);
             createIndex = true;
         }
 
@@ -68,6 +71,7 @@ sealed class OutboxSchemaInstaller(IReadOnlySettings settings, InstallerSettings
                 Background = true
             });
 
-        outboxCollection.Indexes.CreateOne(indexModel);
+        await outboxCollection.Indexes.CreateOneAsync(indexModel, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 }

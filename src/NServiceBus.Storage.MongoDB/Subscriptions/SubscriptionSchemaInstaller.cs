@@ -9,11 +9,11 @@ using Settings;
 
 sealed class SubscriptionSchemaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
 {
-    public Task Install(string identity, CancellationToken cancellationToken = default)
+    public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
@@ -21,13 +21,12 @@ sealed class SubscriptionSchemaInstaller(IReadOnlySettings settings, InstallerSe
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
-        InitializeSubscription(client(), databaseSettings, databaseName, collectionSettings, collectionNamingConvention);
-
-        return Task.CompletedTask;
+        await CreateInfrastructureForSubscriptionTypes(client(), databaseSettings, databaseName, collectionSettings, collectionNamingConvention, cancellationToken)
+            .ConfigureAwait(false);
     }
 
-    internal static void InitializeSubscription(IMongoClient client, MongoDatabaseSettings databaseSettings,
-        string databaseName, MongoCollectionSettings collectionSettings, Func<Type, string> collectionNamingConvention)
+    internal static async Task CreateInfrastructureForSubscriptionTypes(IMongoClient client, MongoDatabaseSettings databaseSettings,
+        string databaseName, MongoCollectionSettings collectionSettings, Func<Type, string> collectionNamingConvention, CancellationToken cancellationToken = default)
     {
         var subscriptionCollectionName = collectionNamingConvention(typeof(EventSubscription));
         var collection = client.GetDatabase(databaseName, databaseSettings).GetCollection<EventSubscription>(subscriptionCollectionName, collectionSettings);
@@ -39,6 +38,7 @@ sealed class SubscriptionSchemaInstaller(IReadOnlySettings settings, InstallerSe
             .Ascending(x => x.MessageTypeName)
             .Ascending(x => x.TransportAddress)
             .Ascending(x => x.Endpoint));
-        collection.Indexes.CreateMany([uniqueIndex, searchIndex]);
+        await collection.Indexes.CreateManyAsync([uniqueIndex, searchIndex], cancellationToken)
+            .ConfigureAwait(false);
     }
 }

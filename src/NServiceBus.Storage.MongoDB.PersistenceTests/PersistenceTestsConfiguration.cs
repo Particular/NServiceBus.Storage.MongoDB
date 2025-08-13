@@ -48,8 +48,8 @@ public partial class PersistenceTestsConfiguration
         };
 
         SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
-        SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
-            MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
+        await SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
+            MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection, cancellationToken);
 
         SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
         var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,

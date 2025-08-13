@@ -14,23 +14,21 @@ using Unicast.Subscriptions.MessageDrivenSubscriptions;
 class SubscriptionStorageTests
 {
     [OneTimeSetUp]
-    public void OneTimeSetUp()
+    public async Task OneTimeSetUp()
     {
         DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
-        var subscriptionCollection = ClientProvider.Client
-            .GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings)
-            .GetCollection<EventSubscription>("eventsubscriptions");
+        var subscriptionCollection = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings)
+            .GetCollection<EventSubscription>("eventsubscriptions", MongoPersistence.DefaultCollectionSettings);
+
+        await SubscriptionInstaller.CreateInfrastructureForSubscriptionTypes(ClientProvider.Client, MongoPersistence.DefaultDatabaseSettings, DatabaseName, MongoPersistence.DefaultCollectionSettings, _ => "eventsubscriptions");
+
         var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);
-        SubscriptionSchemaInstaller.InitializeSubscription(ClientProvider.Client, MongoPersistence.DefaultDatabaseSettings, DatabaseName, MongoPersistence.DefaultCollectionSettings, _ => "eventsubscriptions");
         storage = subscriptionPersister;
     }
 
     [OneTimeTearDown]
-    public async Task OneTimeTearDown()
-    {
-        await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
-    }
+    public async Task OneTimeTearDown() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
 
     [Test]
     public async Task Should_not_have_duplicate_subscriptions()
@@ -40,7 +38,7 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
         await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(1));
         var subscription = subscribers.Single();
@@ -59,10 +57,10 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address1", "endpoint1"), eventType, new ContextBag());
         await storage.Subscribe(new Subscriber("address2", "endpoint1"), eventType, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(2));
-        Assert.That(subscribers.Select(s => s.TransportAddress), Is.EquivalentTo(new[] { "address1", "address2" }));
+        Assert.That(subscribers.Select(s => s.TransportAddress), Is.EquivalentTo(["address1", "address2"]));
     }
 
     [Test]
@@ -73,7 +71,7 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address1", "endpointA"), eventType, new ContextBag());
         await storage.Subscribe(new Subscriber("address1", "endpointB"), eventType, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType], new ContextBag());
 
         Assert.Multiple(() =>
         {
@@ -95,7 +93,7 @@ class SubscriptionStorageTests
             await storage.GetSubscriberAddressesForMessage([eventType1, eventType2], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(2));
-        Assert.That(subscribers.Select(s => s.TransportAddress), Is.EquivalentTo(new[] { "address", "address" }));
+        Assert.That(subscribers.Select(s => s.TransportAddress), Is.EquivalentTo(["address", "address"]));
     }
 
     [Test]
@@ -106,7 +104,7 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
         await storage.Unsubscribe(new Subscriber("another address", "endpoint1"), eventType1, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType1 }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType1], new ContextBag());
 
         Assert.That(subscribers.Single().TransportAddress, Is.EqualTo("address"));
     }
@@ -120,7 +118,7 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address", "endpoint2"), eventType1, new ContextBag());
         await storage.Unsubscribe(new Subscriber("address", "endpoint1"), eventType1, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType1 }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType1], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(0));
     }
@@ -132,7 +130,7 @@ class SubscriptionStorageTests
 
         await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(1));
         var subscriber = subscribers.Single();
@@ -151,7 +149,7 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
         await storage.Subscribe(new Subscriber("address", "endpoint"), eventType, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(1));
         var subscriber = subscribers.Single();
@@ -170,7 +168,7 @@ class SubscriptionStorageTests
         await storage.Subscribe(new Subscriber("address", "endpoint"), eventType, new ContextBag());
         await storage.Subscribe(new Subscriber("address", null), eventType, new ContextBag());
 
-        var subscribers = await storage.GetSubscriberAddressesForMessage(new[] { eventType }, new ContextBag());
+        var subscribers = await storage.GetSubscriberAddressesForMessage([eventType], new ContextBag());
 
         Assert.That(subscribers.Count(), Is.EqualTo(1));
         var subscriber = subscribers.Single();
@@ -194,10 +192,7 @@ class SubscriptionStorageTests
         Assert.That(subscribers.Single().Endpoint, Is.EqualTo("subscriberA"));
     }
 
-    static MessageType CreateUniqueMessageType()
-    {
-        return new MessageType(Guid.NewGuid().ToString("N"), "1.0.0");
-    }
+    static MessageType CreateUniqueMessageType() => new(Guid.NewGuid().ToString("N"), "1.0.0");
 
     ISubscriptionStorage storage;
     string DatabaseName;

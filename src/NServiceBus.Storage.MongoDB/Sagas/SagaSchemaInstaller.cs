@@ -11,11 +11,11 @@ using Settings;
 
 sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings installerSettings) : INeedToInstallSomething
 {
-    public Task Install(string identity, CancellationToken cancellationToken = default)
+    public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
@@ -25,16 +25,16 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
         var collectionSettings = settings.Get<MongoCollectionSettings>();
 
         var memberMapCache = new MemberMapCache();
-        CreateIndexesForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection);
-
-        return Task.CompletedTask;
+        await CreateIndexesForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
+            .ConfigureAwait(false);
     }
 
-    internal static void CreateIndexesForSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings,
+    internal static async Task CreateIndexesForSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings,
         MemberMapCache memberMapCache,
         string databaseName, Func<Type, string> collectionNamingConvention,
         MongoCollectionSettings collectionSettings,
-        SagaMetadataCollection sagaMetadataCollection)
+        SagaMetadataCollection sagaMetadataCollection,
+         CancellationToken cancellationToken = default)
     {
         var database = client.GetDatabase(databaseName, databaseSettings);
 
@@ -51,13 +51,16 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
                 var indexModel = new CreateIndexModel<BsonDocument>(
                     new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)),
                     new CreateIndexOptions { Unique = true });
-                database.GetCollection<BsonDocument>(collectionName, collectionSettings).Indexes.CreateOne(indexModel);
+                // TODO: Why not CreateMany?
+                await database.GetCollection<BsonDocument>(collectionName, collectionSettings).Indexes.CreateOneAsync(indexModel, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             }
             else
             {
                 try
                 {
-                    database.CreateCollection(collectionName);
+                    await database.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken)
+                        .ConfigureAwait(false);
                 }
                 catch (MongoCommandException ex) when (ex is { Code: 48, CodeName: "NamespaceExists" })
                 {

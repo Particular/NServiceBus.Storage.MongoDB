@@ -68,7 +68,7 @@ public class SagaTestsConfiguration
 
     internal Func<SynchronizedStorageSession> SessionFactory { get; private set; }
 
-    public Task Configure()
+    public async Task Configure()
     {
         var databaseSettings = new MongoDatabaseSettings
         {
@@ -78,9 +78,7 @@ public class SagaTestsConfiguration
         };
 
         SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
-        SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
-
-        return Task.CompletedTask;
+        await SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
     }
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);

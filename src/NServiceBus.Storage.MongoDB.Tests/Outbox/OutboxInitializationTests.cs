@@ -17,7 +17,6 @@ public class OutboxInitializationTests
         databaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
         var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
-
         await database.CreateCollectionAsync(CollectionNamingConvention<OutboxRecord>());
 
         outboxCollection = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings)

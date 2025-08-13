@@ -4,8 +4,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Extensibility;
-using global::MongoDB.Driver;
-using NServiceBus.Outbox;
+using Outbox;
 
 public class OutboxTestsConfiguration
 {
@@ -31,10 +30,7 @@ public class OutboxTestsConfiguration
 
     public IOutboxStorage OutboxStorage { get; private set; }
 
-    public Task<IOutboxTransaction> CreateTransaction(ContextBag context)
-    {
-        return transactionFactory.BeginTransaction(context);
-    }
+    public Task<IOutboxTransaction> CreateTransaction(ContextBag context) => transactionFactory.BeginTransaction(context);
 
     public async Task Configure()
     {
@@ -48,10 +44,7 @@ public class OutboxTestsConfiguration
         OutboxStorage = new OutboxPersister(ClientProvider.Client, DatabaseName, CollectionNamingConvention);
     }
 
-    public async Task Cleanup()
-    {
-        await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
-    }
+    public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
 
     readonly MongoOutboxTransactionFactory transactionFactory;
 }

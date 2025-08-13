@@ -58,10 +58,8 @@ public partial class PersistenceTestsConfiguration
         CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);
 
         OutboxStorageFeature.RegisterOutboxClassMappings();
+        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, TimeSpan.FromDays(7), cancellationToken);
 
-        var database = ClientProvider.Client.GetDatabase(databaseName, databaseSettings);
-        await database.CreateCollectionAsync(MongoPersistence.DefaultCollectionNamingConvention(typeof(OutboxRecord)),
-            cancellationToken: cancellationToken);
         OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
     }
 

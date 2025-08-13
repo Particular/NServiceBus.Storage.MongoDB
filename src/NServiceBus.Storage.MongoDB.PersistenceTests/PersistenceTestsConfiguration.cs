@@ -49,7 +49,7 @@ public partial class PersistenceTestsConfiguration
 
         SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
         SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
-            MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
+            MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
 
         SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
         var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,

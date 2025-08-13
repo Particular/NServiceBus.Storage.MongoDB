@@ -22,15 +22,18 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
+        var collectionSettings = settings.Get<MongoCollectionSettings>();
 
         var memberMapCache = new MemberMapCache();
-        CreateIndexesForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, sagaMetadataCollection);
+        CreateIndexesForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection);
 
         return Task.CompletedTask;
     }
 
-    internal static void CreateIndexesForSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings, MemberMapCache memberMapCache,
+    internal static void CreateIndexesForSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings,
+        MemberMapCache memberMapCache,
         string databaseName, Func<Type, string> collectionNamingConvention,
+        MongoCollectionSettings collectionSettings,
         SagaMetadataCollection sagaMetadataCollection)
     {
         var database = client.GetDatabase(databaseName, databaseSettings);
@@ -48,8 +51,7 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
                 var indexModel = new CreateIndexModel<BsonDocument>(
                     new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)),
                     new CreateIndexOptions { Unique = true });
-                // TODO Should we use the collection settings from the saga metadata?
-                database.GetCollection<BsonDocument>(collectionName).Indexes.CreateOne(indexModel);
+                database.GetCollection<BsonDocument>(collectionName, collectionSettings).Indexes.CreateOne(indexModel);
             }
             else
             {

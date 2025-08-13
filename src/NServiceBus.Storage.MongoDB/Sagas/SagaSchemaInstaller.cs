@@ -51,7 +51,6 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
                 var indexModel = new CreateIndexModel<BsonDocument>(
                     new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(propertyElementName, 1)),
                     new CreateIndexOptions { Unique = true });
-                // TODO: Why not CreateMany?
                 await database.GetCollection<BsonDocument>(collectionName, collectionSettings).Indexes.CreateOneAsync(indexModel, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }

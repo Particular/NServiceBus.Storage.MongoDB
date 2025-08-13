@@ -77,7 +77,7 @@ public class SagaTestsConfiguration
             WriteConcern = WriteConcern.WMajority
         };
 
-        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
+        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection, memberMapCache);
         await SagaInstaller.CreateInfrastructureForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
     }
 

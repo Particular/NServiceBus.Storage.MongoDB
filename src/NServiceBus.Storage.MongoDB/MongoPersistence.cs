@@ -40,6 +40,8 @@ public class MongoPersistence : PersistenceDefinition
             s.SetDefault(DefaultDatabaseSettings);
             s.SetDefault(DefaultCollectionSettings);
 
+            s.SetDefault(new MemberMapCache());
+
             s.EnableFeatureByDefault<InstallerFeature>();
         });
 

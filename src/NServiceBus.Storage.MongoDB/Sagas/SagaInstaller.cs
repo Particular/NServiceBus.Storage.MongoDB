@@ -23,8 +23,8 @@ sealed class SagaInstaller(IReadOnlySettings settings, InstallerSettings install
         var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
         var collectionSettings = settings.Get<MongoCollectionSettings>();
+        var memberMapCache = settings.Get<MemberMapCache>();
 
-        var memberMapCache = new MemberMapCache();
         await CreateInfrastructureForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
             .ConfigureAwait(false);
     }

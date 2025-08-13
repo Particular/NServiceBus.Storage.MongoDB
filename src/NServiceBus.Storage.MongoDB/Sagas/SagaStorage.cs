@@ -22,26 +22,30 @@ class SagaStorage : Feature
             versionElementName = SagaPersister.DefaultVersionElementName;
         }
 
-        context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName, new MemberMapCache()));
+        var memberMapCache = context.Settings.Get<MemberMapCache>();
+        context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName, memberMapCache));
 
         var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
-        RegisterSagaEntityClassMappings(sagaMetadataCollection);
+        RegisterSagaEntityClassMappings(sagaMetadataCollection, memberMapCache);
     }
 
-    internal static void RegisterSagaEntityClassMappings(SagaMetadataCollection sagaMetadataCollection)
+    internal static void RegisterSagaEntityClassMappings(SagaMetadataCollection sagaMetadataCollection, MemberMapCache memberMapCache)
     {
         foreach (var sagaMetadata in sagaMetadataCollection)
         {
-            if (BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
+            if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
             {
-                continue;
+                var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
+                classMap.AutoMap();
+                classMap.SetIgnoreExtraElements(true);
+
+                BsonClassMap.RegisterClassMap(classMap);
             }
 
-            var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
-            classMap.AutoMap();
-            classMap.SetIgnoreExtraElements(true);
-
-            BsonClassMap.RegisterClassMap(classMap);
+            if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
+            {
+                _ = memberMapCache.GetOrAdd(sagaMetadata.SagaEntityType, property);
+            }
         }
     }
 }

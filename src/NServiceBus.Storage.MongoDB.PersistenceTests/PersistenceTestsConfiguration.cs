@@ -47,7 +47,7 @@ public partial class PersistenceTestsConfiguration
             WriteConcern = WriteConcern.WMajority
         };
 
-        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
+        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection, memberMapCache);
         await SagaInstaller.CreateInfrastructureForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
             MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection, cancellationToken);
 

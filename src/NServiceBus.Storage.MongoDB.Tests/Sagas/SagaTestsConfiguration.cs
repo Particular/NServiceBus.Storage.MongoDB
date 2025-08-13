@@ -68,7 +68,7 @@ public class SagaTestsConfiguration
 
     internal Func<SynchronizedStorageSession> SessionFactory { get; private set; }
 
-    public async Task Configure()
+    public Task Configure()
     {
         var databaseSettings = new MongoDatabaseSettings
         {
@@ -77,13 +77,10 @@ public class SagaTestsConfiguration
             WriteConcern = WriteConcern.WMajority
         };
 
-        var database = ClientProvider.Client.GetDatabase(DatabaseName, databaseSettings);
-
-        // TODO: Why are we not using the OutboxSchemaInstaller here?
-        await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
-
         SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
         SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, SagaMetadataCollection);
+
+        return Task.CompletedTask;
     }
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);

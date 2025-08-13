@@ -47,20 +47,27 @@ class OutboxStorage : Feature
 
         context.Services.AddSingleton<IOutboxStorage>(new OutboxPersister(client(), databaseName, collectionNamingConvention));
 
-        if (!BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
+        RegisterOutboxClassMappings();
+    }
+
+    internal static void RegisterOutboxClassMappings()
+    {
+        if (BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
         {
-            BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
-            {
-                cm.AutoMap();
-                cm.MapMember(c => c.Headers)
-                    .SetSerializer(
-                        new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
-                            DictionaryRepresentation.ArrayOfDocuments));
-                cm.MapMember(c => c.Options)
-                    .SetSerializer(
-                        new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
-                            DictionaryRepresentation.ArrayOfDocuments));
-            });
+            return;
         }
+
+        BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
+        {
+            cm.AutoMap();
+            cm.MapMember(c => c.Headers)
+                .SetSerializer(
+                    new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
+                        DictionaryRepresentation.ArrayOfDocuments));
+            cm.MapMember(c => c.Options)
+                .SetSerializer(
+                    new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
+                        DictionaryRepresentation.ArrayOfDocuments));
+        });
     }
 }

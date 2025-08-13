@@ -13,6 +13,7 @@ using NServiceBus.Sagas;
 using Persistence;
 using Storage.MongoDB;
 using Storage.MongoDB.Tests;
+using OutboxStorageFeature = Storage.MongoDB.OutboxStorage;
 using SagaStorageFeature = Storage.MongoDB.SagaStorage;
 using SynchronizedStorageSession = Storage.MongoDB.SynchronizedStorageSession;
 
@@ -56,11 +57,12 @@ public partial class PersistenceTestsConfiguration
             SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
         CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);
 
+        OutboxStorageFeature.RegisterOutboxClassMappings();
+
         var database = ClientProvider.Client.GetDatabase(databaseName, databaseSettings);
         await database.CreateCollectionAsync(MongoPersistence.DefaultCollectionNamingConvention(typeof(OutboxRecord)),
             cancellationToken: cancellationToken);
-        OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName,
-            MongoPersistence.DefaultCollectionNamingConvention);
+        OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
     }
 
     public async Task Cleanup(CancellationToken cancellationToken = default) =>

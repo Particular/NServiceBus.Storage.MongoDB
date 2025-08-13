@@ -78,7 +78,7 @@ public class SagaTestsConfiguration
         };
 
         SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection);
-        await SagaSchemaInstaller.CreateIndexesForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
+        await SagaSchemaInstaller.CreateInfrastructureForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
     }
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);

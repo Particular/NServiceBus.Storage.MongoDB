@@ -34,7 +34,7 @@ public class OutboxInitializationTests
     [Theory]
     public async Task Should_create_index_when_it_doesnt_exist(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        await OutboxSchemaInstaller.CreateIndexesForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
@@ -43,10 +43,10 @@ public class OutboxInitializationTests
     [Theory]
     public async Task Should_recreate_when_expiry_drifts(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        await OutboxSchemaInstaller.CreateIndexesForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData.Add(TimeSpan.FromSeconds(30)));
 
-        await OutboxSchemaInstaller.CreateIndexesForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
@@ -60,7 +60,7 @@ public class OutboxInitializationTests
             new CreateIndexOptions { Name = OutboxSchemaInstaller.OutboxCleanupIndexName, Background = true });
         await outboxCollection.Indexes.CreateOneAsync(indexModel);
 
-        await OutboxSchemaInstaller.CreateIndexesForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+        await OutboxSchemaInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);

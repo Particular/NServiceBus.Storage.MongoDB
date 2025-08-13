@@ -25,11 +25,11 @@ sealed class SagaSchemaInstaller(IReadOnlySettings settings, InstallerSettings i
         var collectionSettings = settings.Get<MongoCollectionSettings>();
 
         var memberMapCache = new MemberMapCache();
-        await CreateIndexesForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
+        await CreateInfrastructureForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
             .ConfigureAwait(false);
     }
 
-    internal static async Task CreateIndexesForSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings,
+    internal static async Task CreateInfrastructureForSagaDataTypes(IMongoClient client, MongoDatabaseSettings databaseSettings,
         MemberMapCache memberMapCache,
         string databaseName, Func<Type, string> collectionNamingConvention,
         MongoCollectionSettings collectionSettings,

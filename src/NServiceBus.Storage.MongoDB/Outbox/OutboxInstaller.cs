@@ -11,8 +11,6 @@ using Settings;
 
 sealed class OutboxInstaller(IReadOnlySettings settings) : INeedToInstallSomething
 {
-    internal const string OutboxCleanupIndexName = "OutboxCleanup";
-
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         var installerSettings = settings.Get<InstallerSettings>();
@@ -28,7 +26,7 @@ sealed class OutboxInstaller(IReadOnlySettings settings) : INeedToInstallSomethi
 
         if (!settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData, out TimeSpan timeToKeepOutboxDeduplicationData))
         {
-            timeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
+            timeToKeepOutboxDeduplicationData = DefaultTimeToKeepOutboxDeduplicationData;
         }
 
         await CreateInfrastructureForOutboxTypes(client(), databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
@@ -80,4 +78,8 @@ sealed class OutboxInstaller(IReadOnlySettings settings) : INeedToInstallSomethi
         await outboxCollection.Indexes.CreateOneAsync(indexModel, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
+
+    static readonly TimeSpan DefaultTimeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
+
+    internal const string OutboxCleanupIndexName = "OutboxCleanup";
 }

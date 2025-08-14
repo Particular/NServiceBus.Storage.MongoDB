@@ -38,6 +38,11 @@ public class MongoPersistence : PersistenceDefinition
             s.SetDefault(SettingsKeys.CollectionNamingConvention, DefaultCollectionNamingConvention);
 
             s.SetDefault(DefaultDatabaseSettings);
+            s.SetDefault(DefaultCollectionSettings);
+
+            s.SetDefault(new MemberMapCache());
+
+            s.SetDefault(new InstallerSettings());
         });
 
         Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
@@ -76,7 +81,14 @@ public class MongoPersistence : PersistenceDefinition
         }
     }
 
-    internal static MongoDatabaseSettings DefaultDatabaseSettings { get; } = new MongoDatabaseSettings
+    internal static MongoDatabaseSettings DefaultDatabaseSettings { get; } = new()
+    {
+        ReadConcern = ReadConcern.Majority,
+        WriteConcern = WriteConcern.WMajority,
+        ReadPreference = ReadPreference.Primary
+    };
+
+    internal static MongoCollectionSettings DefaultCollectionSettings { get; } = new()
     {
         ReadConcern = ReadConcern.Majority,
         WriteConcern = WriteConcern.WMajority,

@@ -57,15 +57,7 @@ sealed class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
             }
             else
             {
-                try
-                {
-                    await database.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
-                }
-                catch (MongoCommandException ex) when (ex is { Code: 48, CodeName: "NamespaceExists" })
-                {
-                    //Collection already exists, so swallow the exception
-                }
+                await database.SafeCreateCollection(collectionName, cancellationToken).ConfigureAwait(false);
             }
         }
     }

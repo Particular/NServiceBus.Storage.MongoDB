@@ -32,15 +32,7 @@ sealed class SubscriptionInstaller(IReadOnlySettings settings) : INeedToInstallS
         var collectionName = collectionNamingConvention(typeof(EventSubscription));
         var database = client.GetDatabase(databaseName, databaseSettings);
 
-        try
-        {
-            await database.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (MongoCommandException ex) when (ex is { Code: 48, CodeName: "NamespaceExists" })
-        {
-            //Collection already exists, so swallow the exception
-        }
+        await database.SafeCreateCollection(collectionName, cancellationToken).ConfigureAwait(false);
 
         var collection = database.GetCollection<EventSubscription>(collectionName, collectionSettings);
         var uniqueIndex = new CreateIndexModel<EventSubscription>(Builders<EventSubscription>.IndexKeys

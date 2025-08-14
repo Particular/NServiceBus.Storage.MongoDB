@@ -40,15 +40,7 @@ sealed class OutboxInstaller(IReadOnlySettings settings) : INeedToInstallSomethi
         var database = client.GetDatabase(databaseName, databaseSettings);
         var collectionName = collectionNamingConvention(typeof(OutboxRecord));
 
-        try
-        {
-            await database.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (MongoCommandException ex) when (ex is { Code: 48, CodeName: "NamespaceExists" })
-        {
-            //Collection already exists, so swallow the exception
-        }
+        await database.SafeCreateCollection(collectionName, cancellationToken).ConfigureAwait(false);
 
         var outboxCollection = database.GetCollection<OutboxRecord>(collectionName, collectionSettings);
 

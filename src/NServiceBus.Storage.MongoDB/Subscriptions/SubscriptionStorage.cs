@@ -18,12 +18,8 @@ class SubscriptionStorage : Feature
         var collectionNamingConvention =
             context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var subscriptionCollectionName = collectionNamingConvention(typeof(EventSubscription));
-        var collection = client.GetDatabase(databaseName, databaseSettings)
-            .GetCollection<EventSubscription>(subscriptionCollectionName);
+        var collection = client.GetDatabase(databaseName, databaseSettings).GetCollection<EventSubscription>(subscriptionCollectionName);
 
-        var subscriptionPersister = new SubscriptionPersister(collection);
-        subscriptionPersister.CreateIndexes();
-
-        context.Services.AddSingleton<ISubscriptionStorage>(subscriptionPersister);
+        context.Services.AddSingleton<ISubscriptionStorage>(new SubscriptionPersister(collection));
     }
 }

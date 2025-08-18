@@ -9,6 +9,7 @@ using Extensibility;
 using global::MongoDB.Driver;
 using MongoDB;
 using Sagas;
+using SagaStorageFeature = SagaStorage;
 using SynchronizedStorageSession = SynchronizedStorageSession;
 
 public class SagaTestsConfiguration
@@ -76,12 +77,8 @@ public class SagaTestsConfiguration
             WriteConcern = WriteConcern.WMajority
         };
 
-        var database = ClientProvider.Client.GetDatabase(DatabaseName, databaseSettings);
-
-        await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));
-
-        MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, DatabaseName,
-            CollectionNamingConvention, SagaMetadataCollection);
+        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection, memberMapCache);
+        await SagaInstaller.CreateInfrastructureForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, DatabaseName, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection);
     }
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);

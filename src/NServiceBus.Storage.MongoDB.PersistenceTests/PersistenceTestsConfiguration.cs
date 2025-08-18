@@ -13,6 +13,8 @@ using NServiceBus.Sagas;
 using Persistence;
 using Storage.MongoDB;
 using Storage.MongoDB.Tests;
+using OutboxStorageFeature = Storage.MongoDB.OutboxStorage;
+using SagaStorageFeature = Storage.MongoDB.SagaStorage;
 using SynchronizedStorageSession = Storage.MongoDB.SynchronizedStorageSession;
 
 public partial class PersistenceTestsConfiguration
@@ -38,25 +40,27 @@ public partial class PersistenceTestsConfiguration
         BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
         var memberMapCache = new MemberMapCache();
-        Storage.MongoDB.SagaStorage.InitializeSagaDataTypes(ClientProvider.Client, memberMapCache, databaseName,
-            MongoPersistence.DefaultCollectionNamingConvention, SagaMetadataCollection);
-        SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
-        var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,
-            MongoPersistence.DefaultCollectionNamingConvention,
-            SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
-        CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);
-
         var databaseSettings = new MongoDatabaseSettings
         {
             ReadConcern = ReadConcern.Majority,
             ReadPreference = ReadPreference.Primary,
             WriteConcern = WriteConcern.WMajority
         };
-        var database = ClientProvider.Client.GetDatabase(databaseName, databaseSettings);
-        await database.CreateCollectionAsync(MongoPersistence.DefaultCollectionNamingConvention(typeof(OutboxRecord)),
-            cancellationToken: cancellationToken);
-        OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName,
-            MongoPersistence.DefaultCollectionNamingConvention);
+
+        SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection, memberMapCache);
+        await SagaInstaller.CreateInfrastructureForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
+            MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection, cancellationToken);
+
+        SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
+        var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,
+            MongoPersistence.DefaultCollectionNamingConvention,
+            SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
+        CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);
+
+        OutboxStorageFeature.RegisterOutboxClassMappings();
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, TimeSpan.FromDays(7), cancellationToken);
+
+        OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
     }
 
     public async Task Cleanup(CancellationToken cancellationToken = default) =>

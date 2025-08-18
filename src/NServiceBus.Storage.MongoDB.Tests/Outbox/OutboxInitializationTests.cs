@@ -12,23 +12,14 @@ using NUnit.Framework;
 public class OutboxInitializationTests
 {
     [OneTimeSetUp]
-    public async Task OneTimeSetUp()
+    public Task OneTimeSetUp()
     {
         databaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
-        var databaseSettings = new MongoDatabaseSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
+        database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
+        outboxCollection = database.GetCollection<OutboxRecord>(CollectionNamingConvention<OutboxRecord>(), MongoPersistence.DefaultCollectionSettings);
 
-        var database = ClientProvider.Client.GetDatabase(databaseName, databaseSettings);
-
-        await database.CreateCollectionAsync(CollectionNamingConvention<OutboxRecord>());
-
-        outboxCollection = ClientProvider.Client.GetDatabase(databaseName)
-            .GetCollection<OutboxRecord>(CollectionNamingConvention<OutboxRecord>());
+        return Task.CompletedTask;
     }
 
     static string CollectionNamingConvention<T>() => CollectionNamingConvention(typeof(T));
@@ -36,13 +27,27 @@ public class OutboxInitializationTests
     static string CollectionNamingConvention(Type type) => type.Name.ToLower();
 
     [SetUp]
-    public async Task Setup() => await outboxCollection.Indexes.DropAllAsync();
+    public async Task Setup() => await database.DropCollectionAsync(CollectionNamingConvention<OutboxRecord>());
+
+    [Theory]
+    public async Task Should_create_collection_when_it_doesnt_exist(TimeSpan timeToKeepOutboxDeduplicationData)
+    {
+        await database.DropCollectionAsync(CollectionNamingConvention<OutboxRecord>());
+
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
+
+        var collections = await (await database
+            .ListCollectionsAsync()).ToListAsync();
+
+        Assert.That(collections, Has.One.Matches<BsonDocument>(b => b.GetElement("name").Value == CollectionNamingConvention<OutboxRecord>()));
+    }
 
     [Theory]
     public async Task Should_create_index_when_it_doesnt_exist(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        OutboxStorage.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData);
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
     }
@@ -50,11 +55,11 @@ public class OutboxInitializationTests
     [Theory]
     public async Task Should_recreate_when_expiry_drifts(TimeSpan timeToKeepOutboxDeduplicationData)
     {
-        OutboxStorage.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData.Add(TimeSpan.FromSeconds(30)));
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData.Add(TimeSpan.FromSeconds(30)));
 
-        OutboxStorage.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData);
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
     }
@@ -64,22 +69,22 @@ public class OutboxInitializationTests
     {
         var indexModel = new CreateIndexModel<OutboxRecord>(
             Builders<OutboxRecord>.IndexKeys.Ascending(record => record.Dispatched),
-            new CreateIndexOptions { Name = OutboxStorage.OutboxCleanupIndexName, Background = true });
+            new CreateIndexOptions { Name = OutboxInstaller.OutboxCleanupIndexName, Background = true });
         await outboxCollection.Indexes.CreateOneAsync(indexModel);
 
-        OutboxStorage.InitializeOutboxTypes(ClientProvider.Client, databaseName, CollectionNamingConvention,
-            timeToKeepOutboxDeduplicationData);
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, timeToKeepOutboxDeduplicationData);
 
         await AssertIndexCorrect(outboxCollection, timeToKeepOutboxDeduplicationData);
     }
 
     [DatapointSource]
-    public TimeSpan[] Expiry = new TimeSpan[] { TimeSpan.FromHours(1), TimeSpan.FromHours(3), TimeSpan.FromDays(1) };
+    public TimeSpan[] Expiry = [TimeSpan.FromHours(1), TimeSpan.FromHours(3), TimeSpan.FromDays(1)];
 
     static async Task AssertIndexCorrect(IMongoCollection<OutboxRecord> outboxCollection, TimeSpan expiry)
     {
         var outboxCleanupIndex = (await outboxCollection.Indexes.ListAsync()).ToList().SingleOrDefault(indexDocument =>
-            indexDocument.GetElement("name").Value == OutboxStorage.OutboxCleanupIndexName);
+            indexDocument.GetElement("name").Value == OutboxInstaller.OutboxCleanupIndexName);
 
         Assert.That(outboxCleanupIndex, Is.Not.Null);
 
@@ -92,4 +97,5 @@ public class OutboxInitializationTests
 
     IMongoCollection<OutboxRecord> outboxCollection;
     string databaseName;
+    IMongoDatabase database;
 }

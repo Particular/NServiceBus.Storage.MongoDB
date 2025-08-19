@@ -35,14 +35,20 @@ class OutboxStorage : Feature
 
         context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
 
-        RegisterOutboxClassMappings();
+        var usesDefaultClassMap = RegisterOutboxClassMappings();
+
+        context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Outbox", new
+        {
+            UsesDefaultClassMap = usesDefaultClassMap,
+            TimeToKeepDeduplicationData = context.Settings.GetTimeToKeepOutboxDeduplicationData(),
+        });
     }
 
-    internal static void RegisterOutboxClassMappings()
+    internal static bool RegisterOutboxClassMappings()
     {
         if (BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
         {
-            return;
+            return false;
         }
 
         BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
@@ -57,5 +63,7 @@ class OutboxStorage : Feature
                     new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
                         DictionaryRepresentation.ArrayOfDocuments));
         });
+
+        return true;
     }
 }

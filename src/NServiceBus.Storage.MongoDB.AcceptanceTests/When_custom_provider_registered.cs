@@ -1,6 +1,9 @@
-﻿namespace NServiceBus.AcceptanceTests;
+﻿#nullable enable
+
+namespace NServiceBus.AcceptanceTests;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using AcceptanceTesting;
 using EndpointTemplates;
@@ -34,7 +37,7 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
             EndpointSetup<DefaultServer>(config =>
             {
                 config.RegisterComponents(c =>
-                    c.AddSingleton<IMongoClientProvider>(b => new CustomProvider(b.GetService<Context>())));
+                    c.AddSingleton<IMongoClientProvider>(b => new CustomProvider(b.GetRequiredService<Context>())));
             });
 
         public class JustASaga(Context testContext) : Saga<JustASagaData>, IAmStartedByMessages<StartSaga1>
@@ -52,6 +55,7 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
 
         public class CustomProvider(Context testContext) : IMongoClientProvider
         {
+            [field: AllowNull, MaybeNull]
             public IMongoClient Client
             {
                 get

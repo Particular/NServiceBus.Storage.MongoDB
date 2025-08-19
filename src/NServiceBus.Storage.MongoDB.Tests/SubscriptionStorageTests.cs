@@ -18,12 +18,10 @@ class SubscriptionStorageTests
     {
         DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
-        var subscriptionCollection = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings)
-            .GetCollection<EventSubscription>("eventsubscriptions", MongoPersistence.DefaultCollectionSettings);
-
         await SubscriptionInstaller.CreateInfrastructureForSubscriptionTypes(ClientProvider.Client, MongoPersistence.DefaultDatabaseSettings, DatabaseName, MongoPersistence.DefaultCollectionSettings, _ => "eventsubscriptions");
 
-        var subscriptionPersister = new SubscriptionPersister(subscriptionCollection);
+        var subscriptionPersister = new SubscriptionPersister(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings,
+            _ => "eventsubscriptions", MongoPersistence.DefaultCollectionSettings);
         storage = subscriptionPersister;
     }
 

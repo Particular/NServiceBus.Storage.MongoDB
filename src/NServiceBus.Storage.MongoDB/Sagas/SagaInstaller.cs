@@ -3,18 +3,20 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Features;
 using global::MongoDB.Bson;
 using global::MongoDB.Driver;
 using Installation;
+using Microsoft.Extensions.DependencyInjection;
 using Sagas;
 using Settings;
 
-sealed class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+sealed class SagaInstaller(IReadOnlySettings settings, IServiceProvider serviceProvider) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
+        if (installerSettings.Disabled || !settings.IsFeatureActive(typeof(SagaStorage)))
         {
             return;
         }
@@ -26,7 +28,10 @@ sealed class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var memberMapCache = settings.Get<MemberMapCache>();
 
-        await CreateInfrastructureForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
+        // We have to resolve the client provider here because at the time of the creation of the installer the provider might not be registered yet.
+        var clientProvider = serviceProvider.GetRequiredService<IMongoClientProvider>();
+
+        await CreateInfrastructureForSagaDataTypes(clientProvider.Client, databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
             .ConfigureAwait(false);
     }
 

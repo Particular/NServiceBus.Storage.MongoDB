@@ -19,7 +19,7 @@ public static class MongoSettingsExtensions
         ArgumentNullException.ThrowIfNull(persistenceExtensions);
         ArgumentNullException.ThrowIfNull(mongoClient);
 
-        persistenceExtensions.GetSettings().Set(SettingsKeys.MongoClient, () => mongoClient);
+        persistenceExtensions.GetSettings().Set<IMongoClientProvider>(new MongoClientProvidedByConfiguration(mongoClient));
         return persistenceExtensions;
     }
 

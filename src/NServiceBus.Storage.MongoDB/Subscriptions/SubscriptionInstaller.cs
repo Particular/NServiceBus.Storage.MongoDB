@@ -3,16 +3,18 @@ namespace NServiceBus.Storage.MongoDB;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Features;
 using global::MongoDB.Driver;
 using Installation;
+using Microsoft.Extensions.DependencyInjection;
 using Settings;
 
-sealed class SubscriptionInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+sealed class SubscriptionInstaller(IReadOnlySettings settings, IServiceProvider serviceProvider) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
+        if (installerSettings.Disabled || !settings.IsFeatureActive(typeof(SubscriptionStorage)))
         {
             return;
         }
@@ -22,7 +24,10 @@ sealed class SubscriptionInstaller(IReadOnlySettings settings) : INeedToInstallS
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
 
-        await CreateInfrastructureForSubscriptionTypes(client(), databaseSettings, databaseName, collectionSettings, collectionNamingConvention, cancellationToken)
+        // We have to resolve the client provider here because at the time of the creation of the installer the provider might not be registered yet.
+        var clientProvider = serviceProvider.GetRequiredService<IMongoClientProvider>();
+
+        await CreateInfrastructureForSubscriptionTypes(clientProvider.Client, databaseSettings, databaseName, collectionSettings, collectionNamingConvention, cancellationToken)
             .ConfigureAwait(false);
     }
 

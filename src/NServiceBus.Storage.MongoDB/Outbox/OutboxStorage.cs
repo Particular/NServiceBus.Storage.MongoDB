@@ -28,15 +28,12 @@ class OutboxStorage : Feature
                 $"Transactions are required when the Outbox is enabled, but they have been disabled by calling 'EndpointConfiguration.UsePersistence<{nameof(MongoPersistence)}>().UseTransactions(false)'.");
         }
 
-        if (!context.Settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
-        {
-            return;
-        }
-
         var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+        var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
+        var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
 
-        context.Services.AddSingleton<IOutboxStorage>(new OutboxPersister(client(), databaseName, collectionNamingConvention));
+        context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
 
         RegisterOutboxClassMappings();
     }

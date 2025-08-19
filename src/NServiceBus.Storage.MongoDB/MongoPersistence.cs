@@ -26,12 +26,7 @@ public class MongoPersistence : PersistenceDefinition
             // Can't do much earlier due to static nature of class mappings and serialization extensions.
             SafeRegisterDefaultGuidSerializer();
 
-            s.SetDefault(SettingsKeys.MongoClient, static () =>
-            {
-                defaultClient ??= new MongoClient();
-
-                return defaultClient;
-            });
+            s.SetDefault<IMongoClientProvider>(new DefaultMongoClientProvider());
 
             s.SetDefault(SettingsKeys.DatabaseName, s.EndpointName());
 
@@ -97,6 +92,4 @@ public class MongoPersistence : PersistenceDefinition
 
     internal static readonly TimeSpan DefaultTransactionTimeout = TimeSpan.FromSeconds(60);
     internal static readonly Func<Type, string> DefaultCollectionNamingConvention = type => type.Name.ToLower();
-
-    static IMongoClient? defaultClient;
 }

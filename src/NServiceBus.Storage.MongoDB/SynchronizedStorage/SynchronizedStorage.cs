@@ -17,8 +17,8 @@ class SynchronizedStorage : Feature
 
     protected override void Setup(FeatureConfigurationContext context)
     {
-        var mongoClientProvider = context.Settings.Get<IMongoClientProvider>();
-        context.Services.TryAddSingleton(mongoClientProvider);
+        // In case the persistence is used without the SynchronizedStorage feature, we still need to try to register the IMongoClientProvider
+        context.Services.TryAddSingleton(context.Settings.Get<IMongoClientProvider>());
 
         var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);

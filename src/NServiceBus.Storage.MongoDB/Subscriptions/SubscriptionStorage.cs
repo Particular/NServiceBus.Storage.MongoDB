@@ -4,6 +4,7 @@ using System;
 using Features;
 using global::MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 class SubscriptionStorage : Feature
@@ -12,6 +13,8 @@ class SubscriptionStorage : Feature
 
     protected override void Setup(FeatureConfigurationContext context)
     {
+        context.Services.TryAddSingleton(context.Settings.Get<IMongoClientProvider>());
+
         var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();

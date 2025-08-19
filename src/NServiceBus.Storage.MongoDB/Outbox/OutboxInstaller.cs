@@ -9,12 +9,12 @@ using global::MongoDB.Driver;
 using Installation;
 using Settings;
 
-sealed class OutboxInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+sealed class OutboxInstaller(IReadOnlySettings settings, IMongoClientProvider clientProvider) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
+        if (installerSettings.Disabled)
         {
             return;
         }
@@ -29,7 +29,7 @@ sealed class OutboxInstaller(IReadOnlySettings settings) : INeedToInstallSomethi
             timeToKeepOutboxDeduplicationData = DefaultTimeToKeepOutboxDeduplicationData;
         }
 
-        await CreateInfrastructureForOutboxTypes(client(), databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
+        await CreateInfrastructureForOutboxTypes(clientProvider.Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
             .ConfigureAwait(false);
     }
 

@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB;
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,8 +10,14 @@ using Logging;
 using Unicast.Subscriptions;
 using Unicast.Subscriptions.MessageDrivenSubscriptions;
 
-class SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCollection) : ISubscriptionStorage
+class SubscriptionPersister : ISubscriptionStorage
 {
+    public SubscriptionPersister(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
+    {
+        var subscriptionCollectionName = collectionNamingConvention(typeof(EventSubscription));
+        subscriptionsCollection = client.GetDatabase(databaseName, databaseSettings).GetCollection<EventSubscription>(subscriptionCollectionName, collectionSettings);
+    }
+
     public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context,
         CancellationToken cancellationToken = default)
     {
@@ -139,6 +146,8 @@ class SubscriptionPersister(IMongoCollection<EventSubscription> subscriptionsCol
             // and duplicate documents will only be prevented by the unique key constraint.
         }
     }
+
+    readonly IMongoCollection<EventSubscription> subscriptionsCollection;
 
     const int DuplicateKeyErrorCode = 11000;
     static readonly ILog Log = LogManager.GetLogger<SubscriptionPersister>();

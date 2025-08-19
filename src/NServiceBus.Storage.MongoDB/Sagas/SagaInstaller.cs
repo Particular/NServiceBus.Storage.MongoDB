@@ -9,12 +9,12 @@ using Installation;
 using Sagas;
 using Settings;
 
-sealed class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
+sealed class SagaInstaller(IReadOnlySettings settings, IMongoClientProvider clientProvider) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.TryGet<Func<IMongoClient>>(SettingsKeys.MongoClient, out Func<IMongoClient>? client))
+        if (installerSettings.Disabled)
         {
             return;
         }
@@ -26,7 +26,7 @@ sealed class SagaInstaller(IReadOnlySettings settings) : INeedToInstallSomething
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var memberMapCache = settings.Get<MemberMapCache>();
 
-        await CreateInfrastructureForSagaDataTypes(client(), databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
+        await CreateInfrastructureForSagaDataTypes(clientProvider.Client, databaseSettings, memberMapCache, databaseName, collectionNamingConvention, collectionSettings, sagaMetadataCollection, cancellationToken)
             .ConfigureAwait(false);
     }
 

@@ -10,19 +10,11 @@ using Outbox;
 
 class OutboxPersister : IOutboxStorage
 {
-    public OutboxPersister(IMongoClient client, string databaseName, Func<Type, string> collectionNamingConvention)
+    public OutboxPersister(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
     {
-        outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, collectionNamingConvention,
-            MongoPersistence.DefaultTransactionTimeout);
+        outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
 
-        var collectionSettings = new MongoCollectionSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
-
-        outboxRecordCollection = client.GetDatabase(databaseName)
+        outboxRecordCollection = client.GetDatabase(databaseName, databaseSettings)
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
     }
 

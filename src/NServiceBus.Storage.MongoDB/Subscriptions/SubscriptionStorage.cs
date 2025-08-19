@@ -12,14 +12,11 @@ class SubscriptionStorage : Feature
 
     protected override void Setup(FeatureConfigurationContext context)
     {
-        var client = context.Settings.Get<Func<IMongoClient>>(SettingsKeys.MongoClient)();
         var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
+        var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
-        var collectionNamingConvention =
-            context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
-        var subscriptionCollectionName = collectionNamingConvention(typeof(EventSubscription));
-        var collection = client.GetDatabase(databaseName, databaseSettings).GetCollection<EventSubscription>(subscriptionCollectionName);
+        var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
 
-        context.Services.AddSingleton<ISubscriptionStorage>(new SubscriptionPersister(collection));
+        context.Services.AddSingleton<ISubscriptionStorage>(sp => new SubscriptionPersister(sp.GetRequiredService<IMongoClientProvider>().Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
     }
 }

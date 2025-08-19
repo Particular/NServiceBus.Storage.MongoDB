@@ -28,6 +28,10 @@ namespace NServiceBus
 }
 namespace NServiceBus.Storage.MongoDB
 {
+    public interface IMongoClientProvider
+    {
+        MongoDB.Driver.IMongoClient Client { get; }
+    }
     public interface IMongoSynchronizedStorageSession
     {
         MongoDB.Driver.IClientSessionHandle? MongoSession { get; }

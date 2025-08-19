@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 using NServiceBus.Outbox;
 using NServiceBus.Sagas;
 using Persistence;
@@ -40,15 +39,9 @@ public partial class PersistenceTestsConfiguration
         BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
         var memberMapCache = new MemberMapCache();
-        var databaseSettings = new MongoDatabaseSettings
-        {
-            ReadConcern = ReadConcern.Majority,
-            ReadPreference = ReadPreference.Primary,
-            WriteConcern = WriteConcern.WMajority
-        };
 
         SagaStorageFeature.RegisterSagaEntityClassMappings(SagaMetadataCollection, memberMapCache);
-        await SagaInstaller.CreateInfrastructureForSagaDataTypes(ClientProvider.Client, databaseSettings, memberMapCache, databaseName,
+        await SagaInstaller.CreateInfrastructureForSagaDataTypes(ClientProvider.Client, MongoPersistence.DefaultDatabaseSettings, memberMapCache, databaseName,
             MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection, cancellationToken);
 
         SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
@@ -60,7 +53,7 @@ public partial class PersistenceTestsConfiguration
         OutboxStorageFeature.RegisterOutboxClassMappings();
         await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, TimeSpan.FromDays(7), cancellationToken);
 
-        OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultCollectionNamingConvention);
+        OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
     }
 
     public async Task Cleanup(CancellationToken cancellationToken = default) =>

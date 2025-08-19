@@ -9,10 +9,10 @@ using Outbox;
 
 class MongoOutboxTransaction : IOutboxTransaction
 {
-    public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, ContextBag context,
+    public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, MongoDatabaseSettings databaseSettings, ContextBag context,
         Func<Type, string> collectionNamingConvention, TimeSpan transactionTimeout)
     {
-        StorageSession = new StorageSession(mongoSession, databaseName, context, collectionNamingConvention, true,
+        StorageSession = new StorageSession(mongoSession, databaseName, databaseSettings, context, collectionNamingConvention, true,
             transactionTimeout);
         StorageSession.StartTransaction();
     }

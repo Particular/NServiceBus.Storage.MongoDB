@@ -10,6 +10,7 @@ using Outbox;
 sealed class MongoOutboxTransactionFactory(
     IMongoClient client,
     string databaseName,
+    MongoDatabaseSettings databaseSettings,
     Func<Type, string> collectionNamingConvention,
     TimeSpan transactionTimeout)
 {
@@ -18,7 +19,7 @@ sealed class MongoOutboxTransactionFactory(
     {
         var mongoSession = await client.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        return new MongoOutboxTransaction(mongoSession, databaseName, context, collectionNamingConvention,
+        return new MongoOutboxTransaction(mongoSession, databaseName, databaseSettings, context, collectionNamingConvention,
             transactionTimeout);
     }
 }

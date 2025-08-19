@@ -15,7 +15,7 @@ public class OutboxTestsConfiguration
         DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
         CollectionNamingConvention = collectionNamingConvention;
 
-        transactionFactory = new MongoOutboxTransactionFactory(ClientProvider.Client, DatabaseName,
+        transactionFactory = new MongoOutboxTransactionFactory(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings,
             CollectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
     }
 

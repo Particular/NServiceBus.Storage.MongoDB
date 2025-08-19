@@ -8,28 +8,16 @@ using global::MongoDB.Bson;
 using global::MongoDB.Driver;
 using Logging;
 
-class StorageSession
+class StorageSession(
+    IClientSessionHandle mongoSession,
+    string databaseName,
+    MongoDatabaseSettings databaseSettings,
+    ContextBag contextBag,
+    Func<Type, string> collectionNamingConvention,
+    bool useTransaction,
+    TimeSpan transactionTimeout)
 {
-    public StorageSession(IClientSessionHandle mongoSession, string databaseName, ContextBag contextBag,
-        Func<Type, string> collectionNamingConvention, bool useTransaction, TimeSpan transactionTimeout)
-    {
-        MongoSession = mongoSession;
-
-        database = mongoSession.Client.GetDatabase(databaseName,
-            new MongoDatabaseSettings
-            {
-                ReadConcern = ReadConcern.Majority,
-                ReadPreference = ReadPreference.Primary,
-                WriteConcern = WriteConcern.WMajority
-            });
-
-        this.contextBag = contextBag;
-        this.collectionNamingConvention = collectionNamingConvention;
-        this.useTransaction = useTransaction;
-        this.transactionTimeout = transactionTimeout;
-    }
-
-    public IClientSessionHandle MongoSession { get; }
+    public IClientSessionHandle MongoSession { get; } = mongoSession;
 
     public Task InsertOneAsync<T>(T document, CancellationToken cancellationToken = default) => database
         .GetCollection<T>(collectionNamingConvention(typeof(T)))
@@ -91,10 +79,7 @@ class StorageSession
             $"Unable to acquire exclusive write lock for saga on collection '{collectionName}'.");
     }
 
-    bool WriteConflictUnderTransaction(MongoCommandException e)
-    {
-        return useTransaction && e.HasErrorLabel("TransientTransactionError") && e.CodeName == "WriteConflict";
-    }
+    bool WriteConflictUnderTransaction(MongoCommandException e) => useTransaction && e.HasErrorLabel("TransientTransactionError") && e.CodeName == "WriteConflict";
 
     public void StartTransaction()
     {
@@ -104,7 +89,7 @@ class StorageSession
         }
     }
 
-    public async Task AbortTransaction(CancellationToken cancellationToken = default)
+    async Task AbortTransaction(CancellationToken cancellationToken)
     {
         if (useTransaction)
         {
@@ -155,18 +140,11 @@ class StorageSession
 
     bool disposed;
 
-    readonly IMongoDatabase database;
-    readonly ContextBag contextBag;
-    readonly Func<Type, string> collectionNamingConvention;
-    readonly bool useTransaction;
+    readonly IMongoDatabase database = mongoSession.Client.GetDatabase(databaseName, databaseSettings);
 
-    readonly TimeSpan transactionTimeout;
-
-    static readonly TransactionOptions transactionOptions =
-        new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
+    static readonly TransactionOptions transactionOptions = new(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
 
     static readonly ILog Log = LogManager.GetLogger<StorageSession>();
 
-    static readonly FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions =
-        new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After };
+    static readonly FindOneAndUpdateOptions<BsonDocument> FindOneAndUpdateOptions = new() { ReturnDocument = ReturnDocument.After };
 }

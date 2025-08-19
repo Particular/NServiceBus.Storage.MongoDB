@@ -10,6 +10,7 @@ sealed class StorageSessionFactory(
     IMongoClient client,
     bool useTransactions,
     string databaseName,
+    MongoDatabaseSettings databaseSettings,
     Func<Type, string> collectionNamingConvention,
     TimeSpan transactionTimeout)
 {
@@ -17,7 +18,7 @@ sealed class StorageSessionFactory(
     {
         var mongoSession = await client.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        var session = new StorageSession(mongoSession, databaseName, contextBag, collectionNamingConvention,
+        var session = new StorageSession(mongoSession, databaseName, databaseSettings, contextBag, collectionNamingConvention,
             useTransactions, transactionTimeout);
         session.StartTransaction();
         return session;

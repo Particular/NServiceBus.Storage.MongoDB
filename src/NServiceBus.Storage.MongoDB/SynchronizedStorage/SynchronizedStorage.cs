@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Features;
+using global::MongoDB.Driver;
 using global::MongoDB.Driver.Core.Clusters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -22,6 +23,7 @@ class SynchronizedStorage : Feature
 
         var databaseName = context.Settings.Get<string>(SettingsKeys.DatabaseName);
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
+        var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
 
         if (!context.Settings.TryGet(SettingsKeys.UseTransactions, out bool useTransactions))
         {
@@ -32,7 +34,7 @@ class SynchronizedStorage : Feature
 
         context.Services.AddScoped<ICompletableSynchronizedStorageSession, SynchronizedStorageSession>();
         context.Services.AddScoped(sp => (sp.GetService<ICompletableSynchronizedStorageSession>() as IMongoSynchronizedStorageSession)!);
-        context.Services.AddSingleton(sp => new StorageSessionFactory(sp.GetRequiredService<IMongoClientProvider>().Client, useTransactions, databaseName, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout));
+        context.Services.AddSingleton(sp => new StorageSessionFactory(sp.GetRequiredService<IMongoClientProvider>().Client, useTransactions, databaseName, databaseSettings, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout));
     }
 
     class VerifyClusterDetails(IMongoClientProvider clientProvider, string databaseName, bool useTransactions) : FeatureStartupTask

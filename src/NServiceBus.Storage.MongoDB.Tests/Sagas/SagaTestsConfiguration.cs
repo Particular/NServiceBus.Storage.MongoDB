@@ -44,7 +44,7 @@ public class SagaTestsConfiguration
         DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
         CollectionNamingConvention = collectionNamingConvention;
 
-        var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName,
+        var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, DatabaseName, MongoPersistence.DefaultDatabaseSettings,
             collectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
         SessionFactory = () => new SynchronizedStorageSession(synchronizedStorage);
         memberMapCache = new MemberMapCache();

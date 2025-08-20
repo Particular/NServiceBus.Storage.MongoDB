@@ -30,6 +30,11 @@ class SynchronizedStorage : Feature
             useTransactions = true;
         }
 
+        context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.StorageSession", new
+        {
+            UseTransaction = useTransactions
+        });
+
         context.RegisterStartupTask(sp => new VerifyClusterDetails(sp.GetRequiredService<IMongoClientProvider>(), databaseName, useTransactions));
 
         context.Services.AddScoped<ICompletableSynchronizedStorageSession, SynchronizedStorageSession>();

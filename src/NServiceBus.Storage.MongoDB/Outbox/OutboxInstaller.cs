@@ -25,11 +25,7 @@ sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider servic
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
-
-        if (!settings.TryGet(SettingsKeys.TimeToKeepOutboxDeduplicationData, out TimeSpan timeToKeepOutboxDeduplicationData))
-        {
-            timeToKeepOutboxDeduplicationData = DefaultTimeToKeepOutboxDeduplicationData;
-        }
+        var timeToKeepOutboxDeduplicationData = settings.GetTimeToKeepOutboxDeduplicationData();
 
         // We have to resolve the client provider here because at the time of the creation of the installer the provider might not be registered yet.
         var clientProvider = serviceProvider.GetRequiredService<IMongoClientProvider>();
@@ -83,8 +79,6 @@ sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider servic
         await outboxCollection.Indexes.CreateOneAsync(indexModel, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
-
-    static readonly TimeSpan DefaultTimeToKeepOutboxDeduplicationData = TimeSpan.FromDays(7);
 
     internal const string OutboxCleanupIndexName = "OutboxCleanup";
 }

@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Storage.MongoDB;
 
+using System.Collections.Generic;
 using Features;
 using global::MongoDB.Bson.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,13 +27,27 @@ class SagaStorage : Feature
         context.Services.AddSingleton<ISagaPersister>(new SagaPersister(versionElementName, memberMapCache));
 
         var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
-        RegisterSagaEntityClassMappings(sagaMetadataCollection, memberMapCache);
+        var classMappings = RegisterSagaEntityClassMappings(sagaMetadataCollection, memberMapCache);
+
+        context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Sagas", new
+        {
+            VersionElement = versionElementName,
+            ClassMappings = classMappings
+        });
     }
 
-    internal static void RegisterSagaEntityClassMappings(SagaMetadataCollection sagaMetadataCollection, MemberMapCache memberMapCache)
+    internal readonly struct MappingMetadata(string sagaEntity, bool usesDefaultClassMap)
     {
+        public string SagaEntity { get; } = sagaEntity;
+        public bool UsesDefaultClassMap { get; } = usesDefaultClassMap;
+    }
+
+    internal static IReadOnlyCollection<MappingMetadata> RegisterSagaEntityClassMappings(SagaMetadataCollection sagaMetadataCollection, MemberMapCache memberMapCache)
+    {
+        var sagaEntityToClassMapDiagnostics = new List<MappingMetadata>();
         foreach (var sagaMetadata in sagaMetadataCollection)
         {
+            var usesDefaultClassMap = false;
             if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
             {
                 var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
@@ -40,12 +55,17 @@ class SagaStorage : Feature
                 classMap.SetIgnoreExtraElements(true);
 
                 BsonClassMap.RegisterClassMap(classMap);
+
+                usesDefaultClassMap = true;
             }
+
+            sagaEntityToClassMapDiagnostics.Add(new(sagaMetadata.SagaEntityType.FullName!, usesDefaultClassMap));
 
             if (sagaMetadata.TryGetCorrelationProperty(out var property) && property.Name != "Id")
             {
                 _ = memberMapCache.GetOrAdd(sagaMetadata.SagaEntityType, property);
             }
         }
+        return sagaEntityToClassMapDiagnostics;
     }
 }

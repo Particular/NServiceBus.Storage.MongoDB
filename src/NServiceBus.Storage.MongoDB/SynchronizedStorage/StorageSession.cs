@@ -97,9 +97,9 @@ class StorageSession(
         }
     }
 
-    public void StoreVersion<T>(int version) => contextBag.Set(typeof(T).FullName, version);
+    public void StoreVersion<T>(int version) => contextBag.Set(typeof(T).FullName!, version);
 
-    public int RetrieveVersion(Type type) => contextBag.Get<int>(type.FullName);
+    public int RetrieveVersion(Type type) => contextBag.Get<int>(type.FullName!);
 
     public Task CommitTransaction(CancellationToken cancellationToken = default)
     {

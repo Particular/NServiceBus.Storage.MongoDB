@@ -2,6 +2,7 @@
 
 using System;
 using Extensibility;
+using global::MongoDB.Driver;
 using NUnit.Framework;
 
 [TestFixture]
@@ -11,7 +12,7 @@ public class StorageSessionTests
     public void Should_allow_multiple_calls_to_dispose()
     {
         using var sessionHandle = ClientProvider.Client.StartSession();
-        var session = new StorageSession(sessionHandle, "db-name", new ContextBag(), t => t.FullName, true,
+        var session = new StorageSession(sessionHandle, "db-name", new MongoDatabaseSettings(), new ContextBag(), t => t.FullName, true,
             TimeSpan.Zero);
 
         Assert.DoesNotThrow(() => session.Dispose());

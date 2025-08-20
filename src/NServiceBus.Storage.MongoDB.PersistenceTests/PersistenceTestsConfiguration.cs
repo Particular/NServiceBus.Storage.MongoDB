@@ -45,7 +45,7 @@ public partial class PersistenceTestsConfiguration
             MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, SagaMetadataCollection, cancellationToken);
 
         SagaStorage = new SagaPersister(SagaPersister.DefaultVersionElementName, memberMapCache);
-        var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName,
+        var synchronizedStorage = new StorageSessionFactory(ClientProvider.Client, true, databaseName, MongoPersistence.DefaultDatabaseSettings,
             MongoPersistence.DefaultCollectionNamingConvention,
             SessionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
         CreateStorageSession = () => new SynchronizedStorageSession(synchronizedStorage);

@@ -2,6 +2,7 @@
 
 namespace NServiceBus.Storage.MongoDB;
 
+using System;
 using System.Collections.Generic;
 
 class StorageTransportOperation
@@ -14,13 +15,13 @@ class StorageTransportOperation
     {
         MessageId = source.MessageId;
         Options = source.Options != null ? new Dictionary<string, string>(source.Options) : [];
-        Body = source.Body.ToArray();
+        Body = source.Body;
         Headers = source.Headers;
     }
 
     public string MessageId { get; set; }
     public Dictionary<string, string> Options { get; set; }
-    public byte[] Body { get; set; }
+    public ReadOnlyMemory<byte> Body { get; set; }
     public Dictionary<string, string> Headers { get; set; }
 
 

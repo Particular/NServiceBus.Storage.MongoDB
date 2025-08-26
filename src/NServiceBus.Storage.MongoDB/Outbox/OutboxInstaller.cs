@@ -16,7 +16,7 @@ sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider servic
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.IsFeatureActive(typeof(OutboxStorage)))
+        if (installerSettings.Disabled || installerSettings.OutboxDisabled || !settings.IsFeatureActive(typeof(OutboxStorage)))
         {
             return;
         }

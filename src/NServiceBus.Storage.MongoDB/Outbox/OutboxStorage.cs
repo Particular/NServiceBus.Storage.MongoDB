@@ -48,23 +48,40 @@ class OutboxStorage : Feature
 
     internal static bool RegisterOutboxClassMappings()
     {
-        if (BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
+        if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecordId)))
         {
-            return false;
+            BsonClassMap.RegisterClassMap<OutboxRecordId>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapMember(x => x.PartitionKey).SetElementName("pk");
+                cm.MapMember(x => x.MessageId).SetElementName("mid");
+            });
         }
 
-        BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
+        if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecord)))
         {
-            cm.AutoMap();
-            cm.MapMember(c => c.Headers)
-                .SetSerializer(
-                    new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
-                        DictionaryRepresentation.ArrayOfDocuments));
-            cm.MapMember(c => c.Options)
-                .SetSerializer(
-                    new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
-                        DictionaryRepresentation.ArrayOfDocuments));
-        });
+            BsonClassMap.RegisterClassMap<OutboxRecord>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapIdMember(x => x.Id).SetSerializer(new OutboxRecordIdSerializer());
+            });
+        }
+
+        if (!BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
+        {
+            BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapMember(c => c.Headers)
+                    .SetSerializer(
+                        new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
+                            DictionaryRepresentation.ArrayOfDocuments));
+                cm.MapMember(c => c.Options)
+                    .SetSerializer(
+                        new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
+                            DictionaryRepresentation.ArrayOfDocuments));
+            });
+        }
 
         return true;
     }

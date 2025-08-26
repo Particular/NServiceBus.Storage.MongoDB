@@ -2,10 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NServiceBus.Extensibility;
 using NUnit.Framework;
+using Outbox;
 
 public class OutboxStorageTest : OutboxPersisterTests
 {
@@ -14,18 +15,18 @@ public class OutboxStorageTest : OutboxPersisterTests
     {
         var msgId = RandomString();
 
-        var operations = new Outbox.TransportOperation[]
+        var operations = new TransportOperation[]
         {
-            new Outbox.TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
+            new(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
                 Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
-            new Outbox.TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
+            new(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
                 Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
-            new Outbox.TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
+            new(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
                 Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3)),
         };
-        var testMessage = new Outbox.OutboxMessage(msgId, operations);
+        var testMessage = new OutboxMessage(msgId, operations);
 
-        var context = new ContextBag();
+        var context = configuration.GetContextBagForOutboxStorage();
         var empty = await configuration.OutboxStorage.Get(msgId, context);
         Assert.That(empty, Is.Null);
 
@@ -37,6 +38,39 @@ public class OutboxStorageTest : OutboxPersisterTests
 
         var received = await configuration.OutboxStorage.Get(msgId, context);
 
+        AreSame(received, msgId, operations);
+    }
+
+    [Test]
+    public async Task Should_support_legacy_format_in_get()
+    {
+        var msgId = RandomString();
+
+        var database = ClientProvider.Client.GetDatabase(configuration.DatabaseName, MongoPersistence.DefaultDatabaseSettings);
+        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(configuration.CollectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
+
+        var transportOperation = new TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
+            Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3));
+
+        var transportOperations = new[] { transportOperation };
+
+        var storageOperations = transportOperations.Select(o => new StorageTransportOperation(o)).ToArray();
+
+        await outboxCollection.InsertOneAsync(new DuckTypeOutboxRecord
+        {
+            Id = msgId,
+            TransportOperations = storageOperations,
+        });
+
+        var context = configuration.GetContextBagForOutboxStorage();
+
+        var received = await configuration.OutboxStorage.Get(msgId, context);
+
+        AreSame(received, msgId, transportOperations);
+    }
+
+    static void AreSame(OutboxMessage received, string msgId, TransportOperation[] operations)
+    {
         Assert.Multiple(() =>
         {
             Assert.That(received.MessageId, Is.EqualTo(msgId));
@@ -66,10 +100,45 @@ public class OutboxStorageTest : OutboxPersisterTests
         }
     }
 
-    string RandomString()
+    [Test]
+    public async Task Should_support_legacy_format_in_set_as_dispatched()
     {
-        return Guid.NewGuid().ToString();
+        var msgId = RandomString();
+
+        var database = ClientProvider.Client.GetDatabase(configuration.DatabaseName, MongoPersistence.DefaultDatabaseSettings);
+        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(configuration.CollectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
+
+        var transportOperation = new TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
+            Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3));
+
+        var transportOperations = new[] { transportOperation };
+
+        var storageOperations = transportOperations.Select(o => new StorageTransportOperation(o)).ToArray();
+
+        await outboxCollection.InsertOneAsync(new DuckTypeOutboxRecord
+        {
+            Id = msgId,
+            TransportOperations = storageOperations,
+        });
+
+        var context = configuration.GetContextBagForOutboxStorage();
+
+        await configuration.OutboxStorage.SetAsDispatched(msgId, context);
+
+        var receivedAfter = await configuration.OutboxStorage.Get(msgId, context);
+
+        Assert.That(receivedAfter.TransportOperations, Is.Empty);
     }
+
+    class DuckTypeOutboxRecord
+    {
+        public string Id { get; set; }
+        public DateTime? Dispatched { get; set; }
+
+        public StorageTransportOperation[] TransportOperations { get; set; }
+    }
+
+    string RandomString() => Guid.NewGuid().ToString();
 
     T FillDictionary<T>(T dictionary, int count)
         where T : Dictionary<string, string>

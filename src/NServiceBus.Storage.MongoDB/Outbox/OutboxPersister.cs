@@ -10,22 +10,25 @@ using Outbox;
 
 class OutboxPersister : IOutboxStorage
 {
-    public OutboxPersister(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
+    public OutboxPersister(IMongoClient client, string partitionKey, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
     {
         outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, databaseSettings, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
 
         outboxRecordCollection = client.GetDatabase(databaseName, databaseSettings)
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
+
+        this.partitionKey = partitionKey;
     }
 
     public async Task<OutboxMessage> Get(string messageId, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        var outboxRecord = await outboxRecordCollection.Find(record => record.Id == messageId)
+        var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
+        var outboxRecord = await outboxRecordCollection.Find(record => record.Id == outboxRecordId)
             .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
         return outboxRecord != null
-            ? new OutboxMessage(outboxRecord.Id,
+            ? new OutboxMessage(outboxRecordId.MessageId,
                 outboxRecord.TransportOperations?.Select(op => op.ToTransportType()).ToArray())
             : null!;
     }
@@ -42,8 +45,10 @@ class OutboxPersister : IOutboxStorage
         var storageTransportOperations =
             message.TransportOperations.Select(op => new StorageTransportOperation(op)).ToArray();
 
+        var outboxRecordId = new OutboxRecordId { MessageId = message.MessageId, PartitionKey = partitionKey };
+
         return storageSession.InsertOneAsync(
-            new OutboxRecord { Id = message.MessageId, TransportOperations = storageTransportOperations },
+            new OutboxRecord { Id = outboxRecordId, TransportOperations = storageTransportOperations },
             cancellationToken);
     }
 
@@ -54,11 +59,14 @@ class OutboxPersister : IOutboxStorage
             .Set(record => record.TransportOperations, [])
             .CurrentDate(record => record.Dispatched);
 
+        var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
+
         await outboxRecordCollection
-            .UpdateOneAsync(record => record.Id == messageId, update, cancellationToken: cancellationToken)
+            .UpdateOneAsync(record => record.Id == outboxRecordId, update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
     readonly MongoOutboxTransactionFactory outboxTransactionFactory;
     readonly IMongoCollection<OutboxRecord> outboxRecordCollection;
+    readonly string partitionKey;
 }

@@ -1,10 +1,12 @@
 ﻿namespace NServiceBus.Storage.MongoDB;
 
 using System;
+using global::MongoDB.Bson.Serialization.Attributes;
 
 class OutboxRecord
 {
-    public required string Id { get; set; }
+    [BsonId]
+    public required OutboxRecordId Id { get; set; }
 
     public DateTime? Dispatched { get; set; }
 

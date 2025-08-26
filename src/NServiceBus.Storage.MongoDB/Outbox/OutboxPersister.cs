@@ -25,7 +25,7 @@ class OutboxPersister : IOutboxStorage
     {
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
 
-        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(messageId, outboxRecordId);
+        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(outboxRecordId);
 
         var outboxRecord = await outboxRecordCollection.Find(equalityPredicateWithFallback)
             .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -64,18 +64,18 @@ class OutboxPersister : IOutboxStorage
 
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
 
-        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(messageId, outboxRecordId);
+        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(outboxRecordId);
 
         await outboxRecordCollection
             .UpdateOneAsync(equalityPredicateWithFallback, update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
-    static FilterDefinition<OutboxRecord> CreateEqualityPredicateWithFallback(string messageId, OutboxRecordId outboxRecordId)
+    static FilterDefinition<OutboxRecord> CreateEqualityPredicateWithFallback(OutboxRecordId outboxRecordId)
     {
         var equalityPredicateWithFallback = Builders<OutboxRecord>.Filter.Or(
             Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId),
-            Builders<OutboxRecord>.Filter.Eq("_id", messageId)
+            Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId)
         );
         return equalityPredicateWithFallback;
     }

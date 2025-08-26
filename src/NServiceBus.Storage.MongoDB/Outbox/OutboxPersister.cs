@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Extensibility;
 using global::MongoDB.Driver;
-using NServiceBus.Outbox;
+using Outbox;
 
 class OutboxPersister : IOutboxStorage
 {

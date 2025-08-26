@@ -7,5 +7,4 @@ static class SettingsKeys
     public const string CollectionNamingConvention = baseName + nameof(CollectionNamingConvention);
     public const string DatabaseName = baseName + nameof(DatabaseName);
     public const string UseTransactions = baseName + nameof(UseTransactions);
-    public const string TimeToKeepOutboxDeduplicationData = baseName + nameof(TimeToKeepOutboxDeduplicationData);
 }

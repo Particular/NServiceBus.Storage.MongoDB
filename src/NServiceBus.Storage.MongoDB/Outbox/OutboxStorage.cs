@@ -8,15 +8,19 @@ using global::MongoDB.Bson.Serialization.Options;
 using global::MongoDB.Bson.Serialization.Serializers;
 using global::MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection;
-using NServiceBus.Outbox;
+using Outbox;
 
 class OutboxStorage : Feature
 {
     OutboxStorage()
     {
-        Defaults(s => s.EnableFeatureByDefault<SynchronizedStorage>());
+        Defaults(s =>
+        {
+            s.SetDefault(new OutboxPersistenceConfiguration());
+            s.EnableFeatureByDefault<SynchronizedStorage>();
+        });
 
-        DependsOn<Features.Outbox>();
+        DependsOn<Outbox>();
         DependsOn<SynchronizedStorage>();
     }
 
@@ -32,6 +36,7 @@ class OutboxStorage : Feature
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
         var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
+        var timeToKeepOutboxDeduplicationData = context.Settings.Get<OutboxPersistenceConfiguration>().TimeToKeepDeduplicationData;
         var endpointName = context.Settings.EndpointName();
 
         context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, endpointName, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
@@ -41,7 +46,7 @@ class OutboxStorage : Feature
         context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Outbox", new
         {
             UsesDefaultClassMap = usesDefaultClassMap,
-            TimeToKeepDeduplicationData = context.Settings.GetTimeToKeepOutboxDeduplicationData(),
+            TimeToKeepDeduplicationData = timeToKeepOutboxDeduplicationData,
         });
     }
 

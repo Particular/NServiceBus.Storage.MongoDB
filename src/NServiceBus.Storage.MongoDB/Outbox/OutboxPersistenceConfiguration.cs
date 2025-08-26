@@ -14,7 +14,7 @@ sealed class OutboxPersistenceConfiguration
             var seconds = Math.Ceiling(value.TotalSeconds);
             field = TimeSpan.FromSeconds(seconds);
         }
-    }
+    } = TimeSpan.FromDays(7);
 
     public bool ReadFallbackEnabled { get; set; } = true;
 }

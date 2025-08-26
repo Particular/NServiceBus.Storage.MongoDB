@@ -49,11 +49,15 @@ class OutboxStorage : Feature
 #pragma warning disable IDE0037
             TimeToKeepDeduplicationData = configuration.TimeToKeepDeduplicationData,
 #pragma warning restore IDE0037
+            UsesReadFallback = configuration.ReadFallbackEnabled
         });
     }
 
     internal static bool RegisterOutboxClassMappings()
     {
+        // If any of the class maps are already registered, then we assume that the user has provided their own custom class maps
+        // and treat the entire tree as custom.
+        var usesDefaultClassMap = true;
         if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecordId)))
         {
             BsonClassMap.RegisterClassMap<OutboxRecordId>(cm =>
@@ -63,6 +67,10 @@ class OutboxStorage : Feature
                 cm.MapMember(x => x.MessageId).SetElementName("mid");
             });
         }
+        else
+        {
+            usesDefaultClassMap = false;
+        }
 
         if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecord)))
         {
@@ -71,6 +79,10 @@ class OutboxStorage : Feature
                 cm.AutoMap();
                 cm.MapIdMember(x => x.Id).SetSerializer(new OutboxRecordIdSerializer());
             });
+        }
+        else
+        {
+            usesDefaultClassMap = false;
         }
 
         if (!BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
@@ -88,7 +100,11 @@ class OutboxStorage : Feature
                             DictionaryRepresentation.ArrayOfDocuments));
             });
         }
+        else
+        {
+            usesDefaultClassMap = false;
+        }
 
-        return true;
+        return usesDefaultClassMap;
     }
 }

@@ -34,8 +34,6 @@ public class OutboxTestsConfiguration
 
     public async Task Configure()
     {
-        Storage.MongoDB.OutboxStorage.RegisterOutboxClassMappings();
-
         var database = ClientProvider.Client.GetDatabase(DatabaseName, MongoPersistence.DefaultDatabaseSettings);
 
         await database.CreateCollectionAsync(CollectionNamingConvention(typeof(OutboxRecord)));

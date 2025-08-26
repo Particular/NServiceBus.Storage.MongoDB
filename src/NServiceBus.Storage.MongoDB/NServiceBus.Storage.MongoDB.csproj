@@ -15,6 +15,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.PersistenceTests" />
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.Tests" />
+    <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.TransactionalSession" />
   </ItemGroup>
 
 </Project>

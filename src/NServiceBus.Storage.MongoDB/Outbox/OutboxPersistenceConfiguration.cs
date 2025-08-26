@@ -17,4 +17,6 @@ sealed class OutboxPersistenceConfiguration
     } = TimeSpan.FromDays(7);
 
     public bool ReadFallbackEnabled { get; set; } = true;
+
+    public string PartitionKey { get; set; }
 }

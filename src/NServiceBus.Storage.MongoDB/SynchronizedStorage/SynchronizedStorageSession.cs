@@ -20,7 +20,7 @@ class SynchronizedStorageSession(StorageSessionFactory sessionFactory)
     public ValueTask<bool> TryOpen(IOutboxTransaction transaction, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        if (transaction is MongoOutboxTransaction mongoOutboxTransaction)
+        if (transaction is OutboxTransaction mongoOutboxTransaction)
         {
             Session = mongoOutboxTransaction.StorageSession;
             ownsMongoSession = false;

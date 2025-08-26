@@ -61,12 +61,10 @@ public static class MongoSettingsExtensions
         this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToKeepOutboxDeduplicationData)
     {
         ArgumentNullException.ThrowIfNull(persistenceExtensions);
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeToKeepOutboxDeduplicationData, TimeSpan.Zero);
-
-        var seconds = Math.Ceiling(timeToKeepOutboxDeduplicationData.TotalSeconds);
 
         persistenceExtensions.GetSettings()
-            .Set(SettingsKeys.TimeToKeepOutboxDeduplicationData, TimeSpan.FromSeconds(seconds));
+                .GetOrCreate<OutboxPersistenceConfiguration>().TimeToKeepDeduplicationData =
+            timeToKeepOutboxDeduplicationData;
         return persistenceExtensions;
     }
 

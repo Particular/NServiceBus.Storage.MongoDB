@@ -3,7 +3,7 @@ namespace NServiceBus;
 using System;
 using Configuration.AdvancedExtensibility;
 using Outbox;
-using Storage.MongoDB.Outbox;
+using Storage.MongoDB;
 
 /// <summary>
 /// Outbox settings extensions for MongoDB persistence.

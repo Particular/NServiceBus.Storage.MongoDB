@@ -4,7 +4,7 @@ namespace NServiceBus.Storage.MongoDB;
 
 using System;
 using System.Collections.Generic;
-using NServiceBus.Outbox;
+using Outbox;
 
 class StorageTransportOperation
 {

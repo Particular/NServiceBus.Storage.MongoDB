@@ -1,4 +1,4 @@
-namespace NServiceBus.Storage.MongoDB.Outbox;
+namespace NServiceBus.Storage.MongoDB;
 
 using System;
 
@@ -9,6 +9,8 @@ sealed class OutboxPersistenceConfiguration
         get => field;
         set
         {
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, TimeSpan.Zero);
+
             var seconds = Math.Ceiling(value.TotalSeconds);
             field = TimeSpan.FromSeconds(seconds);
         }

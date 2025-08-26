@@ -1,5 +1,6 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NServiceBus.Storage.MongoDB.PersistenceTests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NServiceBus.Storage.MongoDB.Tests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NServiceBus.Storage.MongoDB.TransactionalSession")]
 namespace NServiceBus
 {
     public class CompatibilitySettings : NServiceBus.Configuration.AdvancedExtensibility.ExposeSettings

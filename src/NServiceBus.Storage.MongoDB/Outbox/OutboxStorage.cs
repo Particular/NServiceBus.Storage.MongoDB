@@ -16,7 +16,7 @@ class OutboxStorage : Feature
     {
         Defaults(s =>
         {
-            s.SetDefault(new OutboxPersistenceConfiguration());
+            s.SetDefault(new OutboxPersistenceConfiguration { PartitionKey = s.EndpointName() });
             s.EnableFeatureByDefault<SynchronizedStorage>();
         });
 
@@ -37,9 +37,8 @@ class OutboxStorage : Feature
         var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
         var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
         var configuration = context.Settings.Get<OutboxPersistenceConfiguration>();
-        var endpointName = context.Settings.EndpointName();
 
-        context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, endpointName, configuration.ReadFallbackEnabled, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
+        context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, configuration.PartitionKey, configuration.ReadFallbackEnabled, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
 
         var usesDefaultClassMap = RegisterOutboxClassMappings();
 

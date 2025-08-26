@@ -3,6 +3,7 @@
 using System;
 using Configuration.AdvancedExtensibility;
 using MongoDB.Driver;
+using Particular.Obsoletes;
 using Storage.MongoDB;
 
 /// <summary>
@@ -51,6 +52,11 @@ public static class MongoSettingsExtensions
     /// <summary>
     /// Configures the amount of time to keep outbox deduplication data.
     /// </summary>
+    [ObsoleteMetadata(
+        ReplacementTypeOrMember = "MongoOutboxSettingsExtensions.TimeToKeepOutboxDeduplicationData",
+        RemoveInVersion = "8",
+        TreatAsErrorFromVersion = "7")]
+    [Obsolete("Use 'MongoOutboxSettingsExtensions.TimeToKeepOutboxDeduplicationData' instead. Will be removed in version 8.0.0.", true)]
     public static PersistenceExtensions<MongoPersistence> TimeToKeepOutboxDeduplicationData(
         this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToKeepOutboxDeduplicationData)
     {

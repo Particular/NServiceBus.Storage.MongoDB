@@ -4,7 +4,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Extensibility;
-using Outbox;
+using NServiceBus.Outbox;
 
 public class OutboxTestsConfiguration
 {

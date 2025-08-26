@@ -18,5 +18,5 @@ sealed class OutboxPersistenceConfiguration
 
     public bool ReadFallbackEnabled { get; set; } = true;
 
-    public string PartitionKey { get; set; }
+    public string PartitionKey { get; set; } = null!; // will be set by defaults
 }

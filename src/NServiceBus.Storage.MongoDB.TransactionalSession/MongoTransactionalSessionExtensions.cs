@@ -38,8 +38,7 @@ public static class MongoTransactionalSessionExtensions
         {
             settings.GetOrCreate<OutboxPersistenceConfiguration>().PartitionKey = transactionalSessionOptions.ProcessorEndpoint;
 
-            // settings.GetOrCreate<InstallerSettings>()
-            //     .DoNotCreateOutboxTable = true;
+            settings.GetOrCreate<InstallerSettings>().OutboxDisabled = true;
         }
 
         return persistenceExtensions;

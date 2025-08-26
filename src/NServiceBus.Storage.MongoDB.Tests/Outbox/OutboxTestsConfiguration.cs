@@ -15,7 +15,7 @@ public class OutboxTestsConfiguration
         DatabaseName = "Test_" + DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
         CollectionNamingConvention = collectionNamingConvention;
 
-        transactionFactory = new MongoOutboxTransactionFactory(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings,
+        transactionFactory = new OutboxTransactionFactory(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings,
             CollectionNamingConvention, transactionTimeout ?? MongoPersistence.DefaultTransactionTimeout);
     }
 
@@ -46,5 +46,5 @@ public class OutboxTestsConfiguration
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);
 
-    readonly MongoOutboxTransactionFactory transactionFactory;
+    readonly OutboxTransactionFactory transactionFactory;
 }

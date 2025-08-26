@@ -12,7 +12,7 @@ class OutboxPersister : IOutboxStorage
 {
     public OutboxPersister(IMongoClient client, string partitionKey, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
     {
-        outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, databaseSettings, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
+        outboxTransactionFactory = new OutboxTransactionFactory(client, databaseName, databaseSettings, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
 
         outboxRecordCollection = client.GetDatabase(databaseName, databaseSettings)
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
@@ -43,7 +43,7 @@ class OutboxPersister : IOutboxStorage
     public Task Store(OutboxMessage message, IOutboxTransaction transaction, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
+        var mongoOutboxTransaction = (OutboxTransaction)transaction;
         var storageSession = mongoOutboxTransaction.StorageSession;
         var storageTransportOperations =
             message.TransportOperations.Select(op => new StorageTransportOperation(op)).ToArray();
@@ -80,7 +80,7 @@ class OutboxPersister : IOutboxStorage
         return equalityPredicateWithFallback;
     }
 
-    readonly MongoOutboxTransactionFactory outboxTransactionFactory;
+    readonly OutboxTransactionFactory outboxTransactionFactory;
     readonly IMongoCollection<OutboxRecord> outboxRecordCollection;
     readonly string partitionKey;
 }

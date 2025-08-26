@@ -7,9 +7,9 @@ using Extensibility;
 using global::MongoDB.Driver;
 using Outbox;
 
-class MongoOutboxTransaction : IOutboxTransaction
+class OutboxTransaction : IOutboxTransaction
 {
-    public MongoOutboxTransaction(IClientSessionHandle mongoSession, string databaseName, MongoDatabaseSettings databaseSettings, ContextBag context,
+    public OutboxTransaction(IClientSessionHandle mongoSession, string databaseName, MongoDatabaseSettings databaseSettings, ContextBag context,
         Func<Type, string> collectionNamingConvention, TimeSpan transactionTimeout)
     {
         StorageSession = new StorageSession(mongoSession, databaseName, databaseSettings, context, collectionNamingConvention, true,

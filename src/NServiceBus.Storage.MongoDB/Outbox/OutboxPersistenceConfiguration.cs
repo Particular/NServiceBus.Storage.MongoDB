@@ -15,4 +15,6 @@ sealed class OutboxPersistenceConfiguration
             field = TimeSpan.FromSeconds(seconds);
         }
     }
+
+    public bool ReadFallbackEnabled { get; set; } = true;
 }

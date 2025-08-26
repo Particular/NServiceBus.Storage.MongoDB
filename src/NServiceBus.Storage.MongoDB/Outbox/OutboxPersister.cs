@@ -24,7 +24,10 @@ class OutboxPersister : IOutboxStorage
         CancellationToken cancellationToken = default)
     {
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
-        var outboxRecord = await outboxRecordCollection.Find(record => record.Id == outboxRecordId)
+
+        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(messageId, outboxRecordId);
+
+        var outboxRecord = await outboxRecordCollection.Find(equalityPredicateWithFallback)
             .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
         return outboxRecord != null
@@ -61,9 +64,20 @@ class OutboxPersister : IOutboxStorage
 
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
 
+        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(messageId, outboxRecordId);
+
         await outboxRecordCollection
-            .UpdateOneAsync(record => record.Id == outboxRecordId, update, cancellationToken: cancellationToken)
+            .UpdateOneAsync(equalityPredicateWithFallback, update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    static FilterDefinition<OutboxRecord> CreateEqualityPredicateWithFallback(string messageId, OutboxRecordId outboxRecordId)
+    {
+        var equalityPredicateWithFallback = Builders<OutboxRecord>.Filter.Or(
+            Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId),
+            Builders<OutboxRecord>.Filter.Eq("_id", messageId)
+        );
+        return equalityPredicateWithFallback;
     }
 
     readonly MongoOutboxTransactionFactory outboxTransactionFactory;

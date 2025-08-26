@@ -10,8 +10,8 @@ namespace NServiceBus
     }
     public static class MongoOutboxSettingsExtensions
     {
-        public static void DisableReadFallback(this NServiceBus.Outbox.OutboxSettings outboxSettings) { }
-        public static void TimeToKeepOutboxDeduplicationData(this NServiceBus.Outbox.OutboxSettings outboxSettings, System.TimeSpan timeToKeepOutboxDeduplicationData) { }
+        public static NServiceBus.Outbox.OutboxSettings DisableReadFallback(this NServiceBus.Outbox.OutboxSettings outboxSettings) { }
+        public static NServiceBus.Outbox.OutboxSettings TimeToKeepOutboxDeduplicationData(this NServiceBus.Outbox.OutboxSettings outboxSettings, System.TimeSpan timeToKeepOutboxDeduplicationData) { }
     }
     public class MongoPersistence : NServiceBus.Persistence.PersistenceDefinition
     {

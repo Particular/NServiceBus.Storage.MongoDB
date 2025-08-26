@@ -16,7 +16,6 @@ public static class MongoOutboxSettingsExtensions
     public static void TimeToKeepOutboxDeduplicationData(this OutboxSettings outboxSettings, TimeSpan timeToKeepOutboxDeduplicationData)
     {
         ArgumentNullException.ThrowIfNull(outboxSettings);
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeToKeepOutboxDeduplicationData, TimeSpan.Zero);
 
         outboxSettings.GetSettings().GetOrCreate<OutboxPersistenceConfiguration>().TimeToKeepDeduplicationData = timeToKeepOutboxDeduplicationData;
     }

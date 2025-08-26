@@ -53,7 +53,7 @@ public partial class PersistenceTestsConfiguration
         OutboxStorageFeature.RegisterOutboxClassMappings();
         await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings, TimeSpan.FromDays(7), cancellationToken);
 
-        OutboxStorage = new OutboxPersister(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
+        OutboxStorage = new OutboxPersister(ClientProvider.Client, string.Empty, databaseName, MongoPersistence.DefaultDatabaseSettings, MongoPersistence.DefaultCollectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
     }
 
     public async Task Cleanup(CancellationToken cancellationToken = default) =>

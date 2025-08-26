@@ -10,7 +10,7 @@ using Outbox;
 
 class OutboxPersister : IOutboxStorage
 {
-    public OutboxPersister(IMongoClient client, string partitionKey, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
+    public OutboxPersister(IMongoClient client, string partitionKey, bool readFallbackEnabled, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
     {
         outboxTransactionFactory = new OutboxTransactionFactory(client, databaseName, databaseSettings, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
 
@@ -18,6 +18,7 @@ class OutboxPersister : IOutboxStorage
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
 
         this.partitionKey = partitionKey;
+        this.readFallbackEnabled = readFallbackEnabled;
     }
 
     public async Task<OutboxMessage> Get(string messageId, ContextBag context,
@@ -25,7 +26,7 @@ class OutboxPersister : IOutboxStorage
     {
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
 
-        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(outboxRecordId);
+        var equalityPredicateWithFallback = CreateOutboxRecordFilterPredicate(outboxRecordId);
 
         var outboxRecord = await outboxRecordCollection.Find(equalityPredicateWithFallback)
             .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -64,23 +65,23 @@ class OutboxPersister : IOutboxStorage
 
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
 
-        var equalityPredicateWithFallback = CreateEqualityPredicateWithFallback(outboxRecordId);
+        var equalityPredicateWithFallback = CreateOutboxRecordFilterPredicate(outboxRecordId);
 
         await outboxRecordCollection
             .UpdateOneAsync(equalityPredicateWithFallback, update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
-    static FilterDefinition<OutboxRecord> CreateEqualityPredicateWithFallback(OutboxRecordId outboxRecordId)
+    FilterDefinition<OutboxRecord> CreateOutboxRecordFilterPredicate(OutboxRecordId outboxRecordId)
     {
-        var equalityPredicateWithFallback = Builders<OutboxRecord>.Filter.Or(
-            Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId),
-            Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId)
-        );
-        return equalityPredicateWithFallback;
+        var isStructuredId = Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId);
+        return readFallbackEnabled
+            ? Builders<OutboxRecord>.Filter.Or(isStructuredId, Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId))
+            : isStructuredId;
     }
 
     readonly OutboxTransactionFactory outboxTransactionFactory;
     readonly IMongoCollection<OutboxRecord> outboxRecordCollection;
     readonly string partitionKey;
+    readonly bool readFallbackEnabled;
 }

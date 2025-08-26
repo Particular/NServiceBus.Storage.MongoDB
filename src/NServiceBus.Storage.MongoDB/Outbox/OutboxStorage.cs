@@ -36,17 +36,19 @@ class OutboxStorage : Feature
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
         var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
-        var timeToKeepOutboxDeduplicationData = context.Settings.Get<OutboxPersistenceConfiguration>().TimeToKeepDeduplicationData;
+        var configuration = context.Settings.Get<OutboxPersistenceConfiguration>();
         var endpointName = context.Settings.EndpointName();
 
-        context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, endpointName, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
+        context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, endpointName, configuration.ReadFallbackEnabled, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
 
         var usesDefaultClassMap = RegisterOutboxClassMappings();
 
         context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Outbox", new
         {
             UsesDefaultClassMap = usesDefaultClassMap,
-            TimeToKeepDeduplicationData = timeToKeepOutboxDeduplicationData,
+#pragma warning disable IDE0037
+            TimeToKeepDeduplicationData = configuration.TimeToKeepDeduplicationData,
+#pragma warning restore IDE0037
         });
     }
 

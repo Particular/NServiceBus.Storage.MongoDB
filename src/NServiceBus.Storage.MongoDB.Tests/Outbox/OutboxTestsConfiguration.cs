@@ -41,7 +41,7 @@ public class OutboxTestsConfiguration
         await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, DatabaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, TimeSpan.FromHours(1));
 
-        OutboxStorage = new OutboxPersister(ClientProvider.Client, string.Empty, DatabaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
+        OutboxStorage = new OutboxPersister(ClientProvider.Client, string.Empty, true, DatabaseName, MongoPersistence.DefaultDatabaseSettings, CollectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
     }
 
     public async Task Cleanup() => await ClientProvider.Client.DropDatabaseAsync(DatabaseName);

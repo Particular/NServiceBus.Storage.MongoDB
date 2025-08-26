@@ -32,7 +32,6 @@ class OutboxStorage : Feature
         var collectionNamingConvention = context.Settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
         var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
-        // TODO Should we normalize this to the endpoint name?
         var endpointName = context.Settings.EndpointName();
 
         context.Services.AddSingleton<IOutboxStorage>(sp => new OutboxPersister(sp.GetRequiredService<IMongoClientProvider>().Client, endpointName, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));

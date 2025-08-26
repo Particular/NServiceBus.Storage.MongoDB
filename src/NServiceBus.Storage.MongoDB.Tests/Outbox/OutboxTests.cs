@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NServiceBus.Outbox;
 using NUnit.Framework;
-using Outbox;
 
 public class OutboxStorageTest : OutboxPersisterTests
 {

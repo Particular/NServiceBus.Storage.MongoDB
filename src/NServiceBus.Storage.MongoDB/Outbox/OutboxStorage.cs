@@ -8,7 +8,7 @@ using global::MongoDB.Bson.Serialization.Options;
 using global::MongoDB.Bson.Serialization.Serializers;
 using global::MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection;
-using Outbox;
+using NServiceBus.Outbox;
 
 class OutboxStorage : Feature
 {
@@ -16,7 +16,7 @@ class OutboxStorage : Feature
     {
         Defaults(s => s.EnableFeatureByDefault<SynchronizedStorage>());
 
-        DependsOn<Outbox>();
+        DependsOn<Features.Outbox>();
         DependsOn<SynchronizedStorage>();
     }
 

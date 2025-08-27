@@ -2,17 +2,44 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Extensibility;
 using NServiceBus.Outbox;
 using NUnit.Framework;
 
-public class OutboxStorageTest : OutboxPersisterTests
+public class OutboxStorageTest
 {
+    string databaseName;
+    OutboxTransactionFactory transactionFactory;
+    readonly Func<Type, string> collectionNamingConvention = t => t.Name.ToLower();
+
+    [OneTimeSetUp]
+    public virtual async Task OneTimeSetUp()
+    {
+        databaseName = $"Test_{DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture)}";
+
+        var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
+
+        await database.CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
+
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, collectionNamingConvention,
+            MongoPersistence.DefaultCollectionSettings, TimeSpan.FromHours(1));
+
+        transactionFactory = new OutboxTransactionFactory(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings,
+            collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
+    }
+
+    [OneTimeTearDown]
+    public virtual async Task OneTimeTearDown() => await ClientProvider.Client.DropDatabaseAsync(databaseName);
+
     [Test]
     public async Task Should_return_same_data()
     {
+        var persister = SetupPersister();
+
         var msgId = RandomString();
 
         var operations = new TransportOperation[]
@@ -26,17 +53,17 @@ public class OutboxStorageTest : OutboxPersisterTests
         };
         var testMessage = new OutboxMessage(msgId, operations);
 
-        var context = configuration.GetContextBagForOutboxStorage();
-        var empty = await configuration.OutboxStorage.Get(msgId, context);
+        var context = new ContextBag();
+        var empty = await persister.Get(msgId, context);
         Assert.That(empty, Is.Null);
 
-        using (var transaction = await configuration.CreateTransaction(context))
+        using (var transaction = await CreateTransaction(context))
         {
-            await configuration.OutboxStorage.Store(testMessage, transaction, context);
+            await persister.Store(testMessage, transaction, context);
             await transaction.Commit();
         }
 
-        var received = await configuration.OutboxStorage.Get(msgId, context);
+        var received = await persister.Get(msgId, context);
 
         AreSame(received, msgId, operations);
     }
@@ -44,10 +71,12 @@ public class OutboxStorageTest : OutboxPersisterTests
     [Test]
     public async Task Should_support_legacy_format_in_get()
     {
+        var persister = SetupPersister(enableReadFallback: true);
+
         var msgId = RandomString();
 
-        var database = ClientProvider.Client.GetDatabase(configuration.DatabaseName, MongoPersistence.DefaultDatabaseSettings);
-        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(configuration.CollectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
+        var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
+        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
 
         var transportOperation = new TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
             Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3));
@@ -62,9 +91,9 @@ public class OutboxStorageTest : OutboxPersisterTests
             TransportOperations = storageOperations,
         });
 
-        var context = configuration.GetContextBagForOutboxStorage();
+        var context = new ContextBag();
 
-        var received = await configuration.OutboxStorage.Get(msgId, context);
+        var received = await persister.Get(msgId, context);
 
         AreSame(received, msgId, transportOperations);
     }
@@ -103,10 +132,12 @@ public class OutboxStorageTest : OutboxPersisterTests
     [Test]
     public async Task Should_support_legacy_format_in_set_as_dispatched()
     {
+        var persister = SetupPersister(enableReadFallback: true);
+
         var msgId = RandomString();
 
-        var database = ClientProvider.Client.GetDatabase(configuration.DatabaseName, MongoPersistence.DefaultDatabaseSettings);
-        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(configuration.CollectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
+        var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
+        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
 
         var transportOperation = new TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
             Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3));
@@ -121,14 +152,16 @@ public class OutboxStorageTest : OutboxPersisterTests
             TransportOperations = storageOperations,
         });
 
-        var context = configuration.GetContextBagForOutboxStorage();
+        var context = new ContextBag();
 
-        await configuration.OutboxStorage.SetAsDispatched(msgId, context);
+        await persister.SetAsDispatched(msgId, context);
 
-        var receivedAfter = await configuration.OutboxStorage.Get(msgId, context);
+        var receivedAfter = await persister.Get(msgId, context);
 
         Assert.That(receivedAfter.TransportOperations, Is.Empty);
     }
+
+    OutboxPersister SetupPersister(bool enableReadFallback = true, string partitionKey = "") => new(ClientProvider.Client, partitionKey, enableReadFallback, databaseName, MongoPersistence.DefaultDatabaseSettings, collectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
 
     class DuckTypeOutboxRecord
     {
@@ -150,4 +183,6 @@ public class OutboxStorageTest : OutboxPersisterTests
 
         return dictionary;
     }
+
+    Task<IOutboxTransaction> CreateTransaction(ContextBag context) => transactionFactory.BeginTransaction(context);
 }

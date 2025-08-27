@@ -98,6 +98,38 @@ public class OutboxStorageTest
         AreSame(received, msgId, transportOperations);
     }
 
+    [Test]
+    public async Task Should_treat_as_new_record_when_fallback_disabled()
+    {
+        var persister = SetupPersister(enableReadFallback: false);
+
+        var msgId = RandomString();
+
+        var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
+        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(
+            collectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
+
+        var transportOperation = new TransportOperation(RandomString(),
+            FillDictionary(new Transport.DispatchProperties(), 3),
+            Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3));
+
+        var transportOperations = new[] { transportOperation };
+
+        var storageOperations = transportOperations.Select(o => new StorageTransportOperation(o)).ToArray();
+
+        await outboxCollection.InsertOneAsync(new DuckTypeOutboxRecord
+        {
+            Id = msgId,
+            TransportOperations = storageOperations,
+        });
+
+        var context = new ContextBag();
+
+        var received = await persister.Get(msgId, context);
+
+        Assert.That(received, Is.Null);
+    }
+
     static void AreSame(OutboxMessage received, string msgId, TransportOperation[] operations)
     {
         Assert.Multiple(() =>

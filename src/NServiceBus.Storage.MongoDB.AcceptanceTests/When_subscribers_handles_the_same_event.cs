@@ -8,7 +8,6 @@ using AcceptanceTests;
 using EndpointTemplates;
 using NUnit.Framework;
 
-// TODO Can we also move this test to Core?
 public class When_subscribers_handles_the_same_event : NServiceBusAcceptanceTest
 {
     [Test]

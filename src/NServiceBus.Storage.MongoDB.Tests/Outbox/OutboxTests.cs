@@ -12,10 +12,6 @@ using NUnit.Framework;
 
 public class OutboxStorageTest
 {
-    string databaseName;
-    OutboxTransactionFactory transactionFactory;
-    readonly Func<Type, string> collectionNamingConvention = t => t.Name.ToLower();
-
     [OneTimeSetUp]
     public virtual async Task OneTimeSetUp()
     {
@@ -25,10 +21,12 @@ public class OutboxStorageTest
 
         await database.CreateCollectionAsync(collectionNamingConvention(typeof(OutboxRecord)));
 
-        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings, collectionNamingConvention,
+        await OutboxInstaller.CreateInfrastructureForOutboxTypes(ClientProvider.Client, databaseName,
+            MongoPersistence.DefaultDatabaseSettings, collectionNamingConvention,
             MongoPersistence.DefaultCollectionSettings, TimeSpan.FromHours(1));
 
-        transactionFactory = new OutboxTransactionFactory(ClientProvider.Client, databaseName, MongoPersistence.DefaultDatabaseSettings,
+        transactionFactory = new OutboxTransactionFactory(ClientProvider.Client, databaseName,
+            MongoPersistence.DefaultDatabaseSettings,
             collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
     }
 
@@ -76,9 +74,11 @@ public class OutboxStorageTest
         var msgId = RandomString();
 
         var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
-        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
+        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(
+            collectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
 
-        var transportOperation = new TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
+        var transportOperation = new TransportOperation(RandomString(),
+            FillDictionary(new Transport.DispatchProperties(), 3),
             Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3));
 
         var transportOperations = new[] { transportOperation };
@@ -137,9 +137,11 @@ public class OutboxStorageTest
         var msgId = RandomString();
 
         var database = ClientProvider.Client.GetDatabase(databaseName, MongoPersistence.DefaultDatabaseSettings);
-        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
+        var outboxCollection = database.GetCollection<DuckTypeOutboxRecord>(
+            collectionNamingConvention(typeof(OutboxRecord)), MongoPersistence.DefaultCollectionSettings);
 
-        var transportOperation = new TransportOperation(RandomString(), FillDictionary(new Transport.DispatchProperties(), 3),
+        var transportOperation = new TransportOperation(RandomString(),
+            FillDictionary(new Transport.DispatchProperties(), 3),
             Encoding.UTF8.GetBytes(RandomString()), FillDictionary(new Dictionary<string, string>(), 3));
 
         var transportOperations = new[] { transportOperation };
@@ -161,7 +163,10 @@ public class OutboxStorageTest
         Assert.That(receivedAfter.TransportOperations, Is.Empty);
     }
 
-    OutboxPersister SetupPersister(bool enableReadFallback = true, string partitionKey = "") => new(ClientProvider.Client, partitionKey, enableReadFallback, databaseName, MongoPersistence.DefaultDatabaseSettings, collectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
+    OutboxPersister SetupPersister(bool enableReadFallback = true, string partitionKey = "") => new(
+        ClientProvider.Client, partitionKey, enableReadFallback, databaseName, MongoPersistence.DefaultDatabaseSettings,
+        collectionNamingConvention, MongoPersistence.DefaultCollectionSettings);
+
 
     class DuckTypeOutboxRecord
     {
@@ -171,9 +176,9 @@ public class OutboxStorageTest
         public StorageTransportOperation[] TransportOperations { get; set; }
     }
 
-    string RandomString() => Guid.NewGuid().ToString();
+    static string RandomString() => Guid.NewGuid().ToString();
 
-    T FillDictionary<T>(T dictionary, int count)
+    static T FillDictionary<T>(T dictionary, int count)
         where T : Dictionary<string, string>
     {
         for (var i = 0; i < count; i++)
@@ -185,4 +190,8 @@ public class OutboxStorageTest
     }
 
     Task<IOutboxTransaction> CreateTransaction(ContextBag context) => transactionFactory.BeginTransaction(context);
+
+    string databaseName;
+    OutboxTransactionFactory transactionFactory;
+    readonly Func<Type, string> collectionNamingConvention = t => t.Name.ToLower();
 }

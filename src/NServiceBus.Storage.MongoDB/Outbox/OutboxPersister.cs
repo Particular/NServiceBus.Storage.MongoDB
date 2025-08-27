@@ -26,10 +26,16 @@ class OutboxPersister : IOutboxStorage
     {
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
 
-        var equalityPredicateWithFallback = CreateOutboxRecordFilterPredicate(outboxRecordId);
-
-        var outboxRecord = await outboxRecordCollection.Find(equalityPredicateWithFallback)
+        // find by the structured ID first
+        var outboxRecord = await outboxRecordCollection.Find(Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId))
             .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        if (outboxRecord is null && readFallbackEnabled)
+        {
+            // fallback to the legacy ID if the record wasn't found by the structured ID
+            outboxRecord = await outboxRecordCollection.Find(Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId))
+                .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
 
         return outboxRecord != null
             ? new OutboxMessage(outboxRecordId.MessageId,
@@ -65,19 +71,22 @@ class OutboxPersister : IOutboxStorage
 
         var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
 
-        var equalityPredicateWithFallback = CreateOutboxRecordFilterPredicate(outboxRecordId);
-
-        await outboxRecordCollection
-            .UpdateOneAsync(equalityPredicateWithFallback, update, cancellationToken: cancellationToken)
+        // find by the structured ID first
+        var updateResult = await outboxRecordCollection
+            .UpdateOneAsync(Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId), update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-    }
 
-    FilterDefinition<OutboxRecord> CreateOutboxRecordFilterPredicate(OutboxRecordId outboxRecordId)
-    {
-        var isStructuredId = Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId);
-        return readFallbackEnabled
-            ? Builders<OutboxRecord>.Filter.Or(isStructuredId, Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId))
-            : isStructuredId;
+        // This is safe to access because we assume the default collection and database settings are currently not exposed
+        // and therefore WriteConcern.WMajority is always used which means IsAcknowledged is always true.
+        // This is a safe assumption because not only are they not exposed they are also a good choice for the outbox semantics
+        // as of now and changing it would require more careful consideration.
+        if (updateResult.MatchedCount == 0 && readFallbackEnabled)
+        {
+            // fallback to the legacy ID if the record wasn't found by the structured ID
+            await outboxRecordCollection
+                .UpdateOneAsync(Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId), update, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
     }
 
     readonly OutboxTransactionFactory outboxTransactionFactory;

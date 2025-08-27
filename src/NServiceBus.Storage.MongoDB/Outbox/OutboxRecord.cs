@@ -4,7 +4,7 @@ using System;
 
 class OutboxRecord
 {
-    public required string Id { get; set; }
+    public required OutboxRecordId Id { get; set; }
 
     public DateTime? Dispatched { get; set; }
 

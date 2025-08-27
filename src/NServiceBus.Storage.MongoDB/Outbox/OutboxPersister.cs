@@ -10,22 +10,35 @@ using Outbox;
 
 class OutboxPersister : IOutboxStorage
 {
-    public OutboxPersister(IMongoClient client, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
+    public OutboxPersister(IMongoClient client, string partitionKey, bool readFallbackEnabled, string databaseName, MongoDatabaseSettings databaseSettings, Func<Type, string> collectionNamingConvention, MongoCollectionSettings collectionSettings)
     {
-        outboxTransactionFactory = new MongoOutboxTransactionFactory(client, databaseName, databaseSettings, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
+        outboxTransactionFactory = new OutboxTransactionFactory(client, databaseName, databaseSettings, collectionNamingConvention, MongoPersistence.DefaultTransactionTimeout);
 
         outboxRecordCollection = client.GetDatabase(databaseName, databaseSettings)
             .GetCollection<OutboxRecord>(collectionNamingConvention(typeof(OutboxRecord)), collectionSettings);
+
+        this.partitionKey = partitionKey;
+        this.readFallbackEnabled = readFallbackEnabled;
     }
 
     public async Task<OutboxMessage> Get(string messageId, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        var outboxRecord = await outboxRecordCollection.Find(record => record.Id == messageId)
+        var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
+
+        // find by the structured ID first
+        var outboxRecord = await outboxRecordCollection.Find(Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId))
             .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
+        if (outboxRecord is null && readFallbackEnabled)
+        {
+            // fallback to the legacy ID if the record wasn't found by the structured ID
+            outboxRecord = await outboxRecordCollection.Find(Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId))
+                .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
         return outboxRecord != null
-            ? new OutboxMessage(outboxRecord.Id,
+            ? new OutboxMessage(outboxRecordId.MessageId,
                 outboxRecord.TransportOperations?.Select(op => op.ToTransportType()).ToArray())
             : null!;
     }
@@ -37,13 +50,15 @@ class OutboxPersister : IOutboxStorage
     public Task Store(OutboxMessage message, IOutboxTransaction transaction, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        var mongoOutboxTransaction = (MongoOutboxTransaction)transaction;
+        var mongoOutboxTransaction = (OutboxTransaction)transaction;
         var storageSession = mongoOutboxTransaction.StorageSession;
         var storageTransportOperations =
             message.TransportOperations.Select(op => new StorageTransportOperation(op)).ToArray();
 
+        var outboxRecordId = new OutboxRecordId { MessageId = message.MessageId, PartitionKey = partitionKey };
+
         return storageSession.InsertOneAsync(
-            new OutboxRecord { Id = message.MessageId, TransportOperations = storageTransportOperations },
+            new OutboxRecord { Id = outboxRecordId, TransportOperations = storageTransportOperations },
             cancellationToken);
     }
 
@@ -54,11 +69,28 @@ class OutboxPersister : IOutboxStorage
             .Set(record => record.TransportOperations, [])
             .CurrentDate(record => record.Dispatched);
 
-        await outboxRecordCollection
-            .UpdateOneAsync(record => record.Id == messageId, update, cancellationToken: cancellationToken)
+        var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
+
+        // find by the structured ID first
+        var updateResult = await outboxRecordCollection
+            .UpdateOneAsync(Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId), update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+
+        // This is safe to access because we assume the default collection and database settings are currently not exposed
+        // and therefore WriteConcern.WMajority is always used which means IsAcknowledged is always true.
+        // This is a safe assumption because not only are they not exposed they are also a good choice for the outbox semantics
+        // as of now and changing it would require more careful consideration.
+        if (updateResult.MatchedCount == 0 && readFallbackEnabled)
+        {
+            // fallback to the legacy ID if the record wasn't found by the structured ID
+            await outboxRecordCollection
+                .UpdateOneAsync(Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId), update, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
     }
 
-    readonly MongoOutboxTransactionFactory outboxTransactionFactory;
+    readonly OutboxTransactionFactory outboxTransactionFactory;
     readonly IMongoCollection<OutboxRecord> outboxRecordCollection;
+    readonly string partitionKey;
+    readonly bool readFallbackEnabled;
 }

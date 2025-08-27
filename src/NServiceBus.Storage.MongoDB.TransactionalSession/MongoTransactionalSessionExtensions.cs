@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Features;
 using Configuration.AdvancedExtensibility;
+using Storage.MongoDB;
 
 /// <summary>
 /// MongoDB persistence extensions for <see cref="ITransactionalSession"/> support.
@@ -32,6 +33,13 @@ public static class MongoTransactionalSessionExtensions
 
         settings.Set(transactionalSessionOptions);
         settings.EnableFeatureByDefault<MongoTransactionalSession>();
+
+        if (!string.IsNullOrEmpty(transactionalSessionOptions.ProcessorEndpoint))
+        {
+            settings.GetOrCreate<OutboxPersistenceConfiguration>().PartitionKey = transactionalSessionOptions.ProcessorEndpoint;
+
+            settings.GetOrCreate<InstallerSettings>().OutboxDisabled = true;
+        }
 
         return persistenceExtensions;
     }

@@ -16,7 +16,7 @@ sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider servic
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
         var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.IsFeatureActive(typeof(OutboxStorage)))
+        if (installerSettings.Disabled || installerSettings.OutboxDisabled || !settings.IsFeatureActive(typeof(OutboxStorage)))
         {
             return;
         }
@@ -25,12 +25,12 @@ sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider servic
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
-        var timeToKeepOutboxDeduplicationData = settings.GetTimeToKeepOutboxDeduplicationData();
+        var timeToKeepOutboxDeduplicationData = settings.Get<OutboxPersistenceConfiguration>().TimeToKeepDeduplicationData;
 
         // We have to resolve the client provider here because at the time of the creation of the installer the provider might not be registered yet.
         var clientProvider = serviceProvider.GetRequiredService<IMongoClientProvider>();
 
-        await CreateInfrastructureForOutboxTypes(clientProvider!.Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
+        await CreateInfrastructureForOutboxTypes(clientProvider.Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
             .ConfigureAwait(false);
     }
 

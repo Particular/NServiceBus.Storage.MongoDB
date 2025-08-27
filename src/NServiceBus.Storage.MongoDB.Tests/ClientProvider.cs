@@ -15,6 +15,7 @@ static class ClientProvider
             }
 
             MongoPersistence.SafeRegisterDefaultGuidSerializer();
+            OutboxStorage.RegisterOutboxClassMappings();
 
             var containerConnectionString =
                 Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");

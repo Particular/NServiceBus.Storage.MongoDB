@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Extensibility;
 using global::MongoDB.Driver;
-using Outbox;
+using NServiceBus.Outbox;
 using Persistence;
 using Transport;
 
@@ -20,7 +20,7 @@ class SynchronizedStorageSession(StorageSessionFactory sessionFactory)
     public ValueTask<bool> TryOpen(IOutboxTransaction transaction, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        if (transaction is MongoOutboxTransaction mongoOutboxTransaction)
+        if (transaction is OutboxTransaction mongoOutboxTransaction)
         {
             Session = mongoOutboxTransaction.StorageSession;
             ownsMongoSession = false;

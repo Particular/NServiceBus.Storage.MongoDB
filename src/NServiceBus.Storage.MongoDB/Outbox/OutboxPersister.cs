@@ -73,7 +73,7 @@ class OutboxPersister : IOutboxStorage
 
         var outboxRecordId = CreateOutboxRecordId(messageId);
 
-        // find by the structured ID first
+        // update by the structured ID first
         var updateResult = await outboxRecordCollection
             .UpdateOneAsync(ByOutboxRecordId(outboxRecordId), update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);

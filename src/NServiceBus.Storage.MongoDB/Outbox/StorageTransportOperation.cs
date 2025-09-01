@@ -4,6 +4,7 @@ namespace NServiceBus.Storage.MongoDB;
 
 using System;
 using System.Collections.Generic;
+using Outbox;
 
 class StorageTransportOperation
 {
@@ -11,7 +12,7 @@ class StorageTransportOperation
     {
     }
 
-    public StorageTransportOperation(Outbox.TransportOperation source)
+    public StorageTransportOperation(TransportOperation source)
     {
         MessageId = source.MessageId;
         Options = source.Options != null ? new Dictionary<string, string>(source.Options) : [];
@@ -25,6 +26,6 @@ class StorageTransportOperation
     public Dictionary<string, string> Headers { get; set; }
 
 
-    public Outbox.TransportOperation ToTransportType() =>
+    public TransportOperation ToTransportType() =>
         new(MessageId, new Transport.DispatchProperties(Options), Body, Headers);
 }

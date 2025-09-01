@@ -24,16 +24,16 @@ class OutboxPersister : IOutboxStorage
     public async Task<OutboxMessage> Get(string messageId, ContextBag context,
         CancellationToken cancellationToken = default)
     {
-        var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
+        var outboxRecordId = CreateOutboxRecordId(messageId);
 
         // find by the structured ID first
-        var outboxRecord = await outboxRecordCollection.Find(Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId))
+        var outboxRecord = await outboxRecordCollection.Find(ByOutboxRecordId(outboxRecordId))
             .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (outboxRecord is null && readFallbackEnabled)
         {
             // fallback to the legacy ID if the record wasn't found by the structured ID
-            outboxRecord = await outboxRecordCollection.Find(Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId))
+            outboxRecord = await outboxRecordCollection.Find(ByMessageId(outboxRecordId.MessageId))
                 .SingleOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
@@ -42,6 +42,8 @@ class OutboxPersister : IOutboxStorage
                 outboxRecord.TransportOperations?.Select(op => op.ToTransportType()).ToArray())
             : null!;
     }
+
+    OutboxRecordId CreateOutboxRecordId(string messageId) => new() { MessageId = messageId, PartitionKey = partitionKey };
 
     public Task<IOutboxTransaction>
         BeginTransaction(ContextBag context, CancellationToken cancellationToken = default) =>
@@ -55,7 +57,7 @@ class OutboxPersister : IOutboxStorage
         var storageTransportOperations =
             message.TransportOperations.Select(op => new StorageTransportOperation(op)).ToArray();
 
-        var outboxRecordId = new OutboxRecordId { MessageId = message.MessageId, PartitionKey = partitionKey };
+        var outboxRecordId = CreateOutboxRecordId(message.MessageId);
 
         return storageSession.InsertOneAsync(
             new OutboxRecord { Id = outboxRecordId, TransportOperations = storageTransportOperations },
@@ -69,11 +71,11 @@ class OutboxPersister : IOutboxStorage
             .Set(record => record.TransportOperations, [])
             .CurrentDate(record => record.Dispatched);
 
-        var outboxRecordId = new OutboxRecordId { MessageId = messageId, PartitionKey = partitionKey };
+        var outboxRecordId = CreateOutboxRecordId(messageId);
 
         // find by the structured ID first
         var updateResult = await outboxRecordCollection
-            .UpdateOneAsync(Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId), update, cancellationToken: cancellationToken)
+            .UpdateOneAsync(ByOutboxRecordId(outboxRecordId), update, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         // This is safe to access because we assume the default collection and database settings are currently not exposed
@@ -84,10 +86,14 @@ class OutboxPersister : IOutboxStorage
         {
             // fallback to the legacy ID if the record wasn't found by the structured ID
             await outboxRecordCollection
-                .UpdateOneAsync(Builders<OutboxRecord>.Filter.Eq("_id", outboxRecordId.MessageId), update, cancellationToken: cancellationToken)
+                .UpdateOneAsync(ByMessageId(outboxRecordId.MessageId), update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
     }
+
+    static FilterDefinition<OutboxRecord> ByMessageId(string messageId) => Builders<OutboxRecord>.Filter.Eq("_id", messageId);
+
+    static FilterDefinition<OutboxRecord> ByOutboxRecordId(OutboxRecordId outboxRecordId) => Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId);
 
     readonly OutboxTransactionFactory outboxTransactionFactory;
     readonly IMongoCollection<OutboxRecord> outboxRecordCollection;

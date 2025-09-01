@@ -91,8 +91,10 @@ class OutboxPersister : IOutboxStorage
         }
     }
 
+    // Filters by the "legacy" ID which represented the message ID.
     static FilterDefinition<OutboxRecord> ByMessageId(string messageId) => Builders<OutboxRecord>.Filter.Eq("_id", messageId);
 
+    // Filters by the later introduced structured ID
     static FilterDefinition<OutboxRecord> ByOutboxRecordId(OutboxRecordId outboxRecordId) => Builders<OutboxRecord>.Filter.Eq(r => r.Id, outboxRecordId);
 
     readonly OutboxTransactionFactory outboxTransactionFactory;

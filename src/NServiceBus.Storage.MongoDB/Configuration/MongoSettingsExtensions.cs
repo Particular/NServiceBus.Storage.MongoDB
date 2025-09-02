@@ -56,7 +56,7 @@ public static class MongoSettingsExtensions
         ReplacementTypeOrMember = "MongoOutboxSettingsExtensions.TimeToKeepOutboxDeduplicationData",
         RemoveInVersion = "8",
         TreatAsErrorFromVersion = "7")]
-    [Obsolete("Use 'MongoOutboxSettingsExtensions.TimeToKeepOutboxDeduplicationData' instead. Will be removed in version 8.0.0.", true)]
+    [Obsolete("Use 'MongoOutboxSettingsExtensions.TimeToKeepOutboxDeduplicationData' instead. Will be treated as an error from version 7.0.0. Will be removed in version 8.0.0.", false)]
     public static PersistenceExtensions<MongoPersistence> TimeToKeepOutboxDeduplicationData(
         this PersistenceExtensions<MongoPersistence> persistenceExtensions, TimeSpan timeToKeepOutboxDeduplicationData)
     {

@@ -6,17 +6,19 @@ sealed class OutboxPersistenceConfiguration
 {
     public TimeSpan TimeToKeepDeduplicationData
     {
-        get => field;
+        get => timeToKeepDeduplicationData;
         set
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, TimeSpan.Zero);
 
             var seconds = Math.Ceiling(value.TotalSeconds);
-            field = TimeSpan.FromSeconds(seconds);
+            timeToKeepDeduplicationData = TimeSpan.FromSeconds(seconds);
         }
-    } = TimeSpan.FromDays(7);
+    }
 
     public bool ReadFallbackEnabled { get; set; } = true;
 
     public string PartitionKey { get; set; } = null!; // will be set by defaults
+
+    TimeSpan timeToKeepDeduplicationData = TimeSpan.FromDays(7);
 }

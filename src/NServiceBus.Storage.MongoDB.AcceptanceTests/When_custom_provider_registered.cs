@@ -55,23 +55,24 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
 
         public class CustomProvider(Context testContext) : IMongoClientProvider
         {
-            [field: AllowNull, MaybeNull]
             public IMongoClient Client
             {
                 get
                 {
-                    if (field is not null)
+                    if (client is not null)
                     {
-                        return field;
+                        return client;
                     }
 
                     var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
 
-                    field = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
+                    client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
                     testContext.ProviderWasCalled = true;
-                    return field;
+                    return client;
                 }
             }
+
+            IMongoClient? client;
         }
 
         public class JustASagaData : ContainSagaData

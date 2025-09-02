@@ -24,7 +24,7 @@ namespace NServiceBus
         public static void DisableInstaller(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> MongoClient(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, MongoDB.Driver.IMongoClient mongoClient) { }
         [System.Obsolete("Use \'MongoOutboxSettingsExtensions.TimeToKeepOutboxDeduplicationData\' instead. Wi" +
-            "ll be removed in version 8.0.0.", true)]
+            "ll be treated as an error from version 7.0.0. Will be removed in version 8.0.0.", false)]
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> TimeToKeepOutboxDeduplicationData(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, System.TimeSpan timeToKeepOutboxDeduplicationData) { }
         public static NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> UseTransactions(this NServiceBus.PersistenceExtensions<NServiceBus.MongoPersistence> persistenceExtensions, bool useTransactions) { }
     }

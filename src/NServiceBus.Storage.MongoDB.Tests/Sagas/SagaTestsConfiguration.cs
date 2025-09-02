@@ -20,21 +20,23 @@ public class SagaTestsConfiguration
     {
         get
         {
-            if (field != null)
+            if (sagaMetadataCollection != null)
             {
-                return field;
+                return sagaMetadataCollection;
             }
 
             var sagaTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t =>
                 typeof(Saga).IsAssignableFrom(t) || typeof(IFinder).IsAssignableFrom(t)).ToArray();
-            field = new SagaMetadataCollection();
-            field.Initialize(sagaTypes);
+            sagaMetadataCollection = new SagaMetadataCollection();
+            sagaMetadataCollection.Initialize(sagaTypes);
 
-            return field;
+            return sagaMetadataCollection;
         }
 
-        set;
+        set => sagaMetadataCollection = value;
     }
+
+    SagaMetadataCollection sagaMetadataCollection;
 
     readonly MemberMapCache memberMapCache;
 

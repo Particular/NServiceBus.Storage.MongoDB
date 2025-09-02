@@ -1,4 +1,6 @@
-﻿namespace NServiceBus.Storage.MongoDB.Tests;
+﻿#nullable enable
+
+namespace NServiceBus.Storage.MongoDB.Tests;
 
 using System;
 using global::MongoDB.Driver;
@@ -9,9 +11,9 @@ static class ClientProvider
     {
         get
         {
-            if (field != null)
+            if (client != null)
             {
-                return field;
+                return client;
             }
 
             MongoPersistence.SafeRegisterDefaultGuidSerializer();
@@ -20,11 +22,13 @@ static class ClientProvider
             var containerConnectionString =
                 Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
 
-            field = string.IsNullOrWhiteSpace(containerConnectionString)
+            client = string.IsNullOrWhiteSpace(containerConnectionString)
                 ? new MongoClient()
                 : new MongoClient(containerConnectionString);
 
-            return field;
+            return client;
         }
     }
+
+    static IMongoClient? client;
 }

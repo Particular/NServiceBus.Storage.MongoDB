@@ -15,7 +15,7 @@ class StorageSession(
     ContextBag contextBag,
     Func<Type, string> collectionNamingConvention,
     bool useTransaction,
-    TimeSpan transactionTimeout)
+    TimeSpan transactionTimeout) : IDisposable, IAsyncDisposable
 {
     public IClientSessionHandle MongoSession { get; } = mongoSession;
 
@@ -127,6 +127,33 @@ class StorageSession(
                 // so while it might be a *bit* on the defensive side, it does allow us to capture and warn on the exception without doing any worse
                 // than the Mongo client.
                 MongoSession.AbortTransaction(CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Exception thrown while aborting transaction", ex);
+            }
+        }
+
+        MongoSession.Dispose();
+        disposed = true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (disposed)
+        {
+            return;
+        }
+
+        if (MongoSession.IsInTransaction)
+        {
+            try
+            {
+                // Once you track it down, calling AbortTransaction with CancellationToken.None is exactly what the MongoDB driver
+                // does on dispose: https://github.com/mongodb/mongo-csharp-driver/blob/v2.12.0/src/MongoDB.Driver.Core/Core/Bindings/CoreSession.cs#L326-L351
+                // so while it might be a *bit* on the defensive side, it does allow us to capture and warn on the exception without doing any worse
+                // than the Mongo client.
+                await MongoSession.AbortTransactionAsync(CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

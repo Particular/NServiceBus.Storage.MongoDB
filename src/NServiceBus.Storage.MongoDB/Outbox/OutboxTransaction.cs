@@ -7,7 +7,7 @@ using Extensibility;
 using global::MongoDB.Driver;
 using Outbox;
 
-class OutboxTransaction : IOutboxTransaction
+sealed class OutboxTransaction : IOutboxTransaction
 {
     public OutboxTransaction(IClientSessionHandle mongoSession, string databaseName, MongoDatabaseSettings databaseSettings, ContextBag context,
         Func<Type, string> collectionNamingConvention, TimeSpan transactionTimeout)
@@ -22,4 +22,6 @@ class OutboxTransaction : IOutboxTransaction
     public Task Commit(CancellationToken cancellationToken = default) => StorageSession.CommitTransaction(cancellationToken);
 
     public void Dispose() => StorageSession.Dispose();
+
+    public ValueTask DisposeAsync() => StorageSession.DisposeAsync();
 }

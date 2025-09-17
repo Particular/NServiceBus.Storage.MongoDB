@@ -48,6 +48,15 @@ class SynchronizedStorageSession(StorageSessionFactory sessionFactory)
         }
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        if (ownsMongoSession && Session is not null)
+        {
+            await Session.DisposeAsync().ConfigureAwait(false);
+            Session = null;
+        }
+    }
+
     public Task CompleteAsync(CancellationToken cancellationToken = default)
     {
         if (ownsMongoSession && Session is not null)

@@ -70,7 +70,10 @@ class SagaStorage : Feature
     static void RegisterSagaBsonClassMap(SagaMetadata sagaMetadata)
     {
         var genericClassMapType = typeof(BsonClassMap<>).MakeGenericType(sagaMetadata.SagaEntityType);
-        var classMap = Activator.CreateInstance(genericClassMapType) as BsonClassMap;
+        if (Activator.CreateInstance(genericClassMapType) is not BsonClassMap classMap)
+        {
+            return;
+        }
         classMap.AutoMap();
         classMap.SetIgnoreExtraElements(true);
         var tryRegisterClassMapNonGeneric = typeof(BsonClassMap).GetMethods()

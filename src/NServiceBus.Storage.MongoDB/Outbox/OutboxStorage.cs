@@ -59,7 +59,7 @@ class OutboxStorage : Feature
         var usesDefaultClassMap = true;
         if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecordId)))
         {
-            BsonClassMap.RegisterClassMap<OutboxRecordId>(cm =>
+            BsonClassMap.TryRegisterClassMap<OutboxRecordId>(cm =>
             {
                 cm.AutoMap();
                 cm.MapMember(x => x.PartitionKey).SetElementName("pk");
@@ -73,7 +73,7 @@ class OutboxStorage : Feature
 
         if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecord)))
         {
-            BsonClassMap.RegisterClassMap<OutboxRecord>(cm =>
+            BsonClassMap.TryRegisterClassMap<OutboxRecord>(cm =>
             {
                 cm.AutoMap();
                 cm.MapIdMember(x => x.Id).SetSerializer(new OutboxRecordIdSerializer());
@@ -86,7 +86,7 @@ class OutboxStorage : Feature
 
         if (!BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
         {
-            BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
+            BsonClassMap.TryRegisterClassMap<StorageTransportOperation>(cm =>
             {
                 cm.AutoMap();
                 cm.MapMember(c => c.Headers)

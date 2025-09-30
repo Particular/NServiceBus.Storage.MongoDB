@@ -57,53 +57,44 @@ class OutboxStorage : Feature
         // If any of the class maps are already registered, then we assume that the user has provided their own custom class maps
         // and treat the entire tree as custom.
         var usesDefaultClassMap = true;
-        if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecordId)))
-        {
-            BsonClassMap.RegisterClassMap<OutboxRecordId>(cm =>
-            {
-                cm.AutoMap();
-                cm.MapMember(x => x.PartitionKey).SetElementName("pk");
-                cm.MapMember(x => x.MessageId).SetElementName("mid");
-            });
-        }
-        else
+
+        if (!TryRegisterOutboxRecordId())
         {
             usesDefaultClassMap = false;
         }
 
-        if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxRecord)))
-        {
-            BsonClassMap.RegisterClassMap<OutboxRecord>(cm =>
-            {
-                cm.AutoMap();
-                cm.MapIdMember(x => x.Id).SetSerializer(new OutboxRecordIdSerializer());
-            });
-        }
-        else
+        if (!TryRegisterOutboxRecord())
         {
             usesDefaultClassMap = false;
         }
 
-        if (!BsonClassMap.IsClassMapRegistered(typeof(StorageTransportOperation)))
-        {
-            BsonClassMap.RegisterClassMap<StorageTransportOperation>(cm =>
-            {
-                cm.AutoMap();
-                cm.MapMember(c => c.Headers)
-                    .SetSerializer(
-                        new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
-                            DictionaryRepresentation.ArrayOfDocuments));
-                cm.MapMember(c => c.Options)
-                    .SetSerializer(
-                        new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(
-                            DictionaryRepresentation.ArrayOfDocuments));
-            });
-        }
-        else
+        if (!TryRegisterStorageTransportOperation())
         {
             usesDefaultClassMap = false;
         }
 
         return usesDefaultClassMap;
     }
+
+    static bool TryRegisterOutboxRecordId() => BsonClassMap.TryRegisterClassMap<OutboxRecordId>(cm =>
+    {
+        cm.AutoMap();
+        cm.MapMember(x => x.PartitionKey).SetElementName("pk");
+        cm.MapMember(x => x.MessageId).SetElementName("mid");
+    });
+
+    static bool TryRegisterOutboxRecord() => BsonClassMap.TryRegisterClassMap<OutboxRecord>(cm =>
+    {
+        cm.AutoMap();
+        cm.MapIdMember(x => x.Id).SetSerializer(new OutboxRecordIdSerializer());
+    });
+
+    static bool TryRegisterStorageTransportOperation() => BsonClassMap.TryRegisterClassMap<StorageTransportOperation>(cm =>
+    {
+        cm.AutoMap();
+        cm.MapMember(c => c.Headers)
+            .SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
+        cm.MapMember(c => c.Options)
+            .SetSerializer(new DictionaryInterfaceImplementerSerializer<Dictionary<string, string>>(DictionaryRepresentation.ArrayOfDocuments));
+    });
 }

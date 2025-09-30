@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB;
 
 using System.Collections.Generic;
+using System.Threading;
 using Features;
 using global::MongoDB.Bson.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,18 +46,23 @@ class SagaStorage : Feature
     internal static IReadOnlyCollection<MappingMetadata> RegisterSagaEntityClassMappings(SagaMetadataCollection sagaMetadataCollection, MemberMapCache memberMapCache)
     {
         var sagaEntityToClassMapDiagnostics = new List<MappingMetadata>();
+
         foreach (var sagaMetadata in sagaMetadataCollection)
         {
             var usesDefaultClassMap = false;
-            if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
+
+            lock (classMapLock)
             {
-                var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
-                classMap.AutoMap();
-                classMap.SetIgnoreExtraElements(true);
+                if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
+                {
+                    var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
+                    classMap.AutoMap();
+                    classMap.SetIgnoreExtraElements(true);
 
-                BsonClassMap.RegisterClassMap(classMap);
+                    BsonClassMap.RegisterClassMap(classMap);
 
-                usesDefaultClassMap = true;
+                    usesDefaultClassMap = true;
+                }
             }
 
             sagaEntityToClassMapDiagnostics.Add(new(sagaMetadata.SagaEntityType.FullName!, usesDefaultClassMap));
@@ -66,6 +72,9 @@ class SagaStorage : Feature
                 _ = memberMapCache.GetOrAdd(sagaMetadata.SagaEntityType, property);
             }
         }
+
         return sagaEntityToClassMapDiagnostics;
     }
+
+    static readonly Lock classMapLock = new();
 }

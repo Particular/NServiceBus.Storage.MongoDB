@@ -13,8 +13,9 @@ sealed class SubscriptionInstaller(IReadOnlySettings settings, IServiceProvider 
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.IsFeatureActive(typeof(SubscriptionStorage)))
+        var installerSettings = settings.GetOrDefault<InstallerSettings>();
+
+        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive(typeof(SubscriptionStorage)))
         {
             return;
         }

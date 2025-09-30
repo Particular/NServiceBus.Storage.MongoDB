@@ -1,8 +1,7 @@
 ﻿namespace NServiceBus.Storage.MongoDB;
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using Features;
 using global::MongoDB.Bson.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,14 +46,23 @@ class SagaStorage : Feature
     internal static IReadOnlyCollection<MappingMetadata> RegisterSagaEntityClassMappings(SagaMetadataCollection sagaMetadataCollection, MemberMapCache memberMapCache)
     {
         var sagaEntityToClassMapDiagnostics = new List<MappingMetadata>();
+
         foreach (var sagaMetadata in sagaMetadataCollection)
         {
             var usesDefaultClassMap = false;
-            if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
-            {
-                RegisterSagaBsonClassMap(sagaMetadata);
 
-                usesDefaultClassMap = true;
+            lock (classMapLock)
+            {
+                if (!BsonClassMap.IsClassMapRegistered(sagaMetadata.SagaEntityType))
+                {
+                    var classMap = new BsonClassMap(sagaMetadata.SagaEntityType);
+                    classMap.AutoMap();
+                    classMap.SetIgnoreExtraElements(true);
+
+                    BsonClassMap.RegisterClassMap(classMap);
+
+                    usesDefaultClassMap = true;
+                }
             }
 
             sagaEntityToClassMapDiagnostics.Add(new(sagaMetadata.SagaEntityType.FullName!, usesDefaultClassMap));
@@ -64,22 +72,9 @@ class SagaStorage : Feature
                 _ = memberMapCache.GetOrAdd(sagaMetadata.SagaEntityType, property);
             }
         }
+
         return sagaEntityToClassMapDiagnostics;
     }
-    static void RegisterSagaBsonClassMap(SagaMetadata sagaMetadata)
-    {
-        var genericClassMapType = typeof(BsonClassMap<>).MakeGenericType(sagaMetadata.SagaEntityType);
-        if (Activator.CreateInstance(genericClassMapType) is not BsonClassMap classMap)
-        {
-            return;
-        }
-        classMap.AutoMap();
-        classMap.SetIgnoreExtraElements(true);
-        var tryRegisterClassMapNonGeneric = typeof(BsonClassMap).GetMethods()
-            .Where(x => x is { Name: "TryRegisterClassMap", IsGenericMethodDefinition: true })
-            .Single(m =>
-                m.GetParameters().FirstOrDefault()?.ParameterType.ToString() == typeof(BsonClassMap<>).ToString());
-        var tryRegisterClassMapGeneric = tryRegisterClassMapNonGeneric!.MakeGenericMethod(sagaMetadata.SagaEntityType);
-        tryRegisterClassMapGeneric.Invoke(null, [classMap]);
-    }
+
+    static readonly Lock classMapLock = new();
 }

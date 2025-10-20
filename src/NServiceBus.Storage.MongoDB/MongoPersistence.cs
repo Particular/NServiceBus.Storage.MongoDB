@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus;
 
 using System;
-using Features;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -12,12 +11,9 @@ using Storage.MongoDB;
 /// <summary>
 /// Used to configure NServiceBus to use MongoDB persistence.
 /// </summary>
-public class MongoPersistence : PersistenceDefinition
+public partial class MongoPersistence : PersistenceDefinition, IPersistenceDefinitionFactory<MongoPersistence>
 {
-    /// <summary>
-    /// Creates a new instance of the persistence definition.
-    /// </summary>
-    public MongoPersistence()
+    MongoPersistence(object? _)
     {
         Defaults(s =>
         {
@@ -40,9 +36,9 @@ public class MongoPersistence : PersistenceDefinition
             s.SetDefault(new InstallerSettings());
         });
 
-        Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<SagaStorage>());
-        Supports<StorageType.Outbox>(s => s.EnableFeatureByDefault<OutboxStorage>());
-        Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<SubscriptionStorage>());
+        Supports<StorageType.Sagas, SagaStorage>();
+        Supports<StorageType.Outbox, OutboxStorage>();
+        Supports<StorageType.Subscriptions, SubscriptionStorage>();
     }
 
     internal static void SafeRegisterDefaultGuidSerializer()
@@ -75,6 +71,8 @@ public class MongoPersistence : PersistenceDefinition
             }
         }
     }
+
+    static MongoPersistence IPersistenceDefinitionFactory<MongoPersistence>.Create() => new(null);
 
     internal static MongoDatabaseSettings DefaultDatabaseSettings { get; } = new()
     {

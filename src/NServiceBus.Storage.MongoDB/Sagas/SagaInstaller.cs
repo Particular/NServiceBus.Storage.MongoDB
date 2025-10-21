@@ -3,7 +3,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Features;
 using global::MongoDB.Bson;
 using global::MongoDB.Driver;
 using Installation;
@@ -15,13 +14,6 @@ sealed class SagaInstaller(IReadOnlySettings settings, IServiceProvider serviceP
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        var installerSettings = settings.GetOrDefault<InstallerSettings>();
-
-        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive<SagaStorage>())
-        {
-            return;
-        }
-
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var sagaMetadataCollection = settings.Get<SagaMetadataCollection>();

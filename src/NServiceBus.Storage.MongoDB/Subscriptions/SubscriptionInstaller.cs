@@ -3,7 +3,6 @@ namespace NServiceBus.Storage.MongoDB;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Features;
 using global::MongoDB.Driver;
 using Installation;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +12,6 @@ sealed class SubscriptionInstaller(IReadOnlySettings settings, IServiceProvider 
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        var installerSettings = settings.GetOrDefault<InstallerSettings>();
-
-        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive<SubscriptionStorage>())
-        {
-            return;
-        }
-
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
         var collectionSettings = settings.Get<MongoCollectionSettings>();

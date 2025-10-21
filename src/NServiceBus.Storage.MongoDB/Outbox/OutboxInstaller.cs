@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Features;
 using global::MongoDB.Bson;
 using global::MongoDB.Driver;
 using Installation;
@@ -15,13 +14,6 @@ sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider servic
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        var installerSettings = settings.GetOrDefault<InstallerSettings>();
-
-        if (installerSettings is null || installerSettings.Disabled || installerSettings.OutboxDisabled || !settings.IsFeatureActive<OutboxStorage>())
-        {
-            return;
-        }
-
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
         var collectionSettings = settings.Get<MongoCollectionSettings>();

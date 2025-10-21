@@ -30,6 +30,13 @@ sealed class SagaStorage : Feature
         var sagaMetadataCollection = context.Settings.Get<SagaMetadataCollection>();
         var classMappings = RegisterSagaEntityClassMappings(sagaMetadataCollection, memberMapCache);
 
+        var installerSettings = context.Settings.Get<InstallerSettings>();
+
+        if (!installerSettings.Disabled)
+        {
+            context.RegisterInstaller<SagaInstaller>();
+        }
+
         context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Sagas", new
         {
             VersionElement = versionElementName,

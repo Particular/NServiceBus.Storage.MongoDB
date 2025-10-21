@@ -42,6 +42,13 @@ class OutboxStorage : Feature
 
         var usesDefaultClassMap = RegisterOutboxClassMappings();
 
+        var installerSettings = context.Settings.Get<InstallerSettings>();
+
+        if (!installerSettings.Disabled && !installerSettings.OutboxDisabled)
+        {
+            context.RegisterInstaller<OutboxInstaller>();
+        }
+
         context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Outbox", new
         {
             UsesDefaultClassMap = usesDefaultClassMap,

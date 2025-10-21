@@ -20,6 +20,13 @@ class SubscriptionStorage : Feature
         var databaseSettings = context.Settings.Get<MongoDatabaseSettings>();
         var collectionSettings = context.Settings.Get<MongoCollectionSettings>();
 
+        var installerSettings = context.Settings.Get<InstallerSettings>();
+
+        if (!installerSettings.Disabled)
+        {
+            context.RegisterInstaller<SubscriptionInstaller>();
+        }
+
         context.Services.AddSingleton<ISubscriptionStorage>(sp => new SubscriptionPersister(sp.GetRequiredService<IMongoClientProvider>().Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));
     }
 }

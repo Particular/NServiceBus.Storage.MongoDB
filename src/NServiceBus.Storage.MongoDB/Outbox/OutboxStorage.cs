@@ -17,9 +17,8 @@ class OutboxStorage : Feature
         Defaults(s =>
         {
             s.SetDefault(new OutboxPersistenceConfiguration { PartitionKey = s.EndpointName() });
-            s.EnableFeatureByDefault<SynchronizedStorage>();
         });
-
+        EnableByDefault<SynchronizedStorage>();
         DependsOn<Outbox>();
         DependsOn<SynchronizedStorage>();
     }

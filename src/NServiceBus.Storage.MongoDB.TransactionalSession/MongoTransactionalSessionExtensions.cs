@@ -32,7 +32,7 @@ public static class MongoTransactionalSessionExtensions
         var settings = persistenceExtensions.GetSettings();
 
         settings.Set(transactionalSessionOptions);
-        settings.EnableFeatureByDefault<MongoTransactionalSession>();
+        settings.EnableFeature<MongoTransactionalSession>();
 
         if (!string.IsNullOrEmpty(transactionalSessionOptions.ProcessorEndpoint))
         {

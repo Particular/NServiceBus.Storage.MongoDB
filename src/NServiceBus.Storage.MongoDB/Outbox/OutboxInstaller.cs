@@ -17,7 +17,7 @@ sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider servic
     {
         var installerSettings = settings.GetOrDefault<InstallerSettings>();
 
-        if (installerSettings is null || installerSettings.Disabled || installerSettings.OutboxDisabled || !settings.IsFeatureActive(typeof(OutboxStorage)))
+        if (installerSettings is null || installerSettings.Disabled || installerSettings.OutboxDisabled || !settings.IsFeatureActive<OutboxStorage>())
         {
             return;
         }

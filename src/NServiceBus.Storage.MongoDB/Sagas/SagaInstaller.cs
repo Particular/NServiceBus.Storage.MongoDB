@@ -17,7 +17,7 @@ sealed class SagaInstaller(IReadOnlySettings settings, IServiceProvider serviceP
     {
         var installerSettings = settings.GetOrDefault<InstallerSettings>();
 
-        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive(typeof(SagaStorage)))
+        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive<SagaStorage>())
         {
             return;
         }

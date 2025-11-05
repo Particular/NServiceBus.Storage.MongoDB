@@ -11,8 +11,7 @@ class SagaStorage : Feature
 {
     SagaStorage()
     {
-        Defaults(s => s.EnableFeatureByDefault<SynchronizedStorage>());
-
+        EnableByDefault<SynchronizedStorage>();
         DependsOn<Sagas>();
         DependsOn<SynchronizedStorage>();
     }

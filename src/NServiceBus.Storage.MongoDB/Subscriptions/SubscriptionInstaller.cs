@@ -15,7 +15,7 @@ sealed class SubscriptionInstaller(IReadOnlySettings settings, IServiceProvider 
     {
         var installerSettings = settings.GetOrDefault<InstallerSettings>();
 
-        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive(typeof(SubscriptionStorage)))
+        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive<SubscriptionStorage>())
         {
             return;
         }

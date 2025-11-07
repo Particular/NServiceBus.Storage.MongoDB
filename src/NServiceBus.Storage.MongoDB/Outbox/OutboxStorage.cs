@@ -10,15 +10,14 @@ using global::MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection;
 using Outbox;
 
-class OutboxStorage : Feature
+sealed class OutboxStorage : Feature
 {
-    OutboxStorage()
+    public OutboxStorage()
     {
-        Defaults(s =>
-        {
-            s.SetDefault(new OutboxPersistenceConfiguration { PartitionKey = s.EndpointName() });
-        });
-        EnableByDefault<SynchronizedStorage>();
+        Defaults(s => s.SetDefault(new OutboxPersistenceConfiguration { PartitionKey = s.EndpointName() }));
+
+        Enable<SynchronizedStorage>();
+
         DependsOn<Outbox>();
         DependsOn<SynchronizedStorage>();
     }

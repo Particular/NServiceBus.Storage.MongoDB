@@ -7,11 +7,12 @@ using global::MongoDB.Bson.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Sagas;
 
-class SagaStorage : Feature
+sealed class SagaStorage : Feature
 {
-    SagaStorage()
+    public SagaStorage()
     {
-        EnableByDefault<SynchronizedStorage>();
+        Enable<SynchronizedStorage>();
+
         DependsOn<Sagas>();
         DependsOn<SynchronizedStorage>();
     }

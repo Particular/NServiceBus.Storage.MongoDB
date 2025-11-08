@@ -4,32 +4,20 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Features;
 using global::MongoDB.Bson;
 using global::MongoDB.Driver;
 using Installation;
-using Microsoft.Extensions.DependencyInjection;
 using Settings;
 
-sealed class OutboxInstaller(IReadOnlySettings settings, IServiceProvider serviceProvider) : INeedToInstallSomething
+sealed class OutboxInstaller(IReadOnlySettings settings, IMongoClientProvider clientProvider) : INeedToInstallSomething
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        var installerSettings = settings.GetOrDefault<InstallerSettings>();
-
-        if (installerSettings is null || installerSettings.Disabled || installerSettings.OutboxDisabled || !settings.IsFeatureActive<OutboxStorage>())
-        {
-            return;
-        }
-
         var databaseName = settings.Get<string>(SettingsKeys.DatabaseName);
         var databaseSettings = settings.Get<MongoDatabaseSettings>();
         var collectionSettings = settings.Get<MongoCollectionSettings>();
         var collectionNamingConvention = settings.Get<Func<Type, string>>(SettingsKeys.CollectionNamingConvention);
         var timeToKeepOutboxDeduplicationData = settings.Get<OutboxPersistenceConfiguration>().TimeToKeepDeduplicationData;
-
-        // We have to resolve the client provider here because at the time of the creation of the installer the provider might not be registered yet.
-        var clientProvider = serviceProvider.GetRequiredService<IMongoClientProvider>();
 
         await CreateInfrastructureForOutboxTypes(clientProvider.Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings, timeToKeepOutboxDeduplicationData, cancellationToken)
             .ConfigureAwait(false);

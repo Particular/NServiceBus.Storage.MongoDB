@@ -44,7 +44,7 @@ sealed class OutboxStorage : Feature
 
         if (!installerSettings.Disabled && !installerSettings.OutboxDisabled)
         {
-            context.RegisterInstaller<OutboxInstaller>();
+            context.AddInstaller<OutboxInstaller>();
         }
 
         context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Outbox", new

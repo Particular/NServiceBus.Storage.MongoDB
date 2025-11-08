@@ -34,7 +34,7 @@ sealed class SagaStorage : Feature
 
         if (!installerSettings.Disabled)
         {
-            context.RegisterInstaller<SagaInstaller>();
+            context.AddInstaller<SagaInstaller>();
         }
 
         context.Settings.AddStartupDiagnosticsSection("NServiceBus.Storage.MongoDB.Sagas", new

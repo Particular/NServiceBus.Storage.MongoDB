@@ -24,7 +24,7 @@ class SubscriptionStorage : Feature
 
         if (!installerSettings.Disabled)
         {
-            context.RegisterInstaller<SubscriptionInstaller>();
+            context.AddInstaller<SubscriptionInstaller>();
         }
 
         context.Services.AddSingleton<ISubscriptionStorage>(sp => new SubscriptionPersister(sp.GetRequiredService<IMongoClientProvider>().Client, databaseName, databaseSettings, collectionNamingConvention, collectionSettings));

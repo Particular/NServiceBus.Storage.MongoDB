@@ -50,7 +50,7 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
                 return Task.CompletedTask;
             }
 
-            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<JustASagaData> mapper) => mapper.ConfigureMapping<StartSaga1>(m => m.DataId).ToSaga(s => s.DataId);
+            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<JustASagaData> mapper) => mapper.MapSaga(s => s.DataId).ToMessage<StartSaga1>(m => m.DataId);
         }
 
         public class CustomProvider(Context testContext) : IMongoClientProvider

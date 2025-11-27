@@ -14,7 +14,7 @@ public class PropertyTypesTestSaga : Saga<PropertyTypesTestSagaData>,
 
     protected override void ConfigureHowToFindSaga(SagaPropertyMapper<PropertyTypesTestSagaData> mapper)
     {
-        mapper.ConfigureMapping<PropertyTypesTestSagaDataStartMessage>(msg => msg.Id).ToSaga(saga => saga.Id);
+        mapper.MapSaga(saga => saga.Id).ToMessage<PropertyTypesTestSagaDataStartMessage>(msg => msg.Id);
     }
 }
 

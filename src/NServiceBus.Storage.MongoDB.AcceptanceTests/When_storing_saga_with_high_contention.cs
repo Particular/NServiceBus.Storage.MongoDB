@@ -85,8 +85,9 @@ public class When_storing_saga_with_high_contention : NServiceBusAcceptanceTest
 
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<HighContentionSagaData> mapper)
             {
-                mapper.ConfigureMapping<StartSaga>(m => m.SomeId).ToSaga(d => d.SomeId);
-                mapper.ConfigureMapping<AdditionalMessage>(m => m.SomeId).ToSaga(d => d.SomeId);
+                mapper.MapSaga(d => d.SomeId)
+                    .ToMessage<StartSaga>(m => m.SomeId)
+                    .ToMessage<AdditionalMessage>(m => m.SomeId);
             }
 
             public async Task Handle(StartSaga message, IMessageHandlerContext context)

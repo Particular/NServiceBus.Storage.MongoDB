@@ -58,7 +58,7 @@ public class When_mixing_persistence_with_other_persistence_for_sagas_and_outbox
 
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MySagaData> mapper)
             {
-                mapper.ConfigureMapping<StartSaga>(m => m.DataId).ToSaga(s => s.DataId);
+                mapper.MapSaga(s => s.DataId).ToMessage<StartSaga>(m => m.DataId);
             }
 
             public class MySagaData : ContainSagaData

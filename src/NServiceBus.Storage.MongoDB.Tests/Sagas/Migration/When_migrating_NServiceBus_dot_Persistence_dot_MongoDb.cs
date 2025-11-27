@@ -50,7 +50,7 @@
             protected override void ConfigureHowToFindSaga(
                 SagaPropertyMapper<NServiceBusPersistenceMongoDBLegacySagaData> mapper)
             {
-                mapper.ConfigureMapping<MigrationStartMessage>(msg => msg.Id).ToSaga(saga => saga.Id);
+                mapper.MapSaga(saga => saga.Id).ToMessage<MigrationStartMessage>(msg => msg.Id);
             }
         }
 

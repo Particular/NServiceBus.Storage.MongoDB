@@ -27,7 +27,8 @@ public class SagaTestsConfiguration
 
             var sagaTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t =>
                 typeof(Saga).IsAssignableFrom(t) || typeof(IFinder).IsAssignableFrom(t)).ToArray();
-            field = SagaMetadata.CreateMany(sagaTypes);
+            field = new SagaMetadataCollection();
+            field.AddRange(SagaMetadata.CreateMany(sagaTypes));
 
             return field;
         }

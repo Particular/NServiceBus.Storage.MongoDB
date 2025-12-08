@@ -15,8 +15,8 @@ sealed class SagaInstaller(IReadOnlySettings settings, IServiceProvider serviceP
 {
     public async Task Install(string identity, CancellationToken cancellationToken = default)
     {
-        var installerSettings = settings.Get<InstallerSettings>();
-        if (installerSettings.Disabled || !settings.IsFeatureActive(typeof(SagaStorage)))
+        var installerSettings = settings.GetOrDefault<InstallerSettings>();
+        if (installerSettings is null || installerSettings.Disabled || !settings.IsFeatureActive(typeof(SagaStorage)))
         {
             return;
         }

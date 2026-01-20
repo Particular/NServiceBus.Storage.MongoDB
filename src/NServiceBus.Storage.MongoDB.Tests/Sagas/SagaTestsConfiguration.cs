@@ -17,16 +17,25 @@ public class SagaTestsConfiguration
 
     public SagaMetadataCollection SagaMetadataCollection
     {
+#if NET10_0_OR_GREATER
+        get
+        {
+            if (field == null)
+            {
+                var sagaTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => typeof(Saga).IsAssignableFrom(t) || typeof(IFinder).IsAssignableFrom(t)).ToArray();
+                field = new SagaMetadataCollection();
+                field.Initialize(sagaTypes);
+            }
+
+            return field;
+        }
+
+        set;
+#else
         get
         {
             if (sagaMetadataCollection == null)
-            {
-                var sagaTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t =>
-                    typeof(Saga).IsAssignableFrom(t) || typeof(IFinder).IsAssignableFrom(t)).ToArray();
-                sagaMetadataCollection = new SagaMetadataCollection();
-                sagaMetadataCollection.Initialize(sagaTypes);
             }
-
             return sagaMetadataCollection;
         }
 
@@ -34,9 +43,12 @@ public class SagaTestsConfiguration
         {
             sagaMetadataCollection = value;
         }
+#endif
     }
 
+#if !NET10_0_OR_GREATER
     SagaMetadataCollection sagaMetadataCollection;
+#endif
     readonly MemberMapCache memberMapCache;
 
     public SagaTestsConfiguration(string versionElementName, Func<Type, string> collectionNamingConvention,

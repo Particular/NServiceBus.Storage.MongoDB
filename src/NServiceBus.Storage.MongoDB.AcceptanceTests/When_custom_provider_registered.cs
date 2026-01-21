@@ -59,6 +59,18 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
             {
                 get
                 {
+#if NET10_0_OR_GREATER
+                    if (field is not null)
+                    {
+                        return field;
+                    }
+
+                    var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
+
+                    field = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
+                    testContext.ProviderWasCalled = true;
+                    return field;
+#else
                     if (client is not null)
                     {
                         return client;
@@ -69,10 +81,13 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
                     client = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
                     testContext.ProviderWasCalled = true;
                     return client;
+#endif
                 }
             }
-
+#if !NET10_0_OR_GREATER
             IMongoClient? client;
+#endif
+
         }
 
         public class JustASagaData : ContainSagaData

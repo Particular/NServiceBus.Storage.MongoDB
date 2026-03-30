@@ -30,6 +30,22 @@ Once started, initialize the replication set (required for transaction support) 
 
 `docker exec -it TestMongoDB mongosh --eval 'rs.initiate()'`
 
+Once the replica set is initialized, run the following command to advertise to clients how to connect to the replica set:
+
+```shell
+docker exec TestMongoDB mongosh --eval "
+  cfg = rs.conf();
+  cfg.members[0].host = 'localhost:27017';
+  rs.reconfig(cfg, {force: true});
+"
+```
+
+Use the following command to validate that the configuration update is effective:
+
+```shell
+docker exec TestMongoDB mongosh --eval "rs.status()"
+```
+
 #### Local installation
 
 - Install the MongoDB server using the installer from the [MongoDB website](https://docs.mongodb.com/manual/installation/).

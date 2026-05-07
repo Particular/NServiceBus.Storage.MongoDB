@@ -11,6 +11,11 @@
     <PackageReference Include="Particular.Packaging" Version="4.2.2" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup Label="Direct references to transitive dependencies to avoid versions with CVE">
+    <!-- Snappier is brought in by MongoDB.Driver - this reference can be removed when MongoDB.Driver is updated to reference latest version of Snappier -->
+    <PackageReference Include="Snappier" Version="1.3.1" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.PersistenceTests" />
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.Tests" />

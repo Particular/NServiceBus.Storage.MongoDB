@@ -18,7 +18,15 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
     public async Task Should_be_used()
     {
         Context context = await Scenario.Define<Context>()
-            .WithEndpoint<EndpointWithCustomProvider>(b => b.When(session => session.SendLocal(new StartSaga1 { DataId = Guid.NewGuid() })))
+            .WithEndpoint<EndpointWithCustomProvider>(b =>
+            {
+                b.Services(c =>
+                    c.AddSingleton<IMongoClientProvider>(b => new CustomProvider(b.GetRequiredService<Context>())), afterStart: true);
+                b.When(session => session.SendLocal(new StartSaga1
+                {
+                    DataId = Guid.NewGuid()
+                }));
+            })
             .Done(c => c.SagaReceivedMessage)
             .Run();
 
@@ -34,11 +42,7 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
     public class EndpointWithCustomProvider : EndpointConfigurationBuilder
     {
         public EndpointWithCustomProvider() =>
-            EndpointSetup<DefaultServer>(config =>
-            {
-                config.RegisterComponents(c =>
-                    c.AddSingleton<IMongoClientProvider>(b => new CustomProvider(b.GetRequiredService<Context>())));
-            });
+            EndpointSetup<DefaultServer>();
 
         public class JustASaga(Context testContext) : Saga<JustASagaData>, IAmStartedByMessages<StartSaga1>
         {
@@ -53,30 +57,30 @@ public class When_custom_provider_registered : NServiceBusAcceptanceTest
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<JustASagaData> mapper) => mapper.MapSaga(s => s.DataId).ToMessage<StartSaga1>(m => m.DataId);
         }
 
-        public class CustomProvider(Context testContext) : IMongoClientProvider
-        {
-            [field: AllowNull, MaybeNull]
-            public IMongoClient Client
-            {
-                get
-                {
-                    if (field is not null)
-                    {
-                        return field;
-                    }
-
-                    var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
-
-                    field = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
-                    testContext.ProviderWasCalled = true;
-                    return field;
-                }
-            }
-        }
-
         public class JustASagaData : ContainSagaData
         {
             public virtual Guid DataId { get; set; }
+        }
+    }
+
+    public class CustomProvider(Context testContext) : IMongoClientProvider
+    {
+        [field: AllowNull, MaybeNull]
+        public IMongoClient Client
+        {
+            get
+            {
+                if (field is not null)
+                {
+                    return field;
+                }
+
+                var containerConnectionString = Environment.GetEnvironmentVariable("NServiceBusStorageMongoDB_ConnectionString");
+
+                field = string.IsNullOrWhiteSpace(containerConnectionString) ? new MongoClient() : new MongoClient(containerConnectionString);
+                testContext.ProviderWasCalled = true;
+                return field;
+            }
         }
     }
 

@@ -15,7 +15,7 @@
   <ItemGroup Label="Direct references to transitive dependencies to avoid versions with CVE">
     <!-- SharpCompress is brought in by MongoDB.Driver -->
     <!-- This reference can be removed when MongoDB.Driver is updated to reference the latest version of SharpCompress -->
-    <PackageReference Include="SharpCompress" Version="0.48.0" />
+    <PackageReference Include="SharpCompress" Version="0.48.1" />
   </ItemGroup>
 
   <ItemGroup>

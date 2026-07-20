@@ -211,7 +211,7 @@ public class OutboxStorageTest
     static string RandomString() => Guid.NewGuid().ToString();
 
     static T FillDictionary<T>(T dictionary, int count)
-        where T : Dictionary<string, string>
+        where T : IDictionary<string, string>
     {
         for (var i = 0; i < count; i++)
         {

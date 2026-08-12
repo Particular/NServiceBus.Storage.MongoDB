@@ -12,12 +12,6 @@
     <PackageReference Include="Particular.Packaging" Version="4.5.0" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Label="Direct references to transitive dependencies to avoid versions with CVE">
-    <!-- SharpCompress is brought in by MongoDB.Driver -->
-    <!-- This reference can be removed when MongoDB.Driver is updated to reference the latest version of SharpCompress -->
-    <PackageReference Include="SharpCompress" Version="0.48.1" />
-  </ItemGroup>
-
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.PersistenceTests" />
     <InternalsVisibleTo Include="NServiceBus.Storage.MongoDB.Tests" />

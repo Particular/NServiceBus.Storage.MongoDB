@@ -44,7 +44,7 @@ jobs:
           path: nugets/
           retention-days: 7
       - name: Setup MongoDB Server
-        uses: Particular/setup-mongodb-action@685e64c488c438e4dc09e365b0e873949a25185d
+        uses: Particular/setup-mongodb-action@v2.0.0
         with:
           connection-string-name: NServiceBusStorageMongoDB_ConnectionString
           mongodb-port: 27018

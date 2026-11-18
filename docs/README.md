@@ -1,10 +1,28 @@
+# Engineering context
+
+## About this repository
+
+This repository implements MongoDB persistence for NServiceBus sagas and the Outbox.
+
+## Start here
+
+- [MongoDB persistence documentation](https://docs.particular.net/persistence/mongodb/): supported versions, configuration, and usage.
+- [Contributing guidance](../CONTRIBUTING.md): how to contribute changes.
+- [Architecture and design decisions](decisions/README.md): when and how to record a decision.
+
+## Architecture and design
+
+- [MongoDB Transactions](#mongodb-transactions) and [MongoDB Server Sessions](#mongodb-server-sessions): why the persister uses transactions and sessions.
+- [Sagas](#sagas): collection naming and optimistic concurrency.
+- [Outbox](#outbox): cleanup and transaction handling.
+
 ## MongoDB Transactions
 
 By default the Saga and Outbox implementations utilize [MongoDB transactions](https://docs.mongodb.com/manual/core/transactions/), which is only supported in MongoDB server version 4.0 or greater and cannot be used in all configurations of MongoDB server. MongoDB transactions rely on the MongoDB server sessions feature.
 
 ## MongoDB Server Sessions
 
-The Saga and Outbox implementations are built around [MongoDB server sessions](https://docs.mongodb.com/manual/reference/server-sessions/). MongoDB sessions were introduced in MongoDB server version 3.6, however version 3.6 can only be used by this package when the user configures the package to disable use of transactions.
+The Saga and Outbox implementations are built around [MongoDB server sessions](https://www.mongodb.com/docs/manual/reference/server-sessions/). MongoDB sessions were introduced in MongoDB server version 3.6, however version 3.6 can only be used by this package when the user configures the package to disable use of transactions.
 
 ## Initialization
 
@@ -20,7 +38,7 @@ For example: a saga class named `SampleSaga` will result in a MongoDB collection
 
 ### Version Element
 
-MongoDB does not provide built-in concurrency control. An incrementing integer version number, combined with filters during document updates, is used to implement a concurrency control system. 
+MongoDB does not provide built-in concurrency control. An incrementing integer version number, combined with filters during document updates, is used to implement a concurrency control system.
 
 MongoDB stores documents in the BSON format. The version is stored as a BSON element that is added and updated on the objects BSON serialized document before operations are sent to the server.
 

@@ -16,6 +16,10 @@ This repository implements MongoDB persistence for NServiceBus sagas and the Out
 - [Sagas](#sagas): collection naming and optimistic concurrency.
 - [Outbox](#outbox): cleanup and transaction handling.
 
+### Decisions recorded in pull requests
+
+- Use a structured document ID to deduplicate per endpoint by default without an additional unique index — [#799](https://github.com/Particular/NServiceBus.Storage.MongoDB/pull/799)
+
 ## MongoDB Transactions
 
 By default the Saga and Outbox implementations utilize [MongoDB transactions](https://docs.mongodb.com/manual/core/transactions/), which is only supported in MongoDB server version 4.0 or greater and cannot be used in all configurations of MongoDB server. MongoDB transactions rely on the MongoDB server sessions feature.

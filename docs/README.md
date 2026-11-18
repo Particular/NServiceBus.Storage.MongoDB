@@ -4,11 +4,13 @@
 
 This repository implements MongoDB persistence for NServiceBus sagas and the Outbox.
 
+- `src/` — persistence, Transactional Session integration, and tests
+- `.github/workflows/` — CI pipelines
+
 ## Start here
 
 - [MongoDB persistence documentation](https://docs.particular.net/persistence/mongodb/): supported versions, configuration, and usage.
 - [Contributing guidance](../CONTRIBUTING.md): how to contribute changes.
-- [Architecture and design decisions](decisions/README.md): when and how to record a decision.
 
 ## Architecture and design
 
@@ -16,31 +18,27 @@ This repository implements MongoDB persistence for NServiceBus sagas and the Out
 - [Sagas](#sagas): collection naming and optimistic concurrency.
 - [Outbox](#outbox): cleanup and transaction handling.
 
-### Decisions recorded in pull requests
-
-- Use a structured document ID to deduplicate per endpoint by default without an additional unique index — [#799](https://github.com/Particular/NServiceBus.Storage.MongoDB/pull/799)
-
-## MongoDB Transactions
+### MongoDB Transactions
 
 By default the Saga and Outbox implementations utilize [MongoDB transactions](https://docs.mongodb.com/manual/core/transactions/), which is only supported in MongoDB server version 4.0 or greater and cannot be used in all configurations of MongoDB server. MongoDB transactions rely on the MongoDB server sessions feature.
 
-## MongoDB Server Sessions
+### MongoDB Server Sessions
 
 The Saga and Outbox implementations are built around [MongoDB server sessions](https://www.mongodb.com/docs/manual/reference/server-sessions/). MongoDB sessions were introduced in MongoDB server version 3.6, however version 3.6 can only be used by this package when the user configures the package to disable use of transactions.
 
-## Initialization
+### Initialization
 
 A default `MongoClient`, which by default targets `mongodb://localhost:27017/`, will be used unless a `IMongoClient` is provided by the user.
 
-## Sagas
+### Sagas
 
-### Collection Naming
+#### Collection Naming
 
 By default collections will be named after the saga data type `Name` property in lower case. To support the `NServiceBus.MongoDB` project, which uses the unaltered saga data types `Name` property, the collection naming convention can be overridden.
 
 For example: a saga class named `SampleSaga` will result in a MongoDB collection named `samplesaga`.
 
-### Version Element
+#### Version Element
 
 MongoDB does not provide built-in concurrency control. An incrementing integer version number, combined with filters during document updates, is used to implement a concurrency control system.
 
@@ -52,16 +50,30 @@ When a saga data is retrieved, the version element's current value is recorded i
 
 In order to support compatibility with the `NServiceBus.MongoDB` and `NServiceBus.Persistence.MongoDB` projects, the version element name can be overridden to match the appropriate version element name used by those projects.
 
-## Serialization
+### Serialization
 
 For saga data types the BSON serializer has been configured to ignore missing properties on the target C# class. This allows saga data types to drop properties without errors, including allowing backwards compatibility with the `NServiceBus.MongoDB` and `NServiceBus.Persistence.MongoDB` community projects.
 
-## Outbox
+### Outbox
 
-### Cleanup
+#### Cleanup
 
 Outbox cleanup is performed using a [time to live index](https://docs.mongodb.com/manual/core/index-ttl/). The index is created, or in the case of a changed TTL value recreated, on startup.
 
-### Outbox Transaction
+#### Outbox Transaction
 
 Outbox transactions are a wrapper around `StorageSession`, taking control of the session's commit and dispose actions.
+
+## Upstream contracts
+
+- [NServiceBus: for downstream components](https://github.com/Particular/NServiceBus/blob/master/docs/README.md#for-downstream-components) — contracts Core documents for downstream components
+
+## Decisions and rationale
+
+- [Architecture and design decisions](decisions/)
+
+### Decisions recorded in pull requests
+
+- Use a structured document ID to deduplicate per endpoint by default without an additional unique index — [#799](https://github.com/Particular/NServiceBus.Storage.MongoDB/pull/799)
+
+Keep this index current when a canonical source is added, replaced, or retired; link, do not copy.
